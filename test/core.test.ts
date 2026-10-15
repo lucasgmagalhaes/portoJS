@@ -306,3 +306,18 @@ describe('createCore: offline', () => {
     expect(game.count).toBe(1000);
   });
 });
+
+describe('createCore: dispose', () => {
+  it('stops the loop and drops all listeners', () => {
+    const fake = fakeScheduler();
+    const { game } = make({ scheduler: fake.scheduler });
+    const log: string[] = [];
+    game.on('stop', () => log.push('stop'));
+    game.on('bump', () => log.push('bump'));
+    game.start();
+    game.dispose();
+    expect(game.running).toBe(false);
+    game.add(1);
+    expect(log).toEqual(['stop']);
+  });
+});

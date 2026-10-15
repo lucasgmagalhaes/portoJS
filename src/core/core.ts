@@ -182,6 +182,15 @@ export class Core<Ev extends object = object> {
     return report;
   }
 
+  /**
+   * Stops the loop and removes every event listener. Call it when discarding a game
+   * (for example when a UI component unmounts) so nothing keeps running or leaking.
+   */
+  dispose(): void {
+    this.stop();
+    this.bus.clear();
+  }
+
   // ---------------------------------------------------------------- events
 
   /** Subscribes to an event. Returns a function that unsubscribes. */

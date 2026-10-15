@@ -162,3 +162,41 @@ describe('createGame: full feature set', () => {
     expect(b.game.hasAchievement('firstPrestige')).toBe(a.game.hasAchievement('firstPrestige'));
   });
 });
+
+describe('createGame: offline tuning', () => {
+  it('passes chain and step limits to the resources plugin', () => {
+    const clock = new ManualClock(0);
+    const game = createGame({
+      clock,
+      offline: { maxChain: 1, maxSteps: 10 },
+      resources: { gold: { initial: 0 } },
+      generators: {
+        t1: {
+          cost: { resource: 'gold', base: 1, growth: 1 },
+          produces: 'gold',
+          rate: 1,
+          initial: 1,
+        },
+        t2: {
+          cost: { resource: 'gold', base: 1, growth: 1 },
+          produces: { generator: 't1' },
+          rate: 1,
+          initial: 1,
+        },
+      },
+    });
+    // maxChain 1 forbids the two-tier closed form, so the bounded simulation runs instead.
+    game.simulateOffline(10_000);
+    expect(game.amount('gold').gt(0)).toBe(true);
+    expect(game.count('t1').gt(1)).toBe(true);
+  });
+
+  it('works with only maxSteps set', () => {
+    const game = createGame({
+      clock: new ManualClock(0),
+      offline: { maxSteps: 5 },
+      resources: { gold: { initial: 0 } },
+    });
+    expect(() => game.simulateOffline(1000)).not.toThrow();
+  });
+});

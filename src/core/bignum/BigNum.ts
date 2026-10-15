@@ -170,6 +170,19 @@ export class BigNum {
     return this.m === 0 ? '0' : `${this.m}e${this.e}`;
   }
 
+  /**
+   * Allows `String(n)` and template literals, but refuses implicit numeric conversion so
+   * that `a < b` or `a + 1` fail loudly instead of silently comparing strings.
+   *
+   * @throws {TypeError} for any non-string hint.
+   */
+  [Symbol.toPrimitive](hint: string): string {
+    if (hint === 'string') return this.toString();
+    throw new TypeError(
+      'BigNum cannot be converted implicitly: use add()/lt()/cmp() or toNumber()',
+    );
+  }
+
   /** JSON representation: the same string as {@link BigNum.toString}. */
   toJSON(): string {
     return this.toString();

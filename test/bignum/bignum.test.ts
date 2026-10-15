@@ -202,3 +202,20 @@ describe('BigNum conversion and JSON', () => {
     expect(() => BigNum.fromJSON('nope')).toThrow(SyntaxError);
   });
 });
+
+describe('BigNum implicit conversion guard', () => {
+  it('allows string conversion', () => {
+    expect(`${big('1.5e12')}`).toBe('1.5e12');
+    expect(String(big(7))).toBe('7e0');
+  });
+
+  it('refuses silent numeric use', () => {
+    const a = big(1);
+    const b = big(2);
+    // TypeScript allows this, but at runtime it must not silently compare strings
+    expect(() => a < b).toThrow(TypeError);
+    // @ts-expect-error arithmetic on objects is intentionally rejected at runtime
+    expect(() => a + 1).toThrow(TypeError);
+    expect(() => Number(a)).toThrow(TypeError);
+  });
+});
