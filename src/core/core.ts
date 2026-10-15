@@ -15,8 +15,18 @@ import type {
   OfflineSource,
   System,
 } from './plugin.js';
-import { createSave, exportSave, importSave, migrateSave, parseSave } from './save/index.js';
+import {
+  SaveCorruptedError,
+  createSave,
+  exportSave,
+  importSave,
+  migrateSave,
+  parseSave,
+} from './save/index.js';
 import type { JsonObject, JsonValue, Migrations, SaveData } from './save/index.js';
+
+/** Default for {@link CoreOptions.maxSaveChars}. */
+const DEFAULT_MAX_SAVE_CHARS = 10_000_000;
 
 /** Offline behaviour of a game. */
 export interface CoreOfflineOptions extends OfflineOptions {
@@ -47,6 +57,11 @@ export interface CoreOptions<P extends readonly AnyPlugin[] = readonly AnyPlugin
   readonly version?: number;
   /** Migrations from older save versions, see {@link Migrations}. */
   readonly migrations?: Migrations;
+  /**
+   * Longest save string accepted by {@link Core.load} / {@link Core.importSave}, in
+   * characters. Larger input is rejected before it is decoded or parsed. Default 10,000,000.
+   */
+  readonly maxSaveChars?: number;
   /** Offline cap, efficiency and triggers. */
   readonly offline?: CoreOfflineOptions;
 }
@@ -75,6 +90,7 @@ export class Core<Ev extends object = object> {
   private readonly systems: System[] = [];
   private readonly offlineOptions: CoreOfflineOptions;
   private readonly migrations: Migrations;
+  private readonly maxSaveChars: number;
   /** @internal Public APIs returned by plugins, keyed by plugin name. */
   readonly pluginApis = new Map<string, object>();
 
@@ -86,6 +102,8 @@ export class Core<Ev extends object = object> {
       throw new RangeError('Core: version must be an integer >= 1');
     }
     this.migrations = options.migrations ?? {};
+    this.maxSaveChars = options.maxSaveChars ?? DEFAULT_MAX_SAVE_CHARS;
+    if (!(this.maxSaveChars > 0)) throw new RangeError('Core: maxSaveChars must be > 0');
     this.offlineOptions = options.offline ?? {};
     resolveElapsed(0, this.offlineOptions); // validate eagerly
 
@@ -235,7 +253,8 @@ export class Core<Ev extends object = object> {
    * @throws {SaveVersionError} if the save is newer than this game or cannot be migrated.
    */
   load(input: SaveData | string, options: LoadOptions = {}): OfflineReport | undefined {
-    const parsed = typeof input === 'string' ? decodeText(input) : parseSave(input);
+    const parsed =
+      typeof input === 'string' ? decodeText(input, this.maxSaveChars) : parseSave(input);
     const save = migrateSave(parsed, this.version, this.migrations);
     const backup = this.collect();
     try {
@@ -257,7 +276,7 @@ export class Core<Ev extends object = object> {
 
   /** Alias of {@link Core.load} for strings from {@link Core.exportSave}. */
   importSave(encoded: string, options: LoadOptions = {}): OfflineReport | undefined {
-    return this.load(importSave(encoded.trim()), options);
+    return this.load(encoded, options);
   }
 
   /** Returns every system to its default state (as if loading an empty save). */
@@ -317,7 +336,12 @@ export class Core<Ev extends object = object> {
   }
 }
 
-function decodeText(text: string): SaveData {
+function decodeText(text: string, maxChars: number): SaveData {
+  if (text.length > maxChars) {
+    throw new SaveCorruptedError(
+      `Save string is too large (${text.length} > ${maxChars} characters)`,
+    );
+  }
   const trimmed = text.trim();
   return trimmed.startsWith('{') ? parseSave(trimmed) : importSave(trimmed);
 }
