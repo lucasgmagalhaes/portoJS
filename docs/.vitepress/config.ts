@@ -5,7 +5,8 @@ const source = fileURLToPath(new URL('../../src/index.ts', import.meta.url));
 
 export default defineConfig({
   title: 'PortoJS',
-  description: 'A headless TypeScript engine for idle and incremental games.',
+  description:
+    'A headless TypeScript game engine with a Unity-style Game, GameObject and Component model.',
   base: process.env['DOCS_BASE'] ?? '/',
   cleanUrls: true,
   lastUpdated: true,
@@ -25,9 +26,9 @@ export default defineConfig({
           { text: 'Offline progress', link: '/offline-progress' },
           { text: 'Saves and migrations', link: '/saves-and-migrations' },
           { text: 'Prestige', link: '/prestige' },
-          { text: 'Writing plugins', link: '/plugins' },
+          { text: 'Components and the game model', link: '/components' },
           { text: 'UI bindings', link: '/bindings' },
-          { text: 'Coming from Phaser', link: '/from-phaser' },
+          { text: 'Coming from Unity or Phaser', link: '/from-unity' },
         ],
       },
       {

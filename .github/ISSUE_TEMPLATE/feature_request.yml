@@ -19,8 +19,14 @@ body:
     id: layer
     attributes:
       label: Where does it belong?
-      description: The core stays game-agnostic; game-specific mechanics are plugins.
-      options: [Core (time, ticks, saves, offline), Mechanics plugin, New plugin, Docs, Not sure]
+      description: The runtime stays game-agnostic; game-specific mechanics are components.
+      options:
+        - Runtime (Game, GameObject, Component)
+        - Core infrastructure (time, saves, offline)
+        - Idle component
+        - New component
+        - Docs
+        - Not sure
     validations:
       required: true
   - type: textarea

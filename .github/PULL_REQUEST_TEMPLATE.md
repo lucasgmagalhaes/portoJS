@@ -18,7 +18,7 @@
 - [ ] Public API is documented with JSDoc
 - [ ] Docs / README updated if behavior changed
 - [ ] No new runtime dependencies, no `any`
-- [ ] The core stays game-agnostic (game-specific logic lives in `src/mechanics`)
+- [ ] The core stays game-agnostic (game-specific logic lives in `src/idle`)
 
 ## Notes for reviewers
 

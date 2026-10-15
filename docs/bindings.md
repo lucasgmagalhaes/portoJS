@@ -4,7 +4,7 @@ PortoJS is headless, so a UI needs a way to read state and re-render when it cha
 
 Both expose a single function, `useGame(game, selector, isEqual?)`.
 
-- The selector runs after every tick, and on load, start and stop.
+- The selector runs after every tick, and on load, start and stop. It receives the game, and you can also read from components you keep a reference to.
 - The UI updates only when the selected value changed. Equality is `Object.is`, plus value equality for `BigNum`, so a selector that computes a fresh `BigNum` (like a rate) does not cause a re-render on every tick.
 - Select primitives (a formatted string, a number) when you can, or pass your own `isEqual` for objects.
 
@@ -14,12 +14,12 @@ Both expose a single function, `useGame(game, selector, isEqual?)`.
 import { useGame } from 'portojs/react';
 import { format } from 'portojs/bignum';
 
-function Gold({ game }: { game: Game }) {
-  const gold = useGame(game, (g) => format(g.amount('gold'), { notation: 'suffix' }));
-  const rate = useGame(game, (g) => format(g.rate('gold')));
+function Gold({ game, gold }: { game: Game; gold: Resource }) {
+  const amount = useGame(game, () => format(gold.amount, { notation: 'suffix' }));
+  const rate = useGame(game, () => format(gold.rate));
   return (
     <p>
-      {gold} ({rate}/s)
+      {amount} ({rate}/s)
     </p>
   );
 }
@@ -33,13 +33,13 @@ It is built on `useSyncExternalStore`, so it is safe with concurrent rendering a
 <script setup lang="ts">
 import { useGame } from 'portojs/vue';
 import { format } from 'portojs/bignum';
-import { game } from './game';
+import { game, gold } from './game';
 
-const { value: gold } = useGame(game, (g) => format(g.amount('gold'), { notation: 'suffix' }));
+const { value: amount } = useGame(game, () => format(gold.amount, { notation: 'suffix' }));
 </script>
 
 <template>
-  <p>{{ gold }}</p>
+  <p>{{ amount }}</p>
 </template>
 ```
 
@@ -47,4 +47,4 @@ const { value: gold } = useGame(game, (g) => format(g.amount('gold'), { notation
 
 ## Writing your own
 
-A binding only needs the `Observable` shape: `on('tick' | 'loaded' | 'start' | 'stop', listener)` returning an unsubscribe function. Every game from `createGame` or `createCore` has it, so wiring Svelte stores, Solid signals or anything else is a few lines.
+A binding only needs the `Observable` shape: `on('tick' | 'loaded' | 'start' | 'stop', listener)` returning an unsubscribe function. A `Game` has it, so wiring Svelte stores, Solid signals or anything else is a few lines.

@@ -34,16 +34,16 @@ CI runs the same checks on every pull request.
 - **Zero runtime dependencies.** Dev dependencies are fine.
 - **Strict TypeScript, no `any`.** Prefer precise types over casts; when a cast is unavoidable, explain it in a comment.
 - **Document the public API** with JSDoc: what it does, parameters, thrown errors, an `@example` when useful.
-- **Keep the core game-agnostic.** Anything specific to a kind of game (resources, prestige, achievements...) belongs in `src/mechanics` as a plugin that uses only the public kernel API.
+- **Keep the core game-agnostic.** Anything specific to a kind of game (resources, prestige, achievements...) belongs in `src/idle` as a component that uses only the public `Game` and `Component` API.
 - **Test what you change.** Cover edge cases: zero, negative, huge values, a clock going backwards, corrupted input. The `BigNum` type has property-based tests (fast-check); add properties when you add operations.
 - **Be deterministic.** Never read the real clock in logic; use the injected `Clock`.
 
 ## Project layout
 
 ```
-src/core/          game-agnostic kernel: bignum, clock, events, engine, save, offline, plugins
-src/mechanics/     plugins: resources (with generators and upgrades), prestige, achievements
-src/game.ts        createGame: the declarative convenience wrapper
+src/core/          infrastructure: bignum, clock, events, engine, save, offline
+src/runtime/       Game, GameObject, Component, GameEvent, Time
+src/idle/          optional idle mechanics as components (resources, generators, prestige...)
 test/              Vitest unit and property tests
 bench/             benchmarks (pnpm bench)
 docs/              guides and the VitePress site (`pnpm docs:dev`, `pnpm docs:build`)

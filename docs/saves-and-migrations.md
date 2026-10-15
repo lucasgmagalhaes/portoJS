@@ -8,12 +8,12 @@
 interface SaveData {
   version: number; // your schema version
   savedAt: number; // clock time in ms, the offline reference point
-  data: JsonObject; // one entry per system (resources, prestige, ...)
+  data: JsonObject; // { objects: { [objectName]: { [componentKey]: data } } }
   checksum: string; // 8 hex digits over version + savedAt + data
 }
 ```
 
-Store it as JSON, or use the string forms:
+Each component stores its own state through `onSave()`, keyed by its object's name and its `typeId`. Store the whole thing as JSON, or use the string forms:
 
 ```ts
 const text = game.exportSave(); // Base64 of the JSON, safe to copy/paste
@@ -35,11 +35,11 @@ Every save carries a checksum computed over a key-order-independent form of its 
 
 ## Size limit
 
-Strings longer than `maxSaveChars` (default 10,000,000 characters) are rejected with `SaveCorruptedError` before any decoding, so an oversized paste or upload cannot exhaust memory. Raise or lower it when creating the game: `createGame({ maxSaveChars: 2_000_000, /* ... */ })`.
+Strings longer than `maxSaveChars` (default 10,000,000 characters) are rejected with `SaveCorruptedError` before any decoding, so an oversized paste or upload cannot exhaust memory. Raise or lower it when creating the game: `new Game({ maxSaveChars: 2_000_000 })`.
 
 ## Atomic loading
 
-`load` is all-or-nothing. If any system rejects the data, the previous state is restored and the error is rethrown, so a bad save never leaves you in a half-loaded state.
+`load` is all-or-nothing. If any component rejects the data, the previous state is restored and the error is rethrown, so a bad save never leaves you in a half-loaded state.
 
 ```ts
 try {
@@ -54,23 +54,21 @@ try {
 
 ## Versions and migrations
 
-Set `version` to the current schema version and describe how to upgrade each older one. The entry at key `n` upgrades version `n` to `n + 1`. Migrations are chained automatically.
+Set `version` to the current schema version and describe how to upgrade each older one. The entry at key `n` upgrades version `n` to `n + 1`. Migrations are chained automatically and receive the `data` object.
 
 ```ts
-const game = createGame({
-  // ...
+const game = new Game({
   version: 3,
   migrations: {
-    // v1 -> v2: the "gems" resource was added
-    1: (data) => ({ ...data, gemsSeen: false }),
-    // v2 -> v3: prestige points moved
-    2: (data) => {
-      const { oldPoints, ...rest } = data;
-      return {
-        ...rest,
-        prestige: { points: oldPoints ?? '0', lifetime: oldPoints ?? '0', count: 0 },
-      };
+    // v1 -> v2: the object "Gold" was renamed "Coins"
+    1: (data) => {
+      const objects = { ...(data['objects'] as JsonObject) };
+      objects['Coins'] = objects['Gold'] ?? {};
+      delete objects['Gold'];
+      return { ...data, objects };
     },
+    // v2 -> v3: nothing changed in the layout
+    2: (data) => data,
   },
 });
 ```
@@ -82,11 +80,9 @@ A v1 save loaded by this game runs `migrations[1]` then `migrations[2]`. Rules:
 - A migration must return an object; anything else throws `SaveVersionError`.
 - The migrated save gets a fresh checksum.
 
-`data` is keyed by system id (`resources`, `prestige`, `achievements`, plus your own).
-
 ### What needs a version bump?
 
-Built-in systems tolerate additions: unknown ids are ignored, and ids missing from the save start at their defaults. So adding a generator or an upgrade does **not** need a migration. Renaming or removing ids, or changing what a stored value means, does.
+Adding objects or components does **not**: components missing from a save get `onLoad(undefined)` and start at their defaults, and data for objects that no longer exist is ignored. Renaming an object or a `typeId`, removing one, or changing what a stored value means does.
 
 ## Autosave pattern
 
@@ -95,12 +91,12 @@ setInterval(() => localStorage.setItem('save', game.exportSave()), 10_000);
 addEventListener('pagehide', () => localStorage.setItem('save', game.exportSave()));
 ```
 
-Saving records `savedAt`, which is what offline progress measures from, so save on `pagehide`/`visibilitychange` as well as on a timer.
+Saving records `savedAt`, which is what offline progress measures from, so save on `pagehide` / `visibilitychange` as well as on a timer.
 
 ## Resetting
 
-`game.reset()` returns every system to its default state, as if loading an empty save.
+`game.reset()` returns every component to its default state, as if loading an empty save.
 
-## Custom systems
+## Custom components
 
-A system persists itself through `serialize()` and `deserialize(data)`. `deserialize(undefined)` must restore defaults. Throw `SaveCorruptedError` for data you cannot accept.
+A component persists itself through `onSave()` and `onLoad(data)`. `onLoad(undefined)` must restore defaults. Throw `SaveCorruptedError` for data you cannot accept. Give the component a `static typeId` so its key does not depend on the class name.

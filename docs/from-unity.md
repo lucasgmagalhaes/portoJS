@@ -1,30 +1,51 @@
-# Coming from Phaser
+# Coming from Unity or Phaser
 
-Phaser is a framework for building **scenes** you draw and update every frame. PortoJS is a headless engine for **idle games**, where most of the per-frame logic (production, costs, offline progress, saves) is the same in every game. So the API is smaller and data-driven, but the concepts line up.
+PortoJS borrows its model from Unity: a `Game` holds `GameObject`s, and behavior lives in `Component`s with a lifecycle. It is **headless** (it draws nothing) and built around a fixed-timestep simulation, which makes it a good fit for games that run over time.
 
-| In Phaser                       | In PortoJS                                                                      |
-| ------------------------------- | ------------------------------------------------------------------------------- |
-| `new Phaser.Game(config)`       | `createGame(config)`                                                            |
-| Scene `update(time, delta)`     | `game.on('tick', ({ dtMs }) => ...)`: fixed steps, independent of frame rate    |
-| Scene `create()`                | Build the game, then subscribe to events                                        |
-| `this.events.on('name', fn)`    | `game.on('name', fn)`; returns an unsubscribe function                          |
-| `this.registry.set/get`         | `registry()` plugin: `game.setData(key, value)` / `game.getData(key)`           |
-| Plugins                         | `definePlugin(name, setup)` and the `plugins` option                            |
-| `this.time.now`                 | `game.now()` (an injectable clock)                                              |
-| Save in `localStorage` yourself | `game.exportSave()` / `game.importSave(text)`: versioned, checksummed, migrated |
+## Unity
 
-## What is different
+| In Unity                           | In PortoJS                                                                    |
+| ---------------------------------- | ----------------------------------------------------------------------------- |
+| `new GameObject("Name")`           | `game.createObject('Name')`                                                   |
+| `AddComponent<T>()`                | `object.addComponent(T, options)`                                             |
+| `GetComponent<T>()`                | `object.getComponent(T)` (returns `undefined` when missing)                   |
+| `FindObjectOfType<T>()`            | `game.findObjectOfType(T)`                                                    |
+| `MonoBehaviour`                    | `Component`                                                                   |
+| `Awake`, `OnEnable`, `Start`       | `awake`, `onEnable`, `start`                                                  |
+| `FixedUpdate()`                    | `fixedUpdate(deltaTime)`: seconds, fixed steps, independent of frame rate     |
+| `OnDisable`, `OnDestroy`           | `onDisable`, `onDestroy`                                                      |
+| `gameObject.SetActive(false)`      | `object.setActive(false)`                                                     |
+| `component.enabled`                | `component.enabled`                                                           |
+| `Destroy(obj)`                     | `object.destroy()` / `component.destroy()`                                    |
+| `UnityEvent`                       | `GameEvent<T>` (`addListener`, `invoke`)                                      |
+| `Time.fixedDeltaTime`, `Time.time` | `game.time.fixedDeltaTime`, `game.time.time`                                  |
+| `PlayerPrefs` / save files         | `game.exportSave()` and `game.importSave()`: versioned, checksummed, migrated |
+| Script Execution Order             | `static executionOrder` on a component class                                  |
 
-- **You declare, the engine simulates.** Instead of writing an `update` that adds `rate * delta` to a counter, you declare `generators` with a `rate` and call `game.buy('miner')`.
-- **Time is explicit.** Pass a `ManualClock` in tests and move it yourself: `clock.advance(1000); game.update()`. The same code is deterministic.
-- **Rendering is yours.** There is no display list. Read state (`game.amount('gold')`) and render with anything: the DOM, React or Vue (see [UI bindings](bindings.md)), a canvas, even Phaser itself.
+### What is different
 
-## Using it with Phaser
+- **There is no `Update()`.** The simulation runs in fixed steps, so `fixedUpdate` is the only per-step hook. Rendering is yours and runs on its own schedule.
+- **Saving is built in.** Components implement `onSave` and `onLoad`, and the game stores them under the object's name. A scene is code, not an asset: objects are created in code, and a save restores their state.
+- **Away-time is a first-class idea.** `onOffline(elapsedMs)` lets a component fast-forward in closed form.
+- **Time is injectable.** Pass a `ManualClock` in tests and move it yourself.
 
-Phaser can draw the game while PortoJS runs the economy:
+## Phaser
+
+Phaser draws scenes you update every frame; PortoJS runs a simulation you draw however you like.
+
+| In Phaser                    | In PortoJS                                                        |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `new Phaser.Game(config)`    | `new Game(options)`                                               |
+| Scene `update(time, delta)`  | A component's `fixedUpdate(deltaTime)`, or `game.on('tick', ...)` |
+| `this.events.on('name', fn)` | `game.on('name', fn)` for game events, `GameEvent` on components  |
+| `this.registry.set/get`      | the `DataStore` component: `set(key, value)` / `get(key)`         |
+| `this.time.now`              | `game.now()` (an injectable clock)                                |
+
+Phaser can draw while PortoJS runs the simulation:
 
 ```ts
-const game = createGame({ resources: { gold: {} } /* ... */ });
+const game = new Game();
+const gold = game.createObject('Gold').addComponent(Resource);
 game.start();
 
 class Main extends Phaser.Scene {
@@ -35,19 +56,9 @@ class Main extends Phaser.Scene {
   }
 
   update() {
-    this.label.setText(format(game.amount('gold'), { notation: 'suffix' }));
+    this.label.setText(format(gold.amount, { notation: 'suffix' }));
   }
 }
 ```
 
-PortoJS keeps its own loop, so Phaser's `update` only reads state; it never has to advance the simulation.
-
-## Free-form data
-
-For data that is not a resource (tutorial flags, a player name, settings), install the registry plugin. It is saved with the game and cleared by `game.reset()`:
-
-```ts
-const game = createGame({ resources: { gold: {} }, plugins: [registry()] });
-game.setData('tutorialDone', true);
-game.getData('tutorialDone'); // true
-```
+PortoJS keeps its own loop, so Phaser's `update` only reads state and never advances the simulation.

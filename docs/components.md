@@ -1,155 +1,172 @@
-# Writing plugins
+# Components and the game model
 
-The core has no idea what a "resource" or a "prestige" is. It provides:
+The `Game` has no idea what a "resource" or a "prestige" is. It provides:
 
-- a fixed-timestep loop (`start`, `stop`, `update`, `advance`)
-- a registry of **systems** that tick, save and fast-forward
-- a typed event bus
+- a fixed-timestep loop (`start`, `stop`, `update`, `advance`) and a `Time` object
+- game objects and components, with a Unity-style lifecycle
+- a typed event bus for game-level events, and `GameEvent` for component-level ones
 - versioned saves and offline crediting
 
-Everything else is a plugin. `createGame` is just `createCore` with the built-in plugins installed.
+Everything else is a component.
 
-## Anatomy
+## Game objects
 
 ```ts
-import { createCore, definePlugin } from 'portojs';
+const game = new Game();
+const player = game.createObject('Player');
+const weapon = game.createObject('Sword', { parent: player });
 
-interface CounterApi {
-  readonly count: number;
-  bump(): void;
+game.find('Player'); // the object, or undefined
+player.setActive(false); // switches the object and its children off
+player.destroy(); // destroys its components and children
+```
+
+Names are unique per game, because they key an object's data in saves. A child is active only while its parent is.
+
+## Components
+
+```ts
+class Counter extends Component {
+  static override typeId = 'Counter';
+  value = 0;
+
+  override awake(): void {}
+  override onEnable(): void {}
+  override start(): void {}
+  override fixedUpdate(deltaTime: number): void {
+    this.value += deltaTime;
+  }
+  override onDisable(): void {}
+  override onDestroy(): void {}
 }
 
-const counter = definePlugin<CounterApi, { bumped: { count: number } }>('counter', (kernel) => {
-  let count = 0;
-
-  kernel.registerSystem({
-    id: 'counter', // also the key in saves
-    tick: (dtMs) => {
-      count += dtMs / 1000;
-    }, // one fixed step
-    offline: (ms) => {
-      count += ms / 1000;
-    }, // away-time, already capped/scaled
-    serialize: () => count, // JSON
-    deserialize: (data) => {
-      count = typeof data === 'number' ? data : 0;
-    }, // undefined => defaults
-  });
-
-  return {
-    get count() {
-      return count;
-    },
-    bump() {
-      count += 1;
-      kernel.emit('bumped', { count });
-    },
-  };
-});
-
-const game = createCore({ plugins: [counter] });
-game.bump();
-game.on('bumped', ({ count }) => console.log(count)); // fully typed
+const counter = player.addComponent(Counter);
+player.getComponent(Counter); // the first Counter, or undefined
+player.requireComponent(Counter); // throws if missing
+game.findObjectsOfType(Counter); // across the whole game
+counter.enabled = false; // stops updates, fires onDisable
 ```
 
-The object returned from `setup` is merged onto the game with its types. A plugin API member that collides with a core member (`save`, `load`, `on`, ...) throws at creation.
+### Lifecycle
 
-`createGame` accepts the same plugins, installed after the built-in ones so they can `kernel.require('resources')`, and merges their types too:
+| Method                   | Called                                                                   |
+| ------------------------ | ------------------------------------------------------------------------ |
+| `awake()`                | Once, right after the component is created and attached                  |
+| `onEnable()`             | When the component becomes active (enabled, and its object active)       |
+| `start()`                | Once, before the first `fixedUpdate` while active                        |
+| `fixedUpdate(deltaTime)` | Every fixed step while active. `deltaTime` is in seconds                 |
+| `onDisable()`            | When the component stops being active                                    |
+| `onDestroy()`            | When the component or its object is destroyed                            |
+| `onOffline(elapsedMs)`   | Away-time is credited. Already capped and scaled by the offline settings |
+| `onSave()` / `onLoad(d)` | Saving and loading. `onLoad(undefined)` means "reset to defaults"        |
+
+Every method is optional. With `noImplicitOverride` on, write `override`.
+
+Within a step, components run by `static executionOrder` (lower first, default `0`), then in the order they were added.
+
+### Events
 
 ```ts
-const game = createGame({
-  resources: { gold: { initial: 10 } },
-  plugins: [counter],
-});
-game.bump(); // typed
+class Door extends Component {
+  readonly opened = new GameEvent<{ by: string }>();
+}
+
+door.opened.addListener(({ by }) => console.log(by));
+door.opened.invoke({ by: 'player' });
 ```
 
-## Built-in plugins
+`addListener` returns an unsubscribe function. A `GameEvent` without a payload is invoked with no argument.
 
-Everything below is a plugin on top of the core, imported from `portojs` or `portojs/mechanics`. Plugins that depend on `resources` must be installed after it. Because their types depend on your ids, pass the ids as generics.
+## Time
 
-| Plugin         | Purpose                                                       | Notes                                           |
-| -------------- | ------------------------------------------------------------- | ----------------------------------------------- |
-| `resources`    | Resources, generators, upgrades, multipliers, purchase guards | Exact offline production                        |
-| `prestige`     | Reset for permanent points and bonuses                        | See [prestige](prestige.md)                     |
-| `achievements` | Condition-based achievements with persistent effects          |                                                 |
-| `unlocks`      | Gate generators and upgrades behind a condition               | Permanent, saved                                |
-| `autoBuyers`   | Buy generators on a timer                                     | Does not act while the player is away           |
-| `challenges`   | Restart with a handicap, earn a permanent reward              | Handicaps and rewards are `resources` modifiers |
+`game.time` mirrors Unity's `Time`: `fixedDeltaTime` and `deltaTime` (seconds per step), `time` and `fixedTime` (seconds simulated), `tickCount`. Away-time is not added to `time`.
+
+## Saving your own components
+
+Implement `onSave` and `onLoad`. A save stores `data.objects[objectName][componentKey]`, where the key is the component's `static typeId` (a second component of the same type on the same object gets `#2`). Set `typeId` explicitly: the class name is the fallback, and a minifier may rename it.
 
 ```ts
-const game = createGame({
-  resources: { gold: { initial: 10 } },
-  generators: {
-    miner: { cost: { resource: 'gold', base: 10, growth: 1.15 }, produces: 'gold', rate: 1 },
-    drill: { cost: { resource: 'gold', base: 500, growth: 1.2 }, produces: 'gold', rate: 20 },
-  },
-  plugins: [
-    unlocks<'gold', 'miner' | 'drill', never, 'deepMining'>({
-      definitions: {
-        deepMining: { condition: (g) => g.bought('miner').gte(10), generators: ['drill'] },
-      },
-    }),
-    autoBuyers({ buyers: { minerBot: { generator: 'miner', everyMs: 2000 } } }),
-    challenges<'gold', 'miner', 'slowGold'>({
-      definitions: {
-        slowGold: {
-          goal: (g) => g.earned('gold').gte(1e6),
-          modifiers: [{ resource: 'gold', multiplier: 0.1 }], // while active
-          reward: [{ resource: 'gold', multiplier: 2 }], // forever once beaten
-        },
-      },
-    }),
-  ],
-});
+class Health extends Component {
+  static override typeId = 'Health';
+  hp = 100;
 
-game.canBuy('drill'); // false until 10 miners are owned
-game.setAutoBuyer('minerBot', true);
-game.startChallenge('slowGold'); // resets the run with the handicap
+  override onSave() {
+    return this.hp;
+  }
+
+  override onLoad(data: JsonValue | undefined) {
+    if (data !== undefined && typeof data !== 'number') {
+      throw new SaveCorruptedError('Health: expected a number');
+    }
+    this.hp = data ?? 100;
+  }
+}
 ```
 
-### Purchase guards
+`game.load()` is atomic: if any `onLoad` throws, every component is restored to its previous state and the error is rethrown. Components missing from a save get `onLoad(undefined)`, and data for objects that no longer exist is ignored, so adding objects does not need a migration.
 
-`resources` exposes `setPurchaseGuard(name, guard)`. A purchase happens only if every guard allows it, and guarded targets report `canBuy` false and `maxAffordable` zero. `unlocks` is built on it; use it for your own rules (quests, tutorials, region locks).
+## Offline progress
 
-## The `System` contract
+Implement `onOffline(elapsedMs)` to react to away-time. Prefer a closed form over looping; if you must loop, use `forEachOfflineStep(totalMs, step)` to keep the work bounded. See [Offline progress](offline-progress.md).
 
-| Member               | Called when            | Notes                                                 |
-| -------------------- | ---------------------- | ----------------------------------------------------- |
-| `tick(dtMs)`         | every fixed step       | order of registration                                 |
-| `offline(elapsedMs)` | away-time is credited  | prefer closed forms; use `forEachOfflineStep` to loop |
-| `serialize()`        | `save()`               | return JSON; omit for stateless systems               |
-| `deserialize(data)`  | `load()` and `reset()` | `undefined` means "use defaults"; throw to reject     |
+## The idle mechanics
 
-`load()` is atomic: if any `deserialize` throws, previous state is restored.
+Imported from `portojs` or `portojs/idle`. They are ordinary components built on the same API.
 
-## The `Kernel`
-
-| Member               | Purpose                                                     |
-| -------------------- | ----------------------------------------------------------- |
-| `registerSystem`     | add a system (ids must be unique)                           |
-| `require<Api>(name)` | get another plugin's API; plugins are set up in array order |
-| `emit`, `on`         | typed events                                                |
-| `now()`, `clock`     | game time                                                   |
-| `stepMs`             | fixed step length                                           |
-
-## Depending on other plugins
+| Component     | Purpose                                                        | Notes                                                   |
+| ------------- | -------------------------------------------------------------- | ------------------------------------------------------- |
+| `Resource`    | A currency (`amount`, `earned`, `rate`, `add`, `spend`)        | Exact offline production                                |
+| `Generator`   | Produces a resource or another generator; bulk buying          | Cost curves: exponential, linear, custom                |
+| `Upgrade`     | Levels that multiply generators, resources or everything       |                                                         |
+| `Economy`     | Production, multipliers and purchase guards for the whole game | Created automatically by the first generator or upgrade |
+| `Prestige`    | Reset for permanent points and bonuses; stackable layers       | See [prestige](prestige.md)                             |
+| `Achievement` | Condition-based, with an optional persistent effect            |                                                         |
+| `Unlock`      | Gates generators and upgrades behind a condition               | Permanent, saved                                        |
+| `AutoBuyer`   | Buys a generator on a timer; switch with `enabled`             | Does not act while the player is away                   |
+| `Challenge`   | Restart with a handicap, earn a permanent reward               | One challenge runs at a time                            |
+| `Boost`       | Time-limited multipliers ("2x for 30 s")                       | Timers pause while away; no boost on offline gains      |
+| `DataStore`   | Free-form saved data (`set` / `get`)                           | Values must be JSON                                     |
 
 ```ts
-const quests = definePlugin<QuestsApi>('quests', (kernel) => {
-  const game = kernel.require<ResourcesApi<'gold', never, never>>('resources');
-  // ... use game.amount('gold')
-  return {/* ... */};
+const gold = game.createObject('Gold').addComponent(Resource, { initial: 10 });
+const miner = game.createObject('Miner').addComponent(Generator, {
+  cost: { resource: gold, base: 10, growth: 1.15 },
+  produces: gold,
+  rate: 1,
 });
-
-createCore({ plugins: [resources({/* ... */}), quests] }); // order matters
+const pick = game.createObject('Pick').addComponent(Upgrade, {
+  cost: { resource: gold, base: 50, growth: 1 },
+  effects: [{ generator: miner, multiplier: 2 }],
+});
+game.createObject('DeepMining').addComponent(Unlock, {
+  condition: () => miner.bought.gte(10),
+  gates: [pick],
+});
+game.createObject('MinerBot').addComponent(AutoBuyer, {
+  target: miner,
+  everyMs: 2000,
+  enabled: true,
+});
 ```
 
-To listen to another plugin's events with types, declare them as the third type parameter: `definePlugin<Api, MyEvents, OtherEvents>(...)`.
+### The economy and purchase guards
+
+`Economy` owns multipliers and guards. Reach it with `Economy.of(game)`:
+
+```ts
+const economy = Economy.of(game);
+economy.setModifier('frenzy', { resource: gold }, 2); // or a function (context) => multiplier
+economy.setPurchaseGuard('tutorial', (target) => target !== miner); // return false to forbid
+economy.multiplierOf({ all: true });
+economy.resetRun({ resources: [gold] }); // return the run to its start, keeping what you list
+economy.purchased.addListener((purchase) => console.log(purchase.kind));
+```
+
+A dynamic modifier receives `{ offline }`, so a time-limited bonus can step aside while away-time is credited.
 
 ## Tips
 
-- Keep systems deterministic: no `Date.now()` or `Math.random()` inside `tick`. Take time from the kernel, and seed randomness from state you save.
+- Keep components deterministic: take time from `game.now()` or `deltaTime`, never `Date.now()`, and seed randomness from state you save.
 - Test with `ManualClock`: `clock.advance(ms); game.update();` is fully deterministic.
-- Keep state JSON-friendly. Use `BigNum#toJSON()` / `BigNum.fromJSON()` for large values.
-- Provide a closed-form `offline` whenever your system is linear in time.
+- Keep state JSON-friendly. Use `BigNum#toJSON()` and `BigNum.fromJSON()` for large values.
+- Give every saved component a `typeId`.

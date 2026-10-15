@@ -8,32 +8,59 @@ pnpm add portojs
 
 PortoJS has no runtime dependencies and ships ESM, CJS and type declarations. It runs in browsers, Node 18+ and Electron.
 
+## The model
+
+If you know Unity, you already know it:
+
+- A **`Game`** runs the loop, owns the clock and handles saves and offline progress.
+- A **`GameObject`** is a named container. Create it with `game.createObject('Name')`.
+- A **`Component`** gives an object behavior. Attach it with `object.addComponent(Type, options)`. Components have a lifecycle: `awake`, `onEnable`, `start`, `fixedUpdate(deltaTime)`, `onDisable`, `onDestroy`.
+- A **`GameEvent`** is a typed event a component exposes (`addListener`, `invoke`).
+
 ## A first game
 
 ```ts
-import { createGame, format } from 'portojs';
+import { Game, Generator, Resource, format } from 'portojs';
 
-const game = createGame({
-  resources: { gold: { initial: 10 } },
-  generators: {
-    miner: { cost: { resource: 'gold', base: 10, growth: 1.15 }, produces: 'gold', rate: 1 },
-  },
+const game = new Game();
+
+const gold = game.createObject('Gold').addComponent(Resource, { initial: 10 });
+const miner = game.createObject('Miner').addComponent(Generator, {
+  cost: { resource: gold, base: 10, growth: 1.15 },
+  produces: gold,
+  rate: 1,
 });
 
-game.start(); // begins ticking
-game.buy('miner'); // x1; also game.buy('miner', 10) and game.buy('miner', 'max')
+game.start();
+miner.buy('max');
 game.on('tick', () => {
-  console.log(format(game.amount('gold'), { notation: 'suffix' }));
+  console.log(format(gold.amount, { notation: 'suffix' }));
 });
 ```
 
-Ids are inferred from your config, so `game.buy('minr')` is a compile error.
+References are real objects, so there are no string ids to mistype: `produces: gold` is checked by the compiler.
 
-## Concepts
+## Idle mechanics are optional
 
-- **The core** runs a fixed-timestep loop (100 ms by default), keeps a registry of systems, an event bus, saves and offline crediting. It knows nothing about any kind of game.
-- **Plugins** add mechanics: `resources` (with generators and upgrades), `prestige`, `achievements`, `unlocks`, `autoBuyers`, `challenges`. `createGame` installs the first three from one config object; add the rest with the `plugins` option.
-- **BigNum** is the number type. Use `game.amount('gold')` (a `BigNum`) with `format()` for display and `toNumber()` only when you must.
+The `Game` knows nothing about resources or prestige. They are components from `portojs/idle` that you add when you want them: `Resource`, `Generator`, `Upgrade`, `Prestige`, `Achievement`, `Unlock`, `AutoBuyer`, `Challenge`, `Boost`, `DataStore`. A game that is not idle simply does not import them.
+
+## Your own behavior
+
+```ts
+import { Component } from 'portojs';
+
+class Spinner extends Component {
+  angle = 0;
+
+  override fixedUpdate(deltaTime: number): void {
+    this.angle += 90 * deltaTime;
+  }
+}
+
+game.createObject('Wheel').addComponent(Spinner);
+```
+
+With `noImplicitOverride` enabled (recommended), mark lifecycle methods `override`. See [Components and the game model](components.md).
 
 ## Saving and offline progress
 
@@ -43,15 +70,15 @@ if (saved) game.importSave(saved); // validates, migrates, credits time spent aw
 setInterval(() => localStorage.setItem('save', game.exportSave()), 10_000);
 ```
 
-See [Offline progress](offline-progress.md) and [Saves and migrations](saves-and-migrations.md).
+Each component saves itself, so you do not write serialization code for the built-in mechanics. See [Offline progress](offline-progress.md) and [Saves and migrations](saves-and-migrations.md).
 
 ## Entry points
 
 ```ts
-import { createGame } from 'portojs'; // everything
+import { Game } from 'portojs'; // everything
 import { BigNum, format } from 'portojs/bignum'; // only the big-number type
-import { createCore, definePlugin } from 'portojs/core'; // the game-agnostic kernel
-import { resources, prestige } from 'portojs/mechanics'; // the built-in plugins
+import { Game, Component } from 'portojs/core'; // the game-agnostic runtime
+import { Resource, Generator } from 'portojs/idle'; // the idle mechanics
 ```
 
 ## Testing your game
@@ -60,9 +87,9 @@ Inject a `ManualClock` to make time deterministic:
 
 ```ts
 const clock = new ManualClock(0);
-const game = createGame({ clock /* ... */ });
+const game = new Game({ clock });
 clock.advance(5_000);
 game.update(); // runs exactly 50 fixed steps
 ```
 
-Next: try the [playground](playground.md), or read [Writing plugins](plugins.md).
+Next: try the [playground](playground.md), or read [Components and the game model](components.md).

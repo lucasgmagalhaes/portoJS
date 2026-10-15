@@ -1,93 +1,92 @@
 # Engineering audit and roadmap
 
-A code-level review of what `portojs` needs to become a dependable, widely used engine. Findings come from measurements on this repository (coverage, `publint`, `are-the-types-wrong`, runtime probes, benchmarks), not from guesses. Items marked **done** were fixed while writing this document.
+A code-level review of what `portojs` needs to become a dependable, widely used engine. Findings come from measurements on this repository (coverage, `publint`, `are-the-types-wrong`, runtime probes, benchmarks), not from guesses.
 
 ## 1. Measured state
 
-| Check                     | Result                                                                  |
-| ------------------------- | ----------------------------------------------------------------------- |
-| Tests                     | 228 passing (unit + property-based)                                     |
-| Coverage                  | 98.6% statements, 94.0% branches, 98.9% functions, 99.4% lines          |
-| Package lint (`publint`)  | clean                                                                   |
-| Types (`attw`)            | clean for node10, node16 (CJS and ESM) and bundler resolution           |
-| Bundle                    | `dist/index.js` 64 KB raw, 16 KB gzip (unminified, everything included) |
-| Tick, 10,000 generators   | ~0.6 ms per 100 ms step; ~0.8 ms with chained tiers                     |
-| Offline 24 h, 10,000 gens | ~5 ms flat, ~24 ms chained (closed form)                                |
-| `save()` / `exportSave()` | ~15 ms / ~29 ms with 10,000 generators                                  |
+| Check                     | Result                                                            |
+| ------------------------- | ----------------------------------------------------------------- |
+| Tests                     | unit, property-based and browser (Playwright) tests               |
+| Coverage                  | about 98% of statements and lines, about 94% of branches          |
+| Package lint (`publint`)  | clean                                                             |
+| Types (`attw`)            | clean for node10, node16 (CJS and ESM) and bundler resolution     |
+| Bundle (brotli, minified) | `portojs/bignum` ~2 KB, `portojs/core` ~6.4 KB, everything ~12 KB |
+| Tick, 10,000 generators   | ~0.5 ms per 100 ms step; ~0.7 ms with chained tiers               |
+| Offline 24 h, 10k gens    | ~4 ms flat, ~24 ms chained (closed form)                          |
+| `save()` / `exportSave()` | ~13 ms / ~34 ms with 10,000 generators                            |
 
-## 2. Findings
+## 2. Architecture
+
+The engine is a **Unity-style runtime** (`Game`, `GameObject`, `Component`) on a game-agnostic core (big numbers, clock, fixed-timestep engine, saves, offline). Idle mechanics live in `portojs/idle` as ordinary components that use only the public runtime API.
+
+An earlier version used a functional plugin kernel (`createCore`, `definePlugin`, `createGame`). It was replaced by the component model because references between mechanics are now real objects (`produces: gold`) instead of string ids, behavior is added the way Unity developers expect, and the idle mechanics became fully optional.
+
+## 3. Findings
 
 ### Release and packaging
 
-| #   | Finding                                                                                                                                                                  | Status                                                                                        |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------- |
-| P1  | No changelog and no versioning flow                                                                                                                                      | **done** (release-please; npm publishing deliberately not automated yet)                      |
-| P2  | `package.json` lacked `repository`, `bugs`, `homepage`, `author`, `publishConfig`                                                                                        | **done**                                                                                      |
-| P3  | CI matrix used Node 18 and 20, but the dev tooling needs newer Node (vitest 5 needs 22.12+, tsup 9 needs 22.18+, ESLint 10 needs 20.19+), so those jobs could never pass | **done** (checks on 22/24; built output smoke-tested on 18/20/22/24)                          |
-| P4  | No automated check that the published artifact works for ESM and CJS consumers                                                                                           | **done** (`pnpm smoke`, `pnpm check:package`)                                                 |
-| P5  | No dependency update automation, no `SECURITY.md`                                                                                                                        | **done**                                                                                      |
-| P6  | PR titles are not validated, but squash merges turn them into changelog entries                                                                                          | **done** (`pr-title.yml`)                                                                     |
-| P7  | Release PRs opened with the default `GITHUB_TOKEN` do not trigger CI                                                                                                     | **done** (the release workflow dispatches CI on the release branch, so checks show on the PR) |
-| P8  | No bundle-size budget                                                                                                                                                    | **done** (`pnpm size`, budgets enforced in CI)                                                |
-| P9  | No API-surface guard against accidental breaking changes                                                                                                                 | open: add `@microsoft/api-extractor` report checked in CI before 1.0                          |
-| P10 | Single entry point; consumers who only need `BigNum` still import through the whole barrel                                                                               | **done** (`portojs/core`, `portojs/bignum`, `portojs/mechanics`)                              |
+| #   | Finding                                                           | Status                                                          |
+| --- | ----------------------------------------------------------------- | --------------------------------------------------------------- |
+| P1  | Changelog and versioning                                          | **done** (release-please; npm publishing not automated yet)     |
+| P2  | Package metadata, publish config                                  | **done**                                                        |
+| P3  | CI on supported Node versions, runtime smoke test, package checks | **done**                                                        |
+| P6  | PR titles feed the changelog                                      | **done** (`pr-title.yml`)                                       |
+| P7  | Release PRs do not trigger CI                                     | **done** (CI is dispatched on the release branch)               |
+| P8  | Bundle-size budget                                                | **done** (`pnpm size`, enforced in CI)                          |
+| P9  | API-surface guard                                                 | **done** (`api-extractor` report checked in CI)                 |
+| P10 | Subpath exports                                                   | **done** (`portojs/core`, `/bignum`, `/idle`, `/react`, `/vue`) |
 
 ### Runtime and correctness
 
-| #   | Finding                                                                                                           | Status                                                                              |
-| --- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| R1  | Verified: a running game kept a Node process alive forever (the default `setInterval` is ref'd)                   | **done** (`createIntervalScheduler({ unref: true })`)                               |
-| R2  | `a < b` or `a + 1` on `BigNum` silently compared strings                                                          | **done** (`Symbol.toPrimitive` now throws)                                          |
-| R3  | No way to tear a game down (UI unmount, tests)                                                                    | **done** (`Core.dispose()`)                                                         |
-| R4  | `BigNum` mantissa is a double: ~15 significant digits, and two doubles within 1 ulp can map to the same BigNum    | accepted, documented; revisit only if a game needs more precision                   |
-| R5  | Chained generators use explicit Euler per tick; offline uses the exact polynomial, so they differ slightly        | accepted, documented in `docs/offline-progress.md`; option: sub-stepping for chains |
-| R6  | `Core.load` does not clear the engine's time accumulator; up to one step of pending time carries across a load    | **done** (`Engine.discardPending()` after load)                                     |
-| R7  | Save import has no size limit: a huge Base64 string is fully decoded and parsed                                   | **done** (`maxSaveChars`, default 10M characters)                                   |
-| R8  | `createGame` cannot install extra plugins with merged types                                                       | **done** (`createGame({ plugins })` with merged types)                              |
-| R9  | Achievement `effect` re-runs on load, so non-idempotent effects double-apply                                      | documented; consider a stricter API (effects declared as modifiers)                 |
-| R10 | Offline `appliedMs` reflects the cap and efficiency but not time lost to `catch-up` dropping outside `background` | by design                                                                           |
+| #   | Finding                                                                           | Status                                                |
+| --- | --------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| R1  | A running game kept a Node process alive                                          | **done** (`createIntervalScheduler({ unref: true })`) |
+| R2  | `a < b` on `BigNum` compared strings silently                                     | **done** (`Symbol.toPrimitive` throws)                |
+| R3  | No way to tear a game down                                                        | **done** (`Game.dispose()`)                           |
+| R4  | `BigNum` mantissa is a double: ~15 significant digits                             | accepted, documented                                  |
+| R5  | Chained generators use explicit Euler per tick; offline uses the exact polynomial | accepted, documented                                  |
+| R6  | Pending loop time carried across a load                                           | **done**                                              |
+| R7  | Save import had no size limit                                                     | **done** (`maxSaveChars`)                             |
+| R8  | Extra mechanics next to the built-ins                                             | **done** (everything is a component)                  |
+| R9  | An achievement `effect` re-runs on load, so a non-idempotent effect applies twice | documented; effects should be idempotent              |
 
 ### Performance
 
-| #   | Finding                                                                                                       | Status                                                                                          |
-| --- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| F1  | Each tick allocates BigNum objects per generator (`add`, `mul`, `mul`); at 10k generators this is GC pressure | **done** (cached `rate × multiplier × dt`; tick ~0.44 ms at 10k generators)                     |
-| F2  | `save()` converts every BigNum to a string each call (~15 ms at 10k generators)                               | **partly done** (generator JSON cached by identity, faster key sorting: `save()` ~11 ms at 10k) |
-| F3  | Chained offline (24 ms at 10k) allocates polynomial arrays per generator                                      | open: reuse buffers; only worth it past ~100k generators                                        |
+| #   | Finding                            | Status                                              |
+| --- | ---------------------------------- | --------------------------------------------------- |
+| F1  | Per-tick allocations               | **done** (cached `rate × multiplier × dt`)          |
+| F2  | `save()` cost with many generators | **partly done** (generator JSON cached by identity) |
+| F3  | Chained offline allocations        | open: only worth it past ~100k generators           |
 
-### Test and quality gaps
+### Tests and quality
 
-| #   | Finding                                                                                                        | Status                                                                                                                                                                                           |
-| --- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| T1  | Uncovered branches remain in `core.ts` (lines 134, 209, 315), `flows.ts` validation, `resources.ts` (120, 358) | **done** (100% of lines and functions covered, 96.9% of branches; the rest are defensive guards)                                                                                                 |
-| T2  | No property test asserting "ticking for T equals offline for T" on random linear configs                       | **done**                                                                                                                                                                                         |
-| T3  | No test in a real browser (visibility throttling, `localStorage`, `pagehide`)                                  | **done** (`pnpm e2e`: Playwright on the example, with a faked clock)                                                                                                                             |
-| T4  | ESLint is not type-aware (`recommendedTypeChecked`, `no-floating-promises`, `no-unnecessary-condition`)        | **done** (`recommendedTypeChecked` plus `no-unnecessary-condition` on source, tests and benchmarks)                                                                                              |
-| T5  | No mutation testing                                                                                            | tried, not adopted: Stryker 10 with Vitest 5 killed only 17% of mutants (0% in `save`) despite thorough tests, so the runner does not apply mutants correctly; revisit when it supports Vitest 5 |
-| T6  | No fuzzing of `parseSave`/`importSave` with arbitrary strings                                                  | **done**                                                                                                                                                                                         |
+| #   | Finding                     | Status                                                                                                                                                                                           |
+| --- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| T1  | Coverage gaps               | **done**                                                                                                                                                                                         |
+| T2  | Tick vs offline equivalence | **done** (property test)                                                                                                                                                                         |
+| T3  | Real browser tests          | **done** (`pnpm e2e`)                                                                                                                                                                            |
+| T4  | Type-aware ESLint           | **done**                                                                                                                                                                                         |
+| T5  | Mutation testing            | tried, not adopted: Stryker 10 with Vitest 5 killed only 17% of mutants (0% in `save`) despite thorough tests, so the runner does not apply mutants correctly; revisit when it supports Vitest 5 |
+| T6  | Fuzzing `importSave`        | **done**                                                                                                                                                                                         |
 
-## 3. Feature roadmap
+## 4. Roadmap
 
-**Before 1.0 (stabilise)**
+**Engine**
 
-1. Resolve P7–P10, R6–R8 and T1–T6.
-2. Freeze the plugin contract (`System`, `Kernel`, `definePlugin`) and document the stability promise.
-3. Publish `0.1.0` through the release PR.
+- Prefabs: templates to create many similar objects.
+- A JSON scene description that builds objects and components.
+- Coroutines for sequenced timed behavior.
 
-**Mechanics as plugins**
+**Idle mechanics**
 
-- Auto-buyers (rules that run `buy` on a schedule).
-- Unlock conditions (generators and upgrades hidden until a condition holds).
-- Challenges / run modifiers.
-- Multiple prestige layers sharing one reset primitive.
-- Time-limited events and boosts.
+- Time-limited events and a calendar.
+- More cost curves and a cost-curve visualiser for balancing.
 
 **Developer experience**
 
-- Documentation site (VitePress) with generated API reference and a live playground.
-- Balancing tools: a headless simulator that fast-forwards a config and reports time-to-milestone and cost curves.
-- Devtools: inspect state, edit values, fast-forward time.
-- Framework bindings as separate packages: `@portojs/react`, `@portojs/vue`, `@portojs/svelte`.
+- Balancing tools: a headless simulator that fast-forwards a game and reports time-to-milestone.
+- Devtools: inspect objects and components, edit values, fast-forward time.
+- Svelte and Solid bindings.
 
 **Platform**
 
@@ -95,7 +94,7 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 - Optional compressed save format.
 - Localisable number suffix sets.
 
-## 4. How releases work now
+## 5. How releases work
 
 1. Merge PRs with Conventional Commit titles (`feat:`, `fix:`, `perf:`, `docs:` ...).
 2. `release-please` keeps a release PR open that bumps the version and writes `CHANGELOG.md` from those commits. Before 1.0, `feat` bumps the minor and `fix` bumps the patch; a `!` or `BREAKING CHANGE:` also bumps the minor.
