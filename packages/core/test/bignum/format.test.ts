@@ -66,3 +66,31 @@ describe('format', () => {
     expect(format(0, { notation: custom, precision: 5 })).toBe('<0|5>');
   });
 });
+
+describe('localisable suffixes', () => {
+  it('ships ready-made suffix sets', async () => {
+    const { SUFFIX_SETS } = await import('../../src/index.ts');
+    expect(format('1.5e12', { notation: 'suffix', suffixes: SUFFIX_SETS.short })).toBe('1.5T');
+    expect(format('2.5e9', { notation: 'suffix', suffixes: SUFFIX_SETS.si })).toBe('2.5G');
+    expect(format('1.5e9', { notation: 'suffix', suffixes: SUFFIX_SETS.pt, decimal: ',' })).toBe(
+      '1,5 bi',
+    );
+    expect(format('4e3', { notation: 'suffix', suffixes: SUFFIX_SETS.pt })).toBe('4 mil');
+  });
+
+  it('uses the decimal separator in every notation, plain numbers included', () => {
+    expect(format(1234.5, { decimal: ',', plainBelow: 5 })).toBe('1234,5');
+    expect(format('1.5e12', { decimal: ',' })).toBe('1,5e12');
+    expect(format('1.5e12', { notation: 'engineering', decimal: ',' })).toBe('1,5e12');
+    expect(format(0, { decimal: ',' })).toBe('0');
+    expect(format('1.5e12', { notation: (n) => `<${n.toNumber()}>`, decimal: ',' })).toBe(
+      '<1500000000000>',
+    );
+  });
+
+  it('places the default suffixes on the right powers of ten', () => {
+    expect(format('1e60', { notation: 'suffix' })).toBe('1Nod');
+    expect(format('1e63', { notation: 'suffix' })).toBe('1Vg');
+    expect(format('1e66', { notation: 'suffix' })).toBe('1e66');
+  });
+});

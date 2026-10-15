@@ -40,6 +40,20 @@ game.on('tick', () => {
 
 References are real objects, so there are no string ids to mistype: `produces: gold` is checked by the compiler.
 
+### Localised numbers
+
+`format` takes ready-made suffix sets and a decimal separator, so the same number reads naturally in other languages:
+
+```ts
+import { SUFFIX_SETS, format } from 'portojs/bignum';
+
+format('1.5e9', { notation: 'suffix' }); // "1.5B"
+format('1.5e9', { notation: 'suffix', suffixes: SUFFIX_SETS.pt, decimal: ',' }); // "1,5 bi"
+format('2.5e9', { notation: 'suffix', suffixes: SUFFIX_SETS.si }); // "2.5G"
+```
+
+You can also pass your own `suffixes` array, starting at 10^3.
+
 ## Idle mechanics are optional
 
 The `Game` knows nothing about resources or prestige. They are components from `portojs/idle` that you add when you want them: `Resource`, `Generator`, `Upgrade`, `Prestige`, `Achievement`, `Unlock`, `AutoBuyer`, `Challenge`, `Boost`, `DataStore`. A game that is not idle simply does not import them.

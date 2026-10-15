@@ -32,6 +32,10 @@ export interface FormatOptions {
    * Suffix list for the `'suffix'` notation, starting at 10^3. Defaults to {@link DEFAULT_SUFFIXES}.
    */
   readonly suffixes?: readonly string[];
+  /**
+   * Decimal separator for the mantissa, for example `','` for Portuguese. Default `'.'`.
+   */
+  readonly decimal?: string;
 }
 
 /**
@@ -60,6 +64,20 @@ export const DEFAULT_SUFFIXES: readonly string[] = [
   'Nod',
   'Vg',
 ];
+
+/**
+ * Ready-made suffix lists for the `'suffix'` notation, all starting at 10^3: the default `short`
+ * scale (`K`, `M`, `B`...), `si` prefixes (`k`, `M`, `G`...) and Brazilian Portuguese (` mil`,
+ * ` mi`, ` bi`...). Pass one as `suffixes`, and `decimal: ','` for Portuguese.
+ *
+ * @example
+ * format('1.5e9', { notation: 'suffix', suffixes: SUFFIX_SETS.pt, decimal: ',' }); // "1,5 bi"
+ */
+export const SUFFIX_SETS: Readonly<Record<'short' | 'si' | 'pt', readonly string[]>> = {
+  short: DEFAULT_SUFFIXES,
+  si: ['k', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y', 'R', 'Q'],
+  pt: [' mil', ' mi', ' bi', ' tri', ' quad', ' quin', ' sex', ' sep', ' oct', ' non', ' dec'],
+};
 
 /**
  * Smallest exponent that still prints as a plain decimal (`0.001`).
@@ -113,17 +131,7 @@ function formatSuffix(n: BigNum, precision: number, suffixes: readonly string[])
   return `${n.m < 0 ? '-' : ''}${trim(mantissa.toFixed(precision))}${suffix}`;
 }
 
-/**
- * Formats a number for display.
- *
- * @example
- * format('1.5e12');                          // "1.5e12"
- * format('1.5e12', { notation: 'suffix' });  // "1.5T"
- * format(1234.5, { notation: 'engineering', plainBelow: 0 }); // "1.23e3"
- *
- * @throws {RangeError} if `precision` is not an integer between 0 and 15.
- */
-export function format(value: BigNumLike, options: FormatOptions = {}): string {
+function formatNumber(value: BigNumLike, options: FormatOptions): string {
   const n = BigNum.from(value);
   const precision = options.precision ?? 2;
   if (!Number.isInteger(precision) || precision < 0 || precision > 15) {
@@ -144,4 +152,21 @@ export function format(value: BigNumLike, options: FormatOptions = {}): string {
     case 'scientific':
       return formatScientific(n, precision);
   }
+}
+
+/**
+ * Formats a number for display.
+ *
+ * @example
+ * format('1.5e12');                          // "1.5e12"
+ * format('1.5e12', { notation: 'suffix' });  // "1.5T"
+ * format(1234.5, { notation: 'engineering', plainBelow: 0 }); // "1.23e3"
+ *
+ * @throws {RangeError} if `precision` is not an integer between 0 and 15.
+ */
+export function format(value: BigNumLike, options: FormatOptions = {}): string {
+  const text = formatNumber(value, options);
+  const decimal = options.decimal ?? '.';
+  const custom = typeof options.notation === 'function';
+  return decimal === '.' || custom ? text : text.replace('.', decimal);
 }
