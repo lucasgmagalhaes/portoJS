@@ -1,5 +1,5 @@
 /**
- * Tracks which buttons or keys are held and which changed since the last {@link endFrame}.
+ * Tracks which buttons or keys are held and which changed since the last {@link ButtonState.endFrame}.
  * Ids are plain strings, so the same class backs keyboards, pointers and gamepads.
  */
 export class ButtonState {
@@ -39,14 +39,14 @@ export class ButtonState {
   }
 
   /**
-   * Whether `id` went down since the last {@link endFrame}.
+   * Whether `id` went down since the last {@link ButtonState.endFrame}.
    */
   wasPressed(id: string): boolean {
     return this.pressedNow.has(id);
   }
 
   /**
-   * Whether `id` went up since the last {@link endFrame}.
+   * Whether `id` went up since the last {@link ButtonState.endFrame}.
    */
   wasReleased(id: string): boolean {
     return this.releasedNow.has(id);

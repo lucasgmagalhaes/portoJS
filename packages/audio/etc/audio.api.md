@@ -57,6 +57,7 @@ export class Playback {
     constructor(source: AudioBufferSourceNode, gain: GainNode, panner: StereoPannerNode | undefined, onFinished: (playback: Playback) => void);
     readonly ended: Promise<void>;
     get isPlaying(): boolean;
+    get pan(): number;
     set pan(value: number);
     get rate(): number;
     set rate(value: number);

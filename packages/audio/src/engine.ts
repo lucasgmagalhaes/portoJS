@@ -118,8 +118,12 @@ export class Playback {
   }
 
   /**
-   * Stereo position from `-1` to `1`. Ignored where panning is unsupported.
+   * Stereo position from `-1` to `1` (`0` where panning is unsupported).
    */
+  get pan(): number {
+    return this.panner?.pan.value ?? 0;
+  }
+
   set pan(value: number) {
     if (this.panner !== undefined) this.panner.pan.value = Math.max(-1, Math.min(1, value));
   }
