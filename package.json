@@ -1,6 +1,6 @@
 {
   "name": "portojs",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "A headless TypeScript game engine with a Unity-style Game / GameObject / Component model and optional idle-game mechanics: big numbers, a stable tick loop, offline progress and versioned saves.",
   "license": "MIT",
   "packageManager": "pnpm@10.34.7",
