@@ -134,6 +134,52 @@ export class BigNum {
 export type BigNumLike = BigNum | number | string;
 
 // @public
+export interface BoostDef<R extends string, G extends string> {
+    readonly durationMs: number;
+    readonly effects: readonly BoostEffect<R, G>[];
+    readonly onReactivate?: 'refresh' | 'extend' | 'ignore';
+}
+
+// @public
+export type BoostEffect<R extends string, G extends string> = EffectTarget<R, G> & {
+    readonly multiplier: BigNumLike;
+};
+
+// @public
+export function boosts<R extends string, G extends string = never, B extends string = string>(config: BoostsConfig<R, G, B>): Plugin_2<BoostsApi<B>, BoostsEvents<B>>;
+
+// @public
+export const BOOSTS_PLUGIN = "boosts";
+
+// @public
+export interface BoostsApi<B extends string> {
+    activateBoost(id: B): boolean;
+    activeBoosts(): B[];
+    readonly boostIds: readonly B[];
+    boostRemainingMs(id: B): number;
+    cancelBoost(id: B): boolean;
+    isBoostActive(id: B): boolean;
+}
+
+// @public
+export interface BoostsConfig<R extends string, G extends string, B extends string> {
+    readonly definitions: {
+        readonly [id in B]: BoostDef<R, G>;
+    };
+}
+
+// @public
+export interface BoostsEvents<B extends string> {
+    boostEnded: {
+        readonly id: B;
+    };
+    boostStarted: {
+        readonly id: B;
+        readonly remainingMs: number;
+    };
+}
+
+// @public
 export type BulkAmount = number | 'max';
 
 // @public
@@ -518,6 +564,11 @@ export type Migration = (data: JsonObject) => JsonObject;
 export type Migrations = Readonly<Record<number, Migration>>;
 
 // @public
+export interface ModifierContext {
+    readonly offline: boolean;
+}
+
+// @public
 export type Notation = 'scientific' | 'engineering' | 'suffix';
 
 // @public
@@ -552,6 +603,9 @@ export { Plugin_2 as Plugin }
 
 // @public
 export function prestige<R extends string, G extends string = never, U extends string = never>(config: PrestigeConfig<R, G, U>): Plugin_2<PrestigeApi, PrestigeEvents>;
+
+// @public
+export const PRESTIGE_LAYERS_PLUGIN = "prestigeLayers";
 
 // @public
 export const PRESTIGE_PLUGIN = "prestige";
@@ -596,6 +650,50 @@ export interface PrestigeEvents {
 
 // @public
 export type PrestigeFormula = RootFormula | ((runEarned: BigNum) => BigNumLike);
+
+// @public
+export interface PrestigeLayerDef<R extends string, G extends string, U extends string> {
+    readonly basedOn: R | {
+        readonly layer: string;
+    };
+    readonly bonuses?: readonly PrestigeBonus<R, G>[];
+    readonly gain: PrestigeFormula;
+    readonly keep?: ResetKeep<R, G, U>;
+    readonly minimum?: BigNumLike;
+    readonly resetsLower?: boolean;
+}
+
+// @public
+export function prestigeLayers<R extends string, G extends string = never, U extends string = never, L extends string = string>(config: PrestigeLayersConfig<R, G, U, L>): Plugin_2<PrestigeLayersApi<L>, PrestigeLayersEvents<L>>;
+
+// @public
+export interface PrestigeLayersApi<L extends string> {
+    ascend(layer: L): BigNum | undefined;
+    canAscend(layer: L): boolean;
+    layerCount(layer: L): number;
+    readonly layerIds: readonly L[];
+    layerLifetime(layer: L): BigNum;
+    layerPoints(layer: L): BigNum;
+    pendingLayer(layer: L): BigNum;
+    spendLayerPoints(layer: L, amount: BigNumLike): boolean;
+}
+
+// @public
+export interface PrestigeLayersConfig<R extends string, G extends string, U extends string, L extends string> {
+    readonly layers: {
+        readonly [id in L]: PrestigeLayerDef<R, G, U>;
+    };
+}
+
+// @public
+export interface PrestigeLayersEvents<L extends string> {
+    ascended: {
+        readonly layer: L;
+        readonly gained: BigNum;
+        readonly points: BigNum;
+        readonly count: number;
+    };
+}
 
 // @public
 export type PurchaseGuard<G extends string, U extends string> = (target: PurchaseTarget<G, U>) => boolean;
@@ -656,7 +754,7 @@ export interface ResourcesApi<R extends string, G extends string, U extends stri
     removePurchaseGuard(name: string): boolean;
     resetRun(keep?: ResetKeep<R, G, U>): void;
     readonly resourceIds: readonly R[];
-    setModifier(id: string, target: EffectTarget<R, G>, multiplier: BigNumLike | (() => BigNumLike)): void;
+    setModifier(id: string, target: EffectTarget<R, G>, multiplier: BigNumLike | ((context: ModifierContext) => BigNumLike)): void;
     setPurchaseGuard(name: string, guard: PurchaseGuard<G, U>): void;
     spend(resource: R, amount: BigNumLike): boolean;
     upgradeCost(upgrade: U): BigNum | undefined;

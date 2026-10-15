@@ -28,6 +28,7 @@ export default defineConfig({
           { text: 'Saves and migrations', link: '/saves-and-migrations' },
           { text: 'Prestige', link: '/prestige' },
           { text: 'Writing plugins', link: '/plugins' },
+          { text: 'UI bindings', link: '/bindings' },
         ],
       },
       {
