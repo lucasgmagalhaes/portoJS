@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { prestigeLayers, resources } from '../src/mechanics/index.js';
@@ -129,7 +130,7 @@ describe('prestigeLayers', () => {
     a.game.ascend('ascension');
     a.game.add('gold', 1);
     a.game.buy('miner');
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
 
     const b = build();
     b.game.load(save, { offline: false });
@@ -163,7 +164,7 @@ describe('prestigeLayers', () => {
     ];
     for (const entry of bad) {
       expect(() =>
-        game.load(createSave(1, 0, { prestigeLayers: entry as never }), { offline: false }),
+        game.load(createSave(1, 0, { prestigeLayers: entry }), { offline: false }),
       ).toThrow(SaveCorruptedError);
     }
   });

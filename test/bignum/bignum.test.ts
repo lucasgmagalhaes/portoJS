@@ -190,7 +190,9 @@ describe('BigNum conversion and JSON', () => {
     const values = ['0', '1.5e12', '-7.77e-200', '1e100000', '9.999999999999998e5'];
     for (const v of values) {
       const original = big(v);
-      const restored = BigNum.fromJSON(JSON.parse(JSON.stringify({ n: original })).n);
+      const restored = BigNum.fromJSON(
+        (JSON.parse(JSON.stringify({ n: original })) as { n: string }).n,
+      );
       expect(restored.eq(original)).toBe(true);
       expect(restored.toString()).toBe(original.toString());
     }
@@ -205,6 +207,7 @@ describe('BigNum conversion and JSON', () => {
 
 describe('BigNum implicit conversion guard', () => {
   it('allows string conversion', () => {
+    // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
     expect(`${big('1.5e12')}`).toBe('1.5e12');
     expect(String(big(7))).toBe('7e0');
   });
@@ -214,6 +217,7 @@ describe('BigNum implicit conversion guard', () => {
     const b = big(2);
     expect(() => a < b).toThrow(TypeError);
     // @ts-expect-error arithmetic on objects is intentionally rejected at runtime
+    // eslint-disable-next-line @typescript-eslint/restrict-plus-operands, @typescript-eslint/no-unsafe-return
     expect(() => a + 1).toThrow(TypeError);
     expect(() => Number(a)).toThrow(TypeError);
   });

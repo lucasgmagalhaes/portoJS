@@ -2,23 +2,20 @@
 
 ## [0.3.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.2.0...v0.3.0) (2026-10-15)
 
-
 ### Features
 
-* **bindings:** add useGame hooks for React and Vue ([633bd71](https://github.com/lucasgmagalhaes/portoJS/commit/633bd715847220ee347f1864410f42a61fc565fc))
-* **boosts:** add plugin for time-limited multipliers ([9f35b6f](https://github.com/lucasgmagalhaes/portoJS/commit/9f35b6f2e391e6e90f260124966e00939d2370b3))
-* **prestige-layers:** add plugin for stacked prestige layers ([7263598](https://github.com/lucasgmagalhaes/portoJS/commit/72635982005026da45b2b7d81cb5aec8efa71c4b))
-* **resources:** tell dynamic modifiers when away-time is being credited ([6be0ada](https://github.com/lucasgmagalhaes/portoJS/commit/6be0ada361cf34eb0ff9ce23f6d20ffe366388c2))
-
+- **bindings:** add useGame hooks for React and Vue ([633bd71](https://github.com/lucasgmagalhaes/portoJS/commit/633bd715847220ee347f1864410f42a61fc565fc))
+- **boosts:** add plugin for time-limited multipliers ([9f35b6f](https://github.com/lucasgmagalhaes/portoJS/commit/9f35b6f2e391e6e90f260124966e00939d2370b3))
+- **prestige-layers:** add plugin for stacked prestige layers ([7263598](https://github.com/lucasgmagalhaes/portoJS/commit/72635982005026da45b2b7d81cb5aec8efa71c4b))
+- **resources:** tell dynamic modifiers when away-time is being credited ([6be0ada](https://github.com/lucasgmagalhaes/portoJS/commit/6be0ada361cf34eb0ff9ce23f6d20ffe366388c2))
 
 ### Refactoring
 
-* replace inline callbacks with loops and named functions ([123803a](https://github.com/lucasgmagalhaes/portoJS/commit/123803aea74671c3d7c2e9c97ae69564f0d32eb3))
-
+- replace inline callbacks with loops and named functions ([123803a](https://github.com/lucasgmagalhaes/portoJS/commit/123803aea74671c3d7c2e9c97ae69564f0d32eb3))
 
 ### Documentation
 
-* document UI bindings, boosts and prestige layers ([800f269](https://github.com/lucasgmagalhaes/portoJS/commit/800f2698a7bb660a80d52d13819a1c6f743351a2))
+- document UI bindings, boosts and prestige layers ([800f269](https://github.com/lucasgmagalhaes/portoJS/commit/800f2698a7bb660a80d52d13819a1c6f743351a2))
 
 ## [0.2.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.1.0...v0.2.0) (2026-10-15)
 

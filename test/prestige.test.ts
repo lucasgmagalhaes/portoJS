@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { prestige } from '../src/mechanics/prestige/index.js';
@@ -147,7 +148,7 @@ describe('prestige', () => {
     a.game.prestige();
     a.game.add('gold', 20);
     a.game.buy('miner');
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
 
     const b = build();
     b.game.load(save, { offline: false });
@@ -166,7 +167,7 @@ describe('prestige', () => {
       'text',
     ] as const;
     for (const entry of bad) {
-      const save = createSave(1, 0, { prestige: entry as never });
+      const save = createSave(1, 0, { prestige: entry });
       expect(() => game.load(save, { offline: false })).toThrow(SaveCorruptedError);
     }
   });

@@ -10,6 +10,19 @@ export interface Scheduler {
   start(callback: () => void, intervalMs: number): () => void;
 }
 
+interface Unrefable {
+  unref(): void;
+}
+
+function isUnrefable(handle: unknown): handle is Unrefable {
+  return (
+    typeof handle === 'object' &&
+    handle !== null &&
+    'unref' in handle &&
+    typeof handle.unref === 'function'
+  );
+}
+
 /** Options for {@link createIntervalScheduler}. */
 export interface IntervalSchedulerOptions {
   /**
@@ -25,15 +38,7 @@ export function createIntervalScheduler(options: IntervalSchedulerOptions = {}):
     start(callback, intervalMs) {
       const id = setInterval(callback, intervalMs);
       const handle: unknown = id;
-      if (
-        options.unref === true &&
-        typeof handle === 'object' &&
-        handle !== null &&
-        'unref' in handle &&
-        typeof handle.unref === 'function'
-      ) {
-        handle.unref();
-      }
+      if (options.unref === true && isUnrefable(handle)) handle.unref();
       return () => clearInterval(id);
     },
   };

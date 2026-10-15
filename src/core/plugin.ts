@@ -118,7 +118,7 @@ export function definePlugin<
   Ev extends object = object,
   Deps extends object = object,
 >(name: string, setup: (kernel: Kernel<Ev, Deps>) => Api): Plugin<Api, Ev> {
-  return { name, setup: setup as (kernel: Kernel<Ev>) => Api };
+  return { name, setup };
 }
 
 type UnionToIntersection<U> = (U extends unknown ? (x: U) => void : never) extends (

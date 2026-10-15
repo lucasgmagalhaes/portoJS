@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { autoBuyers, resources, unlocks } from '../src/mechanics/index.js';
@@ -87,7 +88,7 @@ describe('autoBuyers', () => {
     a.game.setAutoBuyer('minerBot', false);
     a.clock.advance(300);
     a.game.update();
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
 
     const b = build();
     b.game.load(save, { offline: false });
@@ -116,9 +117,9 @@ describe('autoBuyers', () => {
       5,
     ];
     for (const entry of bad) {
-      expect(() =>
-        game.load(createSave(1, 0, { autoBuyers: entry as never }), { offline: false }),
-      ).toThrow(SaveCorruptedError);
+      expect(() => game.load(createSave(1, 0, { autoBuyers: entry }), { offline: false })).toThrow(
+        SaveCorruptedError,
+      );
     }
     expect(() =>
       createCore({

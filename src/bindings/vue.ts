@@ -22,7 +22,7 @@ export function useGame<G extends Observable, T>(
   selector: (game: G) => T,
   isEqual: (a: T, b: T) => boolean = sameValue,
 ): { readonly value: Readonly<ShallowRef<T>>; readonly stop: () => void } {
-  const state = shallowRef(selector(game));
+  const state: ShallowRef<T> = shallowRef(selector(game));
   const refresh = (): void => {
     const next = selector(game);
     if (!isEqual(state.value, next)) state.value = next;

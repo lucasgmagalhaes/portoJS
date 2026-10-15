@@ -60,7 +60,7 @@ console.log(`\nportojs benchmarks, ${COUNT} generators (Node ${process.version})
 console.table(
   bench.tasks.map((task) => {
     const stats = task.result;
-    if (stats === undefined || !('latency' in stats)) {
+    if (!('latency' in stats)) {
       return { task: task.name, 'ops/s': 'n/a', 'mean (ms)': 'n/a', 'p99 (ms)': 'n/a' };
     }
     return {

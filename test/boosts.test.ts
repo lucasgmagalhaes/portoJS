@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { boosts, resources } from '../src/mechanics/index.js';
@@ -96,7 +97,7 @@ describe('boosts', () => {
     const a = build();
     a.game.activateBoost('frenzy');
     a.game.advance(400);
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
     const b = build();
     b.game.load(save, { offline: false });
     expect(b.game.boostRemainingMs('frenzy')).toBeCloseTo(600, 9);
@@ -108,9 +109,9 @@ describe('boosts', () => {
     expect(() => game.activateBoost('nope' as 'frenzy')).toThrow(/unknown boost/);
     expect(() => game.isBoostActive('nope' as 'frenzy')).toThrow(/unknown boost/);
     for (const entry of [{ frenzy: 'x' }, { frenzy: -1 }, 4]) {
-      expect(() =>
-        game.load(createSave(1, 0, { boosts: entry as never }), { offline: false }),
-      ).toThrow(SaveCorruptedError);
+      expect(() => game.load(createSave(1, 0, { boosts: entry }), { offline: false })).toThrow(
+        SaveCorruptedError,
+      );
     }
     expect(() =>
       createCore({

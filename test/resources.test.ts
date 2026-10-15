@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import fc from 'fast-check';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
@@ -400,7 +401,7 @@ describe('resources: saves and reset', () => {
     game.buy('miner', 'max');
     game.buyUpgrade('pick');
     game.add('gems', '3.5e12');
-    const snapshot = JSON.parse(JSON.stringify(game.save()));
+    const snapshot = parseSave(JSON.stringify(game.save()));
     const bought = game.bought('miner');
     const gold = game.amount('gold');
 

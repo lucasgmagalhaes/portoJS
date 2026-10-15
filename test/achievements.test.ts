@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { achievements } from '../src/mechanics/achievements/index.js';
@@ -89,7 +90,7 @@ describe('achievements', () => {
     a.game.add('gold', 150);
     a.game.checkAchievements();
     expect(a.game.multiplier({ all: true }).toNumber()).toBe(2);
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
 
     const b = build();
     expect(b.game.multiplier({ all: true }).toNumber()).toBe(1);

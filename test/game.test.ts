@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   ManualClock,
@@ -264,7 +265,7 @@ describe('createGame: extra plugins', () => {
     const a = make();
     a.tip(3);
     const b = make();
-    b.load(JSON.parse(JSON.stringify(a.save())), { offline: false });
+    b.load(parseSave(JSON.stringify(a.save())), { offline: false });
     expect(b.tipsGiven).toBe(3);
     expect(b.amount('gold').toNumber()).toBe(7);
   });

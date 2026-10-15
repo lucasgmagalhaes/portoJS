@@ -31,6 +31,8 @@ const noPlainComments = {
   },
 };
 
+const TYPED_FILES = ['src/**/*.ts', 'test/**/*.{ts,tsx}', 'bench/**/*.ts', 'e2e/**/*.ts'];
+
 const INLINE_FUNCTION_MESSAGE =
   'Inline functions are not allowed in library code. Declare a named function or a const and pass it by name.';
 
@@ -59,6 +61,21 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
     },
+  },
+  ...tseslint.configs.recommendedTypeChecked.map((config) => ({
+    ...config,
+    files: TYPED_FILES,
+  })),
+  {
+    files: TYPED_FILES,
+    languageOptions: {
+      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+    },
+    rules: { '@typescript-eslint/no-unnecessary-condition': 'error' },
+  },
+  {
+    files: ['test/**/*.{ts,tsx}'],
+    rules: { '@typescript-eslint/unbound-method': 'off' },
   },
   {
     files: ['**/*.{ts,tsx,js,mjs}'],

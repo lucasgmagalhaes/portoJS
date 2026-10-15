@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { challenges, resources } from '../src/mechanics/index.js';
@@ -120,7 +121,7 @@ describe('challenges', () => {
     const a = build();
     a.game.startChallenge('slow');
     a.game.buy('miner');
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
 
     const b = build();
     b.game.load(save, { offline: false });
@@ -132,9 +133,9 @@ describe('challenges', () => {
     const { game } = build();
     const bad = [{ active: 'ghost' }, { completed: ['ghost'] }, { completed: 'slow' }, 7];
     for (const entry of bad) {
-      expect(() =>
-        game.load(createSave(1, 0, { challenges: entry as never }), { offline: false }),
-      ).toThrow(SaveCorruptedError);
+      expect(() => game.load(createSave(1, 0, { challenges: entry }), { offline: false })).toThrow(
+        SaveCorruptedError,
+      );
     }
     expect(() =>
       createCore({

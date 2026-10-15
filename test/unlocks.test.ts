@@ -1,3 +1,4 @@
+import { parseSave } from '../src/core/index.js';
 import { describe, expect, it } from 'vitest';
 import { ManualClock, SaveCorruptedError, createCore, createSave } from '../src/core/index.js';
 import { resources, unlocks } from '../src/mechanics/index.js';
@@ -77,7 +78,7 @@ describe('unlocks', () => {
     a.game.isUnlocked('deep');
     a.game.resetRun();
     expect(a.game.isUnlocked('deep')).toBe(true);
-    const save = JSON.parse(JSON.stringify(a.game.save()));
+    const save = parseSave(JSON.stringify(a.game.save()));
 
     const b = build();
     b.game.load(save, { offline: false });

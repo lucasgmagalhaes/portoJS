@@ -23,7 +23,7 @@ import {
   migrateSave,
   parseSave,
 } from './save/index.js';
-import type { JsonObject, JsonValue, Migrations, SaveData } from './save/index.js';
+import type { JsonObject, Migrations, SaveData } from './save/index.js';
 
 /** Default for {@link CoreOptions.maxSaveChars}. */
 const DEFAULT_MAX_SAVE_CHARS = 10_000_000;
@@ -287,7 +287,7 @@ export class Core<Ev extends object = object> {
     const failures: unknown[] = [];
     for (const system of this.systems) {
       try {
-        system.deserialize?.(data[system.id] as JsonValue | undefined);
+        system.deserialize?.(data[system.id]);
       } catch (error) {
         failures.push(error);
       }
