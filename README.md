@@ -120,10 +120,11 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/audio`    | Web Audio mixer with buses and playback control                        |
 | `@portojs/physics`  | 2D rigid bodies and collision events on Rapier                         |
 | `@portojs/worker`   | Run a game in a Web Worker, driven over a typed channel                |
+| `@portojs/platform` | Telegram, TikTok and web adapters: storage, lifecycle, haptics         |
 | `@portojs/tools`    | Balancing simulator and game inspector                                 |
 | `@portojs/devtools` | React panel to inspect, edit and fast-forward a game                   |
 
-`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -150,6 +151,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [UI bindings](docs/bindings.md): `useGame` for React, Vue, Svelte and Solid
 - [Input and audio](docs/input-and-audio.md): `@portojs/input`, `@portojs/audio`
 - [Balancing and devtools](docs/balancing-and-devtools.md): cost curves, simulator, inspector
+- [Platforms](docs/platforms.md): Telegram and TikTok mini-games
 - [Web Worker](docs/worker.md): `@portojs/worker`, simulation off the main thread
 - [Physics](docs/physics.md): `@portojs/physics`, rigid bodies and collisions
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks

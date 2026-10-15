@@ -193,6 +193,16 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/platform:
+    dependencies:
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/portojs:
     dependencies:
       '@portojs/core':

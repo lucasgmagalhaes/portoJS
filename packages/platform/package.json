@@ -1,0 +1,56 @@
+{
+  "name": "@portojs/platform",
+  "version": "0.9.0",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "author": "Lucas Gomes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasgmagalhaes/portojs.git",
+    "directory": "packages/platform"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasgmagalhaes/portojs/issues"
+  },
+  "homepage": "https://github.com/lucasgmagalhaes/portojs#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "description": "Platform adapters for PortoJS: Telegram Mini Apps, TikTok mini games and the plain web, with cloud storage, haptics, lifecycle and a session helper.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json && node ../../scripts/build-cjs-types.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:package": "publint && attw --pack .",
+    "api:check": "api-extractor run",
+    "api:update": "api-extractor run --local"
+  },
+  "dependencies": {
+    "@portojs/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@portojs/core": "workspace:*"
+  }
+}

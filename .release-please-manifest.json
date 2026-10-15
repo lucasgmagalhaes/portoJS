@@ -14,5 +14,6 @@
   "packages/solid": "0.9.0",
   "packages/tools": "0.9.0",
   "packages/devtools": "0.9.0",
-  "packages/worker": "0.9.0"
+  "packages/worker": "0.9.0",
+  "packages/platform": "0.9.0"
 }

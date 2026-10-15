@@ -103,6 +103,8 @@ The guides are static Markdown today. Once the packages settle, replace them wit
 
 **Platform**
 
+- Done: Telegram and TikTok adapters (`@portojs/platform`), verified with fakes; try them in the real clients.
+
 - Done: Web Worker helper (`@portojs/worker`).
 - Done: optional compressed save format (`exportSave({ compress: true })`) and localisable number formatting (`SUFFIX_SETS`, `decimal`).
 

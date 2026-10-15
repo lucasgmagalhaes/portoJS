@@ -29,6 +29,7 @@ export default defineConfig({
           { text: 'Input and audio', link: '/input-and-audio' },
           { text: 'Physics', link: '/physics' },
           { text: 'Web Worker', link: '/worker' },
+          { text: 'Platforms', link: '/platforms' },
           { text: 'Balancing and devtools', link: '/balancing-and-devtools' },
           { text: 'UI bindings', link: '/bindings' },
           { text: 'Coming from Unity or Phaser', link: '/from-unity' },
@@ -86,6 +87,9 @@ export default defineConfig({
         ),
         '@portojs/worker': fileURLToPath(
           new URL('../../packages/worker/src/index.ts', import.meta.url),
+        ),
+        '@portojs/platform': fileURLToPath(
+          new URL('../../packages/platform/src/index.ts', import.meta.url),
         ),
         portojs: fileURLToPath(new URL('../../packages/portojs/src/index.ts', import.meta.url)),
       },
