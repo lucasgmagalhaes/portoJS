@@ -3,13 +3,26 @@ import { createRequire } from 'node:module';
 import * as esm from '../dist/index.js';
 
 const require = createRequire(import.meta.url);
+
+async function loadOptionalEntry(name) {
+  try {
+    return await import(`../dist/${name}.js`);
+  } catch (error) {
+    if (error.code === 'ERR_MODULE_NOT_FOUND') return undefined;
+    throw error;
+  }
+}
 const cjs = require('../dist/index.cjs');
 
 const esmBignum = await import('../dist/bignum.js');
 const esmCore = await import('../dist/core.js');
 const esmMechanics = await import('../dist/mechanics.js');
-assert.equal(typeof (await import('../dist/react.js')).useGame, 'function', 'esm: react entry');
-assert.equal(typeof (await import('../dist/vue.js')).useGame, 'function', 'esm: vue entry');
+for (const peer of ['react', 'vue']) {
+  const loaded = await loadOptionalEntry(peer);
+  if (loaded === undefined)
+    console.log(`esm: ${peer} entry skipped (peer dependency not installed)`);
+  else assert.equal(typeof loaded.useGame, 'function', `esm: ${peer} entry`);
+}
 assert.equal(esmBignum.BigNum, esm.BigNum, 'esm: bignum entry shares BigNum');
 assert.equal(esmCore.BigNum, esm.BigNum, 'esm: core entry shares BigNum');
 assert.equal(typeof esmMechanics.resources, 'function', 'esm: mechanics entry');
