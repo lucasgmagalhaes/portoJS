@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/core-v0.9.0...core-v0.10.0) (2026-10-15)
+
+
+### Features
+
+* **core:** add an optional compressed save format ([1f95668](https://github.com/lucasgmagalhaes/portoJS/commit/1f95668ecf3c131a1063dea4e0e5cc7ffaee82ce))
+* **core:** add suffix sets and a decimal separator for localised numbers ([348d277](https://github.com/lucasgmagalhaes/portoJS/commit/348d27755ca939ce01eb00cdf7884138e439b545))
+
+
+### Documentation
+
+* add a themed documentation site with tutorials, a catalogue and per-package API reference ([4de176c](https://github.com/lucasgmagalhaes/portoJS/commit/4de176c4cffb1e0adfeb52b34cb7b98814a716be))
+
 ## [0.9.0](https://github.com/lucasgmagalhaes/portoJS/compare/core-v0.8.0...core-v0.9.0) (2026-10-15)
 
 

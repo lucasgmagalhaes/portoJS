@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/portojs-v0.9.0...portojs-v0.10.0) (2026-10-15)
+
+
+### Features
+
+* **core:** add an optional compressed save format ([1f95668](https://github.com/lucasgmagalhaes/portoJS/commit/1f95668ecf3c131a1063dea4e0e5cc7ffaee82ce))
+
+
+### Documentation
+
+* add a themed documentation site with tutorials, a catalogue and per-package API reference ([4de176c](https://github.com/lucasgmagalhaes/portoJS/commit/4de176c4cffb1e0adfeb52b34cb7b98814a716be))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.10.0
+    * @portojs/runtime bumped to 0.10.0
+    * @portojs/idle bumped to 0.10.0
+    * @portojs/react bumped to 0.10.0
+    * @portojs/vue bumped to 0.10.0
+
 ## [0.9.0](https://github.com/lucasgmagalhaes/portoJS/compare/portojs-v0.8.0...portojs-v0.9.0) (2026-10-15)
 
 
