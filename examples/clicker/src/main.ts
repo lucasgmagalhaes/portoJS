@@ -1,89 +1,88 @@
-import { SaveCorruptedError, SaveVersionError, createGame, format } from 'portojs';
+import {
+  Achievement,
+  Economy,
+  Game,
+  Generator,
+  Prestige,
+  Resource,
+  SaveCorruptedError,
+  SaveVersionError,
+  Upgrade,
+  format,
+} from 'portojs';
 import type { BigNum, BulkAmount } from 'portojs';
 import './style.css';
 
 const SAVE_KEY = 'portojs-clicker-save';
 const HOUR = 3_600_000;
 
-const game = createGame({
-  resources: { gold: { initial: 0 } },
-  generators: {
-    cursor: { cost: { resource: 'gold', base: 15, growth: 1.15 }, produces: 'gold', rate: 0.2 },
-    grandma: { cost: { resource: 'gold', base: 100, growth: 1.15 }, produces: 'gold', rate: 1 },
-    farm: { cost: { resource: 'gold', base: 1_100, growth: 1.15 }, produces: 'gold', rate: 8 },
-    mine: { cost: { resource: 'gold', base: 12_000, growth: 1.15 }, produces: 'gold', rate: 47 },
-    factory: {
-      cost: { resource: 'gold', base: 130_000, growth: 1.15 },
-      produces: 'gold',
-      rate: 260,
-    },
-  },
-  upgrades: {
-    steelCursors: {
-      cost: { resource: 'gold', base: 100, growth: 1 },
-      effects: [{ generator: 'cursor', multiplier: 2 }],
-    },
-    secretRecipes: {
-      cost: { resource: 'gold', base: 1_000, growth: 1 },
-      effects: [{ generator: 'grandma', multiplier: 2 }],
-    },
-    fertilizer: {
-      cost: { resource: 'gold', base: 11_000, growth: 1 },
-      effects: [{ generator: 'farm', multiplier: 2 }],
-    },
-    deepDrills: {
-      cost: { resource: 'gold', base: 120_000, growth: 1 },
-      effects: [{ generator: 'mine', multiplier: 2 }],
-    },
-    synergy: {
-      cost: { resource: 'gold', base: 500, growth: 5 },
-      maxLevel: 6,
-      effects: [{ all: true, multiplier: 1.25 }],
-    },
-  },
-  prestige: {
-    basedOn: 'gold',
-    gain: { threshold: 1e6 },
-    bonuses: [{ target: { all: true }, perPoint: 0.1 }],
-  },
-  achievements: {
-    firstGold: { condition: (g) => g.earned('gold').gte(1) },
-    hundred: { condition: (g) => g.earned('gold').gte(100) },
-    million: { condition: (g) => g.earned('gold').gte(1e6) },
-    billion: { condition: (g) => g.earned('gold').gte(1e9) },
-    bakery: { condition: (g) => g.bought('grandma').gte(10) },
-    ascended: { condition: (g) => g.prestigeCount() >= 1 },
-  },
-  achievementCheckIntervalMs: 500,
-  offline: { maxMs: 8 * HOUR, efficiency: 0.5 },
+const game = new Game({ offline: { maxMs: 8 * HOUR, efficiency: 0.5 } });
+const gold = game.createObject('Gold').addComponent(Resource);
+
+const generatorSpecs = [
+  ['Cursor', 15, 0.2],
+  ['Grandma', 100, 1],
+  ['Farm', 1_100, 8],
+  ['Mine', 12_000, 47],
+  ['Factory', 130_000, 260],
+] as const;
+
+const generators = generatorSpecs.map(([name, base, rate]) =>
+  game.createObject(name).addComponent(Generator, {
+    cost: { resource: gold, base, growth: 1.15 },
+    produces: gold,
+    rate,
+  }),
+);
+const [cursor, grandma, farm, mine] = generators as [Generator, Generator, Generator, Generator];
+
+const upgradeSpecs = [
+  ['Steel cursors', 'Cursors produce twice as much', 100, cursor],
+  ['Secret recipes', 'Grandmas produce twice as much', 1_000, grandma],
+  ['Fertilizer', 'Farms produce twice as much', 11_000, farm],
+  ['Deep drills', 'Mines produce twice as much', 120_000, mine],
+] as const;
+
+const upgrades = upgradeSpecs.map(([name, , price, target]) =>
+  game.createObject(name).addComponent(Upgrade, {
+    cost: { resource: gold, base: price, growth: 1 },
+    effects: [{ generator: target, multiplier: 2 }],
+  }),
+);
+upgrades.push(
+  game.createObject('Synergy').addComponent(Upgrade, {
+    cost: { resource: gold, base: 500, growth: 5 },
+    maxLevel: 6,
+    effects: [{ all: true, multiplier: 1.25 }],
+  }),
+);
+const upgradeDescriptions = [
+  ...upgradeSpecs.map(([, description]) => description),
+  'All production +25% per level',
+];
+
+const prestige = game.createObject('Ascension').addComponent(Prestige, {
+  basedOn: gold,
+  gain: { threshold: 1e6 },
+  bonuses: [{ all: true, perPoint: 0.1 }],
 });
 
-const generatorLabels = {
-  cursor: 'Cursor',
-  grandma: 'Grandma',
-  farm: 'Farm',
-  mine: 'Mine',
-  factory: 'Factory',
-} as const;
+const achievementSpecs = [
+  ['First gold', () => gold.earned.gte(1)],
+  ['Earn 100 gold in a run', () => gold.earned.gte(100)],
+  ['Earn 1 million gold in a run', () => gold.earned.gte(1e6)],
+  ['Earn 1 billion gold in a run', () => gold.earned.gte(1e9)],
+  ['Own 10 grandmas', () => grandma.bought.gte(10)],
+  ['Ascend for the first time', () => prestige.count >= 1],
+] as const;
 
-const upgradeLabels = {
-  steelCursors: ['Steel cursors', 'Cursors produce twice as much'],
-  secretRecipes: ['Secret recipes', 'Grandmas produce twice as much'],
-  fertilizer: ['Fertilizer', 'Farms produce twice as much'],
-  deepDrills: ['Deep drills', 'Mines produce twice as much'],
-  synergy: ['Synergy', 'All production +25% per level'],
-} as const;
+const achievements = achievementSpecs.map(([name, condition]) =>
+  game.createObject(name).addComponent(Achievement, { condition, checkIntervalMs: 500 }),
+);
 
-const achievementLabels = {
-  firstGold: 'First gold',
-  hundred: 'Earn 100 gold in a run',
-  million: 'Earn 1 million gold in a run',
-  billion: 'Earn 1 billion gold in a run',
-  bakery: 'Own 10 grandmas',
-  ascended: 'Ascend for the first time',
-} as const;
+const economy = Economy.of(game);
 
-type Props = { className?: string; text?: string; id?: string; type?: string };
+type Props = { className?: string; text?: string; id?: string };
 
 function h<K extends keyof HTMLElementTagNameMap>(
   tag: K,
@@ -94,7 +93,6 @@ function h<K extends keyof HTMLElementTagNameMap>(
   if (props.className !== undefined) node.className = props.className;
   if (props.text !== undefined) node.textContent = props.text;
   if (props.id !== undefined) node.id = props.id;
-  if (props.type !== undefined) node.setAttribute('type', props.type);
   node.append(...children);
   return node;
 }
@@ -129,16 +127,16 @@ const modeButtons = modes.map(([label, value]) => {
   return { button, value };
 });
 
-const generatorRows = game.generatorIds.map((id) => {
+const generatorRows = generators.map((generator) => {
   const name = h('strong');
   const meta = h('div', { className: 'meta' });
   const buy = h('button');
   buy.addEventListener('click', () => {
-    game.buy(id, mode);
+    generator.buy(mode);
     render();
   });
   return {
-    id,
+    generator,
     name,
     meta,
     buy,
@@ -146,23 +144,21 @@ const generatorRows = game.generatorIds.map((id) => {
   };
 });
 
-const upgradeRows = game.upgradeIds.map((id) => {
-  const [title, description] = upgradeLabels[id];
+const upgradeRows = upgrades.map((upgrade, index) => {
   const meta = h('div', { className: 'meta' });
   const buy = h('button');
   buy.addEventListener('click', () => {
-    game.buyUpgrade(id);
+    upgrade.buy();
     render();
   });
   return {
-    id,
-    title,
+    upgrade,
     meta,
     buy,
     row: h('div', { className: 'row' }, [
       h('div', {}, [
-        h('strong', { text: title }),
-        h('div', { className: 'meta', text: description }),
+        h('strong', { text: upgrade.gameObject.name }),
+        h('div', { className: 'meta', text: upgradeDescriptions[index] ?? '' }),
         meta,
       ]),
       buy,
@@ -173,19 +169,19 @@ const upgradeRows = game.upgradeIds.map((id) => {
 const prestigeInfo = h('div', { className: 'meta' });
 const prestigeBtn = h('button');
 prestigeBtn.addEventListener('click', () => {
-  const gained = game.pendingPrestige();
-  if (!window.confirm(`Ascend now for ${fmt(gained)} prestige points? Your run resets.`)) return;
-  game.prestige();
+  const question = `Ascend now for ${fmt(prestige.pending)} prestige points? Your run resets.`;
+  if (!window.confirm(question)) return;
+  prestige.perform();
   render();
 });
 
-const achievementRows = game.achievementIds.map((id) => {
+const achievementRows = achievements.map((achievement) => {
   const mark = h('span');
   const row = h('div', { className: 'achievement' }, [
-    h('span', { text: achievementLabels[id] }),
+    h('span', { text: achievement.gameObject.name }),
     mark,
   ]);
-  return { id, mark, row };
+  return { achievement, mark, row };
 });
 
 const saveText = h('textarea');
@@ -228,50 +224,51 @@ app.append(
 );
 
 function render(): void {
-  goldEl.textContent = fmt(game.amount('gold'));
-  rateEl.textContent = `${fmt(game.rate('gold'))} per second`;
+  goldEl.textContent = fmt(gold.amount);
+  rateEl.textContent = `${fmt(gold.rate)} per second`;
 
   for (const { button, value } of modeButtons) {
     button.setAttribute('aria-pressed', String(value === mode));
   }
   for (const g of generatorRows) {
-    const amount = mode;
-    g.name.textContent = `${generatorLabels[g.id]} (${fmt(game.count(g.id))})`;
-    g.meta.textContent = `Next: ${fmt(game.cost(g.id, amount))}`;
-    g.buy.textContent = amount === 'max' ? `Buy ${fmt(game.maxAffordable(g.id))}` : `Buy ${amount}`;
-    g.buy.disabled = !game.canBuy(g.id, amount);
+    const { generator } = g;
+    g.name.textContent = `${generator.gameObject.name} (${fmt(generator.count)})`;
+    g.meta.textContent = `Next: ${fmt(generator.costOf(mode))}`;
+    g.buy.textContent = mode === 'max' ? `Buy ${fmt(generator.maxAffordable)}` : `Buy ${mode}`;
+    g.buy.disabled = !generator.canBuy(mode);
   }
   for (const u of upgradeRows) {
-    const cost = game.upgradeCost(u.id);
-    const level = game.upgradeLevel(u.id);
-    u.meta.textContent = `Level ${level}${cost === undefined ? ' (max)' : ` · ${fmt(cost)}`}`;
+    const { upgrade } = u;
+    const cost = upgrade.cost;
+    u.meta.textContent = `Level ${upgrade.level}${cost === undefined ? ' (max)' : ` · ${fmt(cost)}`}`;
     u.buy.textContent = cost === undefined ? 'Maxed' : 'Buy';
-    u.buy.disabled = !game.canBuyUpgrade(u.id);
+    u.buy.disabled = !upgrade.canBuy();
   }
   prestigeInfo.textContent =
-    `Points: ${fmt(game.prestigePoints())} (+${(game.prestigePoints().toNumber() * 10).toFixed(0)}% production). ` +
-    `Ascending now grants ${fmt(game.pendingPrestige())}.`;
+    `Points: ${fmt(prestige.points)} (+${(prestige.points.toNumber() * 10).toFixed(0)}% production). ` +
+    `Ascending now grants ${fmt(prestige.pending)}.`;
   prestigeBtn.textContent = 'Ascend';
-  prestigeBtn.disabled = !game.canPrestige();
+  prestigeBtn.disabled = !prestige.canPrestige;
   for (const a of achievementRows) {
-    const done = game.hasAchievement(a.id);
+    const done = a.achievement.isUnlocked;
     a.row.classList.toggle('unlocked', done);
     a.mark.textContent = done ? 'Unlocked' : 'Locked';
   }
 }
 
 game.on('tick', render);
-game.on('achievementUnlocked', ({ id }) => toast(`Achievement: ${achievementLabels[id]}`));
-game.on('prestige', ({ gained }) => toast(`Ascended! +${fmt(gained)} prestige points`));
-game.on('offlineGains', ({ elapsedMs, gains }) => {
-  if (gains.gold.isZero()) return;
-  toast(
-    `Welcome back! ${(elapsedMs / 60_000).toFixed(0)} min away earned ${fmt(gains.gold)} gold.`,
-  );
+for (const achievement of achievements) {
+  achievement.unlocked.addListener(() => toast(`Achievement: ${achievement.gameObject.name}`));
+}
+prestige.performed.addListener(({ gained }) => toast(`Ascended! +${fmt(gained)} prestige points`));
+economy.offlineGains.addListener(({ elapsedMs, gains }) => {
+  const earned = gains.get(gold);
+  if (earned === undefined || earned.isZero()) return;
+  toast(`Welcome back! ${(elapsedMs / 60_000).toFixed(0)} min away earned ${fmt(earned)} gold.`);
 });
 
 clickBtn.addEventListener('click', () => {
-  game.add('gold', game.multiplier({ all: true }));
+  gold.add(economy.multiplierOf({ all: true }));
   render();
 });
 

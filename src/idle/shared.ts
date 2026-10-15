@@ -71,23 +71,6 @@ export function wholeCount(amount: number): BigNum {
 }
 
 /**
- * Orders `[key, time]` pairs by time, earliest first.
- */
-export function compareTimes(a: readonly [unknown, number], b: readonly [unknown, number]): number {
-  return a[1] - b[1];
-}
-
-/**
- * Keys of a time map in the order they were recorded (earliest first).
- */
-export function keysByTime<K>(times: ReadonlyMap<K, number>): K[] {
-  const entries = [...times.entries()].sort(compareTimes);
-  const keys: K[] = [];
-  for (const [key] of entries) keys.push(key);
-  return keys;
-}
-
-/**
  * What survives a run reset.
  */
 export interface ResetKeep {
