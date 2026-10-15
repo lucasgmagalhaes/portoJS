@@ -12,6 +12,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write # to dispatch CI on the release PR branch
 
 jobs:
   release-please:
@@ -22,3 +23,13 @@ jobs:
         with:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
+
+      # Pull requests opened with the default GITHUB_TOKEN do not trigger pull_request
+      # workflows, but workflow_dispatch is allowed. Running CI on the release branch makes
+      # its checks appear on the release PR (they attach to the same head commit).
+      - name: Run CI on the release PR
+        if: ${{ steps.release.outputs.pr != '' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+        run: gh workflow run ci.yml --repo "${{ github.repository }}" --ref "$BRANCH"

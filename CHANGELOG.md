@@ -2,26 +2,23 @@
 
 ## [0.2.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.1.0...v0.2.0) (2026-10-15)
 
-
 ### Features
 
-* **auto-buyers:** add plugin that buys generators on a timer ([3bbc400](https://github.com/lucasgmagalhaes/portoJS/commit/3bbc40082fc040ecbece78fce835b82b22617e1d))
-* **challenges:** add plugin for handicapped runs with permanent rewards ([e7dedf5](https://github.com/lucasgmagalhaes/portoJS/commit/e7dedf53b84452206259e6fddfdc9c0e654319c1))
-* **resources:** add purchase guards ([646f5cc](https://github.com/lucasgmagalhaes/portoJS/commit/646f5ccb45e7742d920d7c244ab89ee27fff7dcc))
-* **unlocks:** add plugin that gates generators and upgrades behind conditions ([2f88f56](https://github.com/lucasgmagalhaes/portoJS/commit/2f88f565aaf2398f3ab9031f57892d45840478b7))
-
+- **auto-buyers:** add plugin that buys generators on a timer ([3bbc400](https://github.com/lucasgmagalhaes/portoJS/commit/3bbc40082fc040ecbece78fce835b82b22617e1d))
+- **challenges:** add plugin for handicapped runs with permanent rewards ([e7dedf5](https://github.com/lucasgmagalhaes/portoJS/commit/e7dedf53b84452206259e6fddfdc9c0e654319c1))
+- **resources:** add purchase guards ([646f5cc](https://github.com/lucasgmagalhaes/portoJS/commit/646f5ccb45e7742d920d7c244ab89ee27fff7dcc))
+- **unlocks:** add plugin that gates generators and upgrades behind conditions ([2f88f56](https://github.com/lucasgmagalhaes/portoJS/commit/2f88f565aaf2398f3ab9031f57892d45840478b7))
 
 ### Performance
 
-* **resources:** cache per-step production math and generator save data ([b2febcc](https://github.com/lucasgmagalhaes/portoJS/commit/b2febccd8523b817db2c96c285039579e30b346a))
-* **save:** sort keys without a comparator in stableStringify ([fe9dc44](https://github.com/lucasgmagalhaes/portoJS/commit/fe9dc4499884f3ac77e5ae62ca3f66f7dba95080))
-
+- **resources:** cache per-step production math and generator save data ([b2febcc](https://github.com/lucasgmagalhaes/portoJS/commit/b2febccd8523b817db2c96c285039579e30b346a))
+- **save:** sort keys without a comparator in stableStringify ([fe9dc44](https://github.com/lucasgmagalhaes/portoJS/commit/fe9dc4499884f3ac77e5ae62ca3f66f7dba95080))
 
 ### Documentation
 
-* add VitePress site with generated API reference and an in-browser playground ([8250440](https://github.com/lucasgmagalhaes/portoJS/commit/825044047191bfe37687474faea27cc3d2c9fe3a))
-* document built-in plugins and refresh the API report ([ed088e0](https://github.com/lucasgmagalhaes/portoJS/commit/ed088e081b0eccf74adbf077bdcf7465a9999c33))
-* link the docs site and update the roadmap ([8bcec60](https://github.com/lucasgmagalhaes/portoJS/commit/8bcec6032239feb7abd9869e712143d703a2d6f8))
+- add VitePress site with generated API reference and an in-browser playground ([8250440](https://github.com/lucasgmagalhaes/portoJS/commit/825044047191bfe37687474faea27cc3d2c9fe3a))
+- document built-in plugins and refresh the API report ([ed088e0](https://github.com/lucasgmagalhaes/portoJS/commit/ed088e081b0eccf74adbf077bdcf7465a9999c33))
+- link the docs site and update the roadmap ([8bcec60](https://github.com/lucasgmagalhaes/portoJS/commit/8bcec6032239feb7abd9869e712143d703a2d6f8))
 
 ## 0.1.0 (2026-10-15)
 

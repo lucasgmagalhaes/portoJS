@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
 
 jobs:
   # Dev tooling (vitest, tsup, eslint) needs a recent Node, so quality checks run there.
