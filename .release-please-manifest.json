@@ -1,10 +1,10 @@
 {
-  "packages/core": "0.6.0",
-  "packages/runtime": "0.6.0",
-  "packages/idle": "0.6.0",
-  "packages/react": "0.6.0",
-  "packages/vue": "0.6.0",
-  "packages/portojs": "0.6.0",
-  "packages/ecs": "0.6.0",
-  "packages/render": "0.6.0"
+  "packages/core": "0.7.0",
+  "packages/runtime": "0.7.0",
+  "packages/idle": "0.7.0",
+  "packages/react": "0.7.0",
+  "packages/vue": "0.7.0",
+  "packages/portojs": "0.7.0",
+  "packages/ecs": "0.7.0",
+  "packages/render": "0.7.0"
 }
