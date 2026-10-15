@@ -70,7 +70,7 @@ for (const [name, lib] of [
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { URL, fileURLToPath } from 'node:url';
 
 /**
  * Every .d.ts and .d.cts under `dir`. They must only point at files that exist, with

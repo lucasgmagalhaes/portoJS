@@ -112,6 +112,12 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/idle`    | Opt-in idle mechanics as components                                    |
 | `@portojs/react`   | `useGame` for React                                                    |
 | `@portojs/vue`     | `useGame` for Vue                                                      |
+| `@portojs/ecs`     | Typed-array ECS: integer entities, cached queries, systems             |
+| `@portojs/render`  | Camera, auto-batching sprites, WebGPU with WebGL2 fallback             |
+| `@portojs/input`   | Keyboard, pointer and gamepad input with named actions                 |
+| `@portojs/audio`   | Web Audio mixer with buses and playback control                        |
+
+`@portojs/ecs`, `@portojs/render`, `@portojs/input` and `@portojs/audio` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -136,6 +142,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [Saves and migrations](docs/saves-and-migrations.md): versioning, export/import, corruption handling
 - [Prestige](docs/prestige.md): resets, formulas, layers and permanent bonuses
 - [UI bindings](docs/bindings.md): `useGame` for React and Vue
+- [Input and audio](docs/input-and-audio.md): `@portojs/input`, `@portojs/audio`
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
 - [Coming from Unity or Phaser](docs/from-unity.md): how the concepts map
 - [Engineering audit and roadmap](docs/roadmap.md): measured state, open findings and the release process
