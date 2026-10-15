@@ -1,5 +1,5 @@
 import { Bench } from 'tinybench';
-import { Game, Generator, ManualClock, Resource } from '../src/index.js';
+import { Game, Generator, ManualClock, Resource } from 'portojs';
 
 const COUNT = 10_000;
 const RESOURCE_NAMES = ['gold', 'gems', 'wood', 'iron'] as const;

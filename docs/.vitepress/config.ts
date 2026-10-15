@@ -1,8 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitepress';
 
-const source = fileURLToPath(new URL('../../src/index.ts', import.meta.url));
-
 export default defineConfig({
   title: 'PortoJS',
   description:
@@ -47,5 +45,27 @@ export default defineConfig({
     search: { provider: 'local' },
     footer: { message: 'Released under the MIT License.' },
   },
-  vite: { resolve: { alias: { portojs: source } } },
+  vite: {
+    resolve: {
+      alias: {
+        '@portojs/core/bignum': fileURLToPath(
+          new URL('../../packages/core/src/bignum.ts', import.meta.url),
+        ),
+        '@portojs/core': fileURLToPath(
+          new URL('../../packages/core/src/index.ts', import.meta.url),
+        ),
+        '@portojs/runtime': fileURLToPath(
+          new URL('../../packages/runtime/src/index.ts', import.meta.url),
+        ),
+        '@portojs/idle': fileURLToPath(
+          new URL('../../packages/idle/src/index.ts', import.meta.url),
+        ),
+        '@portojs/react': fileURLToPath(
+          new URL('../../packages/react/src/index.ts', import.meta.url),
+        ),
+        '@portojs/vue': fileURLToPath(new URL('../../packages/vue/src/index.ts', import.meta.url)),
+        portojs: fileURLToPath(new URL('../../packages/portojs/src/index.ts', import.meta.url)),
+      },
+    },
+  },
 });

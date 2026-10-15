@@ -1,119 +1,9 @@
 {
-  "name": "portojs",
+  "name": "portojs-monorepo",
+  "private": true,
   "version": "0.6.0",
-  "description": "A headless TypeScript game engine with a Unity-style Game / GameObject / Component model and optional idle-game mechanics: big numbers, a stable tick loop, offline progress and versioned saves.",
-  "license": "MIT",
-  "packageManager": "pnpm@10.34.7",
+  "description": "Monorepo of PortoJS packages.",
   "type": "module",
-  "sideEffects": false,
-  "main": "./dist/index.cjs",
-  "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": {
-        "types": "./dist/index.d.ts",
-        "default": "./dist/index.js"
-      },
-      "require": {
-        "types": "./dist/index.d.cts",
-        "default": "./dist/index.cjs"
-      }
-    },
-    "./core": {
-      "import": {
-        "types": "./dist/core.d.ts",
-        "default": "./dist/core.js"
-      },
-      "require": {
-        "types": "./dist/core.d.cts",
-        "default": "./dist/core.cjs"
-      }
-    },
-    "./bignum": {
-      "import": {
-        "types": "./dist/bignum.d.ts",
-        "default": "./dist/bignum.js"
-      },
-      "require": {
-        "types": "./dist/bignum.d.cts",
-        "default": "./dist/bignum.cjs"
-      }
-    },
-    "./idle": {
-      "import": {
-        "types": "./dist/idle.d.ts",
-        "default": "./dist/idle.js"
-      },
-      "require": {
-        "types": "./dist/idle.d.cts",
-        "default": "./dist/idle.cjs"
-      }
-    },
-    "./react": {
-      "import": {
-        "types": "./dist/react.d.ts",
-        "default": "./dist/react.js"
-      },
-      "require": {
-        "types": "./dist/react.d.cts",
-        "default": "./dist/react.cjs"
-      }
-    },
-    "./vue": {
-      "import": {
-        "types": "./dist/vue.d.ts",
-        "default": "./dist/vue.js"
-      },
-      "require": {
-        "types": "./dist/vue.d.cts",
-        "default": "./dist/vue.cjs"
-      }
-    },
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
-  ],
-  "scripts": {
-    "build": "tsup",
-    "typecheck": "tsc --noEmit",
-    "lint": "eslint .",
-    "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "bench": "tsx bench/tick.bench.ts",
-    "coverage": "vitest run --coverage",
-    "smoke": "node scripts/smoke.mjs",
-    "check:package": "publint && attw --pack .",
-    "prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "size": "size-limit",
-    "api:check": "api-extractor run",
-    "api:update": "pnpm build && api-extractor run --local",
-    "e2e": "playwright test",
-    "docs:api": "typedoc",
-    "docs:dev": "pnpm docs:api && vitepress dev docs",
-    "docs:build": "pnpm docs:api && vitepress build docs",
-    "docs:preview": "vitepress preview docs"
-  },
-  "keywords": [
-    "game",
-    "engine",
-    "headless",
-    "component",
-    "gameobject",
-    "idle",
-    "incremental",
-    "bignum",
-    "offline",
-    "prestige"
-  ],
-  "engines": {
-    "node": ">=18"
-  },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@eslint/js": "^10.0.1",
@@ -128,6 +18,7 @@
     "eslint": "^10.12.0",
     "fast-check": "^4.10.2",
     "happy-dom": "^21.0.1",
+    "lerna": "^10.1.1",
     "prettier": "^3.9.10",
     "publint": "^0.3.25",
     "react": "^19.3.1",
@@ -144,11 +35,7 @@
     "vitest": "^5.0.4",
     "vue": "^3.5.44"
   },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "esbuild"
-    ]
-  },
+  "packageManager": "pnpm@10.34.7",
   "author": "Lucas Gomes",
   "repository": {
     "type": "git",
@@ -158,51 +45,59 @@
     "url": "https://github.com/lucasgmagalhaes/portojs/issues"
   },
   "homepage": "https://github.com/lucasgmagalhaes/portojs#readme",
-  "publishConfig": {
-    "access": "public",
-    "provenance": true
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
   },
-  "typesVersions": {
-    "*": {
-      "core": [
-        "./dist/core.d.ts"
-      ],
-      "bignum": [
-        "./dist/bignum.d.ts"
-      ],
-      "react": [
-        "./dist/react.d.ts"
-      ],
-      "vue": [
-        "./dist/vue.d.ts"
-      ],
-      "idle": [
-        "./dist/idle.d.ts"
-      ]
-    }
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "scripts": {
+    "build": "lerna run build",
+    "typecheck": "tsc --noEmit",
+    "typecheck:packages": "lerna run typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "bench": "tsx bench/tick.bench.ts",
+    "coverage": "vitest run --coverage",
+    "smoke": "node scripts/smoke.mjs",
+    "check:package": "lerna run check:package",
+    "size": "size-limit",
+    "api:check": "lerna run api:check",
+    "api:update": "pnpm build && lerna run api:update",
+    "e2e": "playwright test",
+    "docs:api": "typedoc",
+    "docs:dev": "pnpm docs:api && vitepress dev docs",
+    "docs:build": "pnpm docs:api && vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "size-limit": [
     {
       "name": "portojs/bignum",
-      "path": "dist/bignum.js",
+      "path": "packages/portojs/dist/bignum.js",
       "import": "*",
       "limit": "3 KB"
     },
     {
       "name": "portojs/core",
-      "path": "dist/core.js",
+      "path": "packages/portojs/dist/core.js",
       "import": "*",
       "limit": "8 KB"
     },
     {
       "name": "portojs (everything)",
-      "path": "dist/index.js",
+      "path": "packages/portojs/dist/index.js",
       "import": "*",
       "limit": "14 KB"
     },
     {
       "name": "portojs/react",
-      "path": "dist/react.js",
+      "path": "packages/portojs/dist/react.js",
       "import": "*",
       "limit": "3 KB",
       "ignore": [
@@ -211,24 +106,12 @@
     },
     {
       "name": "portojs/vue",
-      "path": "dist/vue.js",
+      "path": "packages/portojs/dist/vue.js",
       "import": "*",
       "limit": "3 KB",
       "ignore": [
         "vue"
       ]
     }
-  ],
-  "peerDependencies": {
-    "react": ">=18",
-    "vue": ">=3.3"
-  },
-  "peerDependenciesMeta": {
-    "react": {
-      "optional": true
-    },
-    "vue": {
-      "optional": true
-    }
-  }
+  ]
 }

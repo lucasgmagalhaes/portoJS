@@ -38,7 +38,12 @@ const noPlainComments = {
   },
 };
 
-const TYPED_FILES = ['src/**/*.ts', 'test/**/*.{ts,tsx}', 'bench/**/*.ts', 'e2e/**/*.ts'];
+const TYPED_FILES = [
+  'packages/*/src/**/*.ts',
+  'packages/*/test/**/*.{ts,tsx}',
+  'bench/**/*.ts',
+  'e2e/**/*.ts',
+];
 
 const INLINE_FUNCTION_MESSAGE =
   'Inline functions are not allowed in library code. Declare a named function or a const and pass it by name.';
@@ -46,7 +51,8 @@ const INLINE_FUNCTION_MESSAGE =
 export default tseslint.config(
   {
     ignores: [
-      'dist',
+      '**/dist',
+      '**/temp',
       'node_modules',
       'examples/**/dist',
       'coverage',
@@ -76,12 +82,12 @@ export default tseslint.config(
   {
     files: TYPED_FILES,
     languageOptions: {
-      parserOptions: { projectService: true, tsconfigRootDir: import.meta.dirname },
+      parserOptions: { project: ['./tsconfig.json'], tsconfigRootDir: import.meta.dirname },
     },
     rules: { '@typescript-eslint/no-unnecessary-condition': 'error' },
   },
   {
-    files: ['test/**/*.{ts,tsx}'],
+    files: ['packages/*/test/**/*.{ts,tsx}'],
     rules: { '@typescript-eslint/unbound-method': 'off' },
   },
   {
@@ -90,7 +96,7 @@ export default tseslint.config(
     rules: { 'local/no-plain-comments': 'error' },
   },
   {
-    files: ['src/**/*.ts'],
+    files: ['packages/*/src/**/*.ts'],
     rules: {
       'no-restricted-syntax': [
         'error',

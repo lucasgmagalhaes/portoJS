@@ -1,8 +1,21 @@
+import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitest/config';
 
+const at = (path: string): string => fileURLToPath(new URL(path, import.meta.url));
+
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@portojs/core/bignum': at('./packages/core/src/bignum.ts'),
+      '@portojs/core': at('./packages/core/src/index.ts'),
+      '@portojs/runtime': at('./packages/runtime/src/index.ts'),
+      '@portojs/idle': at('./packages/idle/src/index.ts'),
+      '@portojs/react': at('./packages/react/src/index.ts'),
+      '@portojs/vue': at('./packages/vue/src/index.ts'),
+    },
+  },
   test: {
-    include: ['test/**/*.test.{ts,tsx}'],
-    coverage: { provider: 'v8', include: ['src/**'] },
+    include: ['packages/*/test/**/*.test.{ts,tsx}'],
+    coverage: { provider: 'v8', include: ['packages/*/src/**'] },
   },
 });

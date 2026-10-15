@@ -98,6 +98,19 @@ import { useGame } from 'portojs/react'; // or 'portojs/vue'
 
 All entries share one copy of each class, so `instanceof` works across them in both ESM and CJS.
 
+## Packages
+
+PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `portojs` umbrella, or only the packages you need:
+
+| Package            | What it is                                                             |
+| ------------------ | ---------------------------------------------------------------------- |
+| `portojs`          | Everything below, with the subpath entries shown above                 |
+| `@portojs/core`    | Big numbers, clock, fixed-timestep engine, events, offline math, saves |
+| `@portojs/runtime` | `Game`, `GameObject`, `Component`, coroutines, prefabs, JSON scenes    |
+| `@portojs/idle`    | Opt-in idle mechanics as components                                    |
+| `@portojs/react`   | `useGame` for React                                                    |
+| `@portojs/vue`     | `useGame` for Vue                                                      |
+
 ## Performance
 
 Measured with `pnpm bench` on Node 24 with 10,000 generators:
@@ -129,7 +142,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 
 ```
 pnpm install
-pnpm lint && pnpm typecheck && pnpm test && pnpm build
+pnpm lint && pnpm typecheck && pnpm test && pnpm build   # build runs through Lerna
 pnpm bench
 ```
 
