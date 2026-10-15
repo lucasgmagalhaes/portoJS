@@ -34,7 +34,7 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "bench": "vitest bench --run"
+    "bench": "tsx bench/tick.bench.ts"
   },
   "keywords": [
     "idle",
@@ -54,7 +54,9 @@
     "eslint": "^10.12.0",
     "fast-check": "^4.10.2",
     "prettier": "^3.9.10",
+    "tinybench": "^6.2.2",
     "tsup": "^9.0.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.2",
     "vitest": "^5.0.4"
