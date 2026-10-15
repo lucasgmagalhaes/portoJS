@@ -10,13 +10,37 @@ export interface Scheduler {
   start(callback: () => void, intervalMs: number): () => void;
 }
 
+/** Options for {@link createIntervalScheduler}. */
+export interface IntervalSchedulerOptions {
+  /**
+   * In Node, `unref` the timer so a running game does not keep the process alive on its
+   * own. Useful for tests and scripts. No effect in browsers. Default `false`.
+   */
+  readonly unref?: boolean;
+}
+
+/** Creates a `setInterval` based {@link Scheduler}. */
+export function createIntervalScheduler(options: IntervalSchedulerOptions = {}): Scheduler {
+  return {
+    start(callback, intervalMs) {
+      const id = setInterval(callback, intervalMs);
+      const handle: unknown = id;
+      if (
+        options.unref === true &&
+        typeof handle === 'object' &&
+        handle !== null &&
+        'unref' in handle &&
+        typeof handle.unref === 'function'
+      ) {
+        handle.unref();
+      }
+      return () => clearInterval(id);
+    },
+  };
+}
+
 /** Default scheduler, backed by `setInterval`. */
-export const intervalScheduler: Scheduler = {
-  start(callback, intervalMs) {
-    const id = setInterval(callback, intervalMs);
-    return () => clearInterval(id);
-  },
-};
+export const intervalScheduler: Scheduler = createIntervalScheduler();
 
 /** Options for {@link Engine}. */
 export interface EngineOptions {

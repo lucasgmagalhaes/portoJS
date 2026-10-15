@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { ManualClock } from '../src/core/clock/index.js';
-import { Engine } from '../src/core/engine/index.js';
+import { Engine, createIntervalScheduler } from '../src/core/engine/index.js';
 import type { Scheduler } from '../src/core/engine/index.js';
 
 /** Scheduler that never fires by itself; the test pumps it. */
@@ -200,5 +200,26 @@ describe('Engine determinism', () => {
       return [engine.stepCount, engine.pending, steps.length];
     };
     expect(run()).toEqual(run());
+  });
+});
+
+describe('createIntervalScheduler', () => {
+  it('unrefs the timer only when asked', () => {
+    const unref = vi.fn();
+    const spy = vi
+      .spyOn(globalThis, 'setInterval')
+      .mockReturnValue({ unref } as unknown as ReturnType<typeof setInterval>);
+    const clear = vi.spyOn(globalThis, 'clearInterval').mockImplementation(() => undefined);
+    try {
+      createIntervalScheduler().start(() => undefined, 10)();
+      expect(unref).not.toHaveBeenCalled();
+      const stop = createIntervalScheduler({ unref: true }).start(() => undefined, 10);
+      expect(unref).toHaveBeenCalledTimes(1);
+      stop();
+      expect(clear).toHaveBeenCalled();
+    } finally {
+      spy.mockRestore();
+      clear.mockRestore();
+    }
   });
 });
