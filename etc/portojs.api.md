@@ -708,6 +708,32 @@ export type PurchaseTarget<G extends string, U extends string> = {
 };
 
 // @public
+export function registry(): Plugin_2<RegistryApi, RegistryEvents>;
+
+// @public
+export const REGISTRY_PLUGIN = "registry";
+
+// @public
+export interface RegistryApi {
+    dataKeys(): string[];
+    getData(key: string): JsonValue | undefined;
+    hasData(key: string): boolean;
+    removeData(key: string): boolean;
+    setData(key: string, value: JsonValue): void;
+}
+
+// @public
+export interface RegistryEvents {
+    dataChanged: {
+        readonly key: string;
+        readonly value: JsonValue;
+    };
+    dataRemoved: {
+        readonly key: string;
+    };
+}
+
+// @public
 export interface ResetKeep<R extends string, G extends string, U extends string> {
     // (undocumented)
     readonly generators?: readonly G[];
