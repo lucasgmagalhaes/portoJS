@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.6.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.5.0...v0.6.0) (2026-10-15)
+
+
+### Features
+
+* **runtime:** add JSON scenes with ComponentRegistry and loadScene ([0e7945b](https://github.com/lucasgmagalhaes/portoJS/commit/0e7945bc4c592826ab09178ad14463d168810180))
+* **runtime:** add Prefab templates and Game.instantiate ([e468321](https://github.com/lucasgmagalhaes/portoJS/commit/e4683217f48cc8c3d2e4558c832281df7761825b))
+* **runtime:** add Unity-style coroutines with WaitForSeconds, WaitUntil and WaitWhile ([2bdc9bc](https://github.com/lucasgmagalhaes/portoJS/commit/2bdc9bc78ae8c023b4cb4aa11bf67b957636200f))
+
+
+### Documentation
+
+* document coroutines, prefabs and JSON scenes ([b58cf4a](https://github.com/lucasgmagalhaes/portoJS/commit/b58cf4a1660080e84b496a9ee1645ede23596eff))
+
 ## [0.5.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.4.0...v0.5.0) (2026-10-15)
 
 
