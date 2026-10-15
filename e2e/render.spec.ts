@@ -72,15 +72,19 @@ test.describe('WebGPU renderer', () => {
     await page.evaluate(() => {
       window.__demo?.spawnBox(0, 0, 100, 0x00ff00ff);
     });
-    const size = await page.evaluate(() => {
-      const canvas = document.getElementById('stage') as HTMLCanvasElement;
-      return [canvas.width, canvas.height];
+    await page.evaluate(() => {
+      window.__demo?.frame(0);
     });
-    const centre = await pixel(
-      page,
-      Math.floor((size[0] ?? 0) / 2),
-      Math.floor((size[1] ?? 0) / 2),
-    );
+    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    const shot = (await page.locator('#stage').screenshot()).toString('base64');
+    const centre = await page.evaluate(async (data) => {
+      const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
+      const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
+      const surface = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const context = surface.getContext('2d') as OffscreenCanvasRenderingContext2D;
+      context.drawImage(bitmap, 0, 0);
+      return Array.from(context.getImageData(bitmap.width >> 1, bitmap.height >> 1, 1, 1).data);
+    }, shot);
     expect(centre.slice(0, 3)).toEqual([0, 255, 0]);
   });
 });
