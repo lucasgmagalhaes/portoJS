@@ -110,6 +110,13 @@ test.describe('WebGPU renderer', () => {
       const surface = new OffscreenCanvas(bitmap.width, bitmap.height);
       const context = surface.getContext('2d') as OffscreenCanvasRenderingContext2D;
       context.drawImage(bitmap, 0, 0);
+      const all = context.getImageData(0, 0, bitmap.width, bitmap.height).data;
+      const seen = new Map<string, number>();
+      for (let i = 0; i < all.length; i += 4) {
+        const key = `${all[i]},${all[i + 1]},${all[i + 2]},${all[i + 3]}`;
+        seen.set(key, (seen.get(key) ?? 0) + 1);
+      }
+      console.log(`size ${bitmap.width}x${bitmap.height} ${JSON.stringify([...seen].slice(0, 8))}`);
       return Array.from(context.getImageData(bitmap.width >> 1, bitmap.height >> 1, 1, 1).data);
     }, shot);
     expect(centre.slice(0, 3)).toEqual([0, 255, 0]);
