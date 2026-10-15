@@ -5,7 +5,7 @@
 ```ts
 
 import { Component } from '@portojs/runtime';
-import { GameObject } from '@portojs/runtime';
+import type { GameObject } from '@portojs/runtime';
 
 // @public
 export class ComponentDef<S extends Schema = Schema> {

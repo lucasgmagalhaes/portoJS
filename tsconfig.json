@@ -12,5 +12,13 @@
       "@portojs/ecs": ["./packages/ecs/src/index.ts"]
     }
   },
-  "include": ["./packages/*/src", "./packages/*/test", "bench", "e2e", "*.config.ts"]
+  "include": [
+    "./packages/*/src",
+    "./packages/*/test",
+    "bench",
+    "e2e",
+    "*.config.ts",
+    "vite.library.ts",
+    "./packages/*/vite.config.ts"
+  ]
 }

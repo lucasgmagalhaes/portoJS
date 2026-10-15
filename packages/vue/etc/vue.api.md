@@ -4,7 +4,7 @@
 
 ```ts
 
-import { ShallowRef } from 'vue';
+import type { ShallowRef } from 'vue';
 
 // @public
 export interface Observable {

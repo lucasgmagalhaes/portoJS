@@ -110,7 +110,7 @@
     }
   },
   "scripts": {
-    "build": "tsup",
+    "build": "vite build && tsc -p tsconfig.build.json && node ../../scripts/build-cjs-types.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "check:package": "publint && attw --pack .",
     "api:check": "api-extractor run",

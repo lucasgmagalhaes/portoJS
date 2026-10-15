@@ -72,3 +72,7 @@ Use the issue templates. For bugs, a failing test or a minimal reproduction usin
 ## Code of conduct
 
 By participating you agree to follow the [Code of Conduct](CODE_OF_CONDUCT.md).
+
+## Build
+
+Each package builds with [Vite](https://vite.dev) in library mode (ESM and CJS, shared chunks) through the shared `vite.library.ts`, then `tsc` emits the `.d.ts` files and `scripts/build-cjs-types.mjs` derives the matching `.d.cts`. [Lerna](https://lerna.js.org) runs the builds in dependency order: `pnpm build`.

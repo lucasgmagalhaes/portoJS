@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  # Dev tooling (vitest, tsup, eslint) needs a recent Node, so quality checks run there.
+  # Dev tooling (vitest, vite, eslint) needs a recent Node, so quality checks run there.
   check:
     runs-on: ubuntu-latest
     strategy:

@@ -5,13 +5,13 @@
 ```ts
 
 import { BigNum } from '@portojs/core';
-import { BigNumLike } from '@portojs/core';
+import type { BigNumLike } from '@portojs/core';
 import { Component } from '@portojs/runtime';
-import { ComponentConstructor } from '@portojs/runtime';
-import { Game } from '@portojs/runtime';
+import type { ComponentConstructor } from '@portojs/runtime';
+import type { Game } from '@portojs/runtime';
 import { GameEvent } from '@portojs/runtime';
-import { GameObject } from '@portojs/runtime';
-import { JsonValue } from '@portojs/core';
+import type { GameObject } from '@portojs/runtime';
+import type { JsonValue } from '@portojs/core';
 
 // @public
 export class Achievement extends Component {

@@ -4,15 +4,15 @@
 
 ```ts
 
-import { Clock } from '@portojs/core';
-import { JsonValue } from '@portojs/core';
-import { Listener } from '@portojs/core';
-import { Migrations } from '@portojs/core';
-import { OfflineOptions } from '@portojs/core';
-import { OfflineReport } from '@portojs/core';
-import { SaveData } from '@portojs/core';
-import { Scheduler } from '@portojs/core';
-import { Unsubscribe } from '@portojs/core';
+import type { Clock } from '@portojs/core';
+import type { JsonValue } from '@portojs/core';
+import type { Listener } from '@portojs/core';
+import type { Migrations } from '@portojs/core';
+import type { OfflineOptions } from '@portojs/core';
+import type { OfflineReport } from '@portojs/core';
+import type { SaveData } from '@portojs/core';
+import type { Scheduler } from '@portojs/core';
+import type { Unsubscribe } from '@portojs/core';
 
 // @public
 export abstract class Component {
