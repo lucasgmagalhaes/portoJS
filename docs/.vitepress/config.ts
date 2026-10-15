@@ -28,6 +28,7 @@ export default defineConfig({
           { text: 'ECS and rendering', link: '/ecs-and-render' },
           { text: 'Input and audio', link: '/input-and-audio' },
           { text: 'Physics', link: '/physics' },
+          { text: 'Web Worker', link: '/worker' },
           { text: 'Balancing and devtools', link: '/balancing-and-devtools' },
           { text: 'UI bindings', link: '/bindings' },
           { text: 'Coming from Unity or Phaser', link: '/from-unity' },
@@ -82,6 +83,9 @@ export default defineConfig({
         ),
         '@portojs/devtools': fileURLToPath(
           new URL('../../packages/devtools/src/index.ts', import.meta.url),
+        ),
+        '@portojs/worker': fileURLToPath(
+          new URL('../../packages/worker/src/index.ts', import.meta.url),
         ),
         portojs: fileURLToPath(new URL('../../packages/portojs/src/index.ts', import.meta.url)),
       },

@@ -279,6 +279,16 @@ importers:
         specifier: '>=3.3'
         version: 3.5.44(typescript@6.0.3)
 
+  packages/worker:
+    dependencies:
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+
 packages:
 
   '@algolia/abtesting@1.26.0':

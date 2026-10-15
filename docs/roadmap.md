@@ -103,7 +103,7 @@ The guides are static Markdown today. Once the packages settle, replace them wit
 
 **Platform**
 
-- Web Worker helper to run the simulation off the main thread.
+- Done: Web Worker helper (`@portojs/worker`).
 - Done: optional compressed save format (`exportSave({ compress: true })`) and localisable number formatting (`SUFFIX_SETS`, `decimal`).
 
 ## 5. How releases work

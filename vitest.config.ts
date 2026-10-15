@@ -14,6 +14,7 @@ export default defineConfig({
       '@portojs/input': at('./packages/input/src/index.ts'),
       '@portojs/physics': at('./packages/physics/src/index.ts'),
       '@portojs/devtools': at('./packages/devtools/src/index.ts'),
+      '@portojs/worker': at('./packages/worker/src/index.ts'),
       '@portojs/tools': at('./packages/tools/src/index.ts'),
       '@portojs/audio': at('./packages/audio/src/index.ts'),
       '@portojs/idle': at('./packages/idle/src/index.ts'),
