@@ -80,6 +80,9 @@ export default defineConfig({
         '@portojs/tools': fileURLToPath(
           new URL('../../packages/tools/src/index.ts', import.meta.url),
         ),
+        '@portojs/devtools': fileURLToPath(
+          new URL('../../packages/devtools/src/index.ts', import.meta.url),
+        ),
         portojs: fileURLToPath(new URL('../../packages/portojs/src/index.ts', import.meta.url)),
       },
     },

@@ -1,0 +1,60 @@
+{
+  "name": "@portojs/devtools",
+  "version": "0.9.0",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "author": "Lucas Gomes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasgmagalhaes/portojs.git",
+    "directory": "packages/devtools"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasgmagalhaes/portojs/issues"
+  },
+  "homepage": "https://github.com/lucasgmagalhaes/portojs#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "description": "A React panel to inspect a PortoJS game, edit component state and fast-forward time.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json && node ../../scripts/build-cjs-types.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:package": "publint && attw --pack .",
+    "api:check": "api-extractor run",
+    "api:update": "api-extractor run --local"
+  },
+  "dependencies": {
+    "@portojs/tools": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": ">=18"
+  },
+  "devDependencies": {
+    "@portojs/core": "workspace:*",
+    "@portojs/runtime": "workspace:*"
+  }
+}

@@ -135,6 +135,22 @@ importers:
 
   packages/core: {}
 
+  packages/devtools:
+    dependencies:
+      '@portojs/tools':
+        specifier: workspace:*
+        version: link:../tools
+      react:
+        specifier: '>=18'
+        version: 19.3.1
+    devDependencies:
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/ecs:
     dependencies:
       '@portojs/runtime':

@@ -104,24 +104,25 @@ All entries share one copy of each class, so `instanceof` works across them in b
 
 PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `portojs` umbrella, or only the packages you need:
 
-| Package            | What it is                                                             |
-| ------------------ | ---------------------------------------------------------------------- |
-| `portojs`          | Everything below, with the subpath entries shown above                 |
-| `@portojs/core`    | Big numbers, clock, fixed-timestep engine, events, offline math, saves |
-| `@portojs/runtime` | `Game`, `GameObject`, `Component`, coroutines, prefabs, JSON scenes    |
-| `@portojs/idle`    | Opt-in idle mechanics as components                                    |
-| `@portojs/react`   | `useGame` for React                                                    |
-| `@portojs/vue`     | `useGame` for Vue                                                      |
-| `@portojs/svelte`  | `useGame` as a Svelte store                                            |
-| `@portojs/solid`   | `useGame` as a Solid signal                                            |
-| `@portojs/ecs`     | Typed-array ECS: integer entities, cached queries, systems             |
-| `@portojs/render`  | Camera, auto-batching sprites, WebGPU with WebGL2 fallback             |
-| `@portojs/input`   | Keyboard, pointer and gamepad input with named actions                 |
-| `@portojs/audio`   | Web Audio mixer with buses and playback control                        |
-| `@portojs/physics` | 2D rigid bodies and collision events on Rapier                         |
-| `@portojs/tools`   | Balancing simulator, inspector and in-page devtools panel              |
+| Package             | What it is                                                             |
+| ------------------- | ---------------------------------------------------------------------- |
+| `portojs`           | Everything below, with the subpath entries shown above                 |
+| `@portojs/core`     | Big numbers, clock, fixed-timestep engine, events, offline math, saves |
+| `@portojs/runtime`  | `Game`, `GameObject`, `Component`, coroutines, prefabs, JSON scenes    |
+| `@portojs/idle`     | Opt-in idle mechanics as components                                    |
+| `@portojs/react`    | `useGame` for React                                                    |
+| `@portojs/vue`      | `useGame` for Vue                                                      |
+| `@portojs/svelte`   | `useGame` as a Svelte store                                            |
+| `@portojs/solid`    | `useGame` as a Solid signal                                            |
+| `@portojs/ecs`      | Typed-array ECS: integer entities, cached queries, systems             |
+| `@portojs/render`   | Camera, auto-batching sprites, WebGPU with WebGL2 fallback             |
+| `@portojs/input`    | Keyboard, pointer and gamepad input with named actions                 |
+| `@portojs/audio`    | Web Audio mixer with buses and playback control                        |
+| `@portojs/physics`  | 2D rigid bodies and collision events on Rapier                         |
+| `@portojs/tools`    | Balancing simulator and game inspector                                 |
+| `@portojs/devtools` | React panel to inspect, edit and fast-forward a game                   |
 
-`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 

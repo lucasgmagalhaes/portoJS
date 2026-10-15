@@ -25,17 +25,6 @@ export interface ComponentInfo {
 }
 
 // @public
-export interface Devtools {
-    dispose(): void;
-    refresh(): void;
-}
-
-// @public
-export interface DevtoolsOptions {
-    readonly refreshEveryTicks?: number;
-}
-
-// @public
 export function fastForward(game: Game, ms: number, mode?: 'steps' | 'offline'): void;
 
 // @public
@@ -51,9 +40,6 @@ export interface GameInfo {
 
 // @public
 export function inspectGame(game: Game): GameInfo;
-
-// @public
-export function mountDevtools(game: Game, container: HTMLElement, options?: DevtoolsOptions): Devtools;
 
 // @public
 export interface ObjectInfo {

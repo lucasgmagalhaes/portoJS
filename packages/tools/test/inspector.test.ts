@@ -1,16 +1,9 @@
-// @vitest-environment happy-dom
 import { ManualClock } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Resource } from '@portojs/idle';
 import { Component, Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
-import {
-  fastForward,
-  findComponent,
-  inspectGame,
-  mountDevtools,
-  setComponentState,
-} from '../src/index.ts';
+import { fastForward, findComponent, inspectGame, setComponentState } from '../src/index.ts';
 
 class Counter extends Component {
   static override typeId = 'Counter';
@@ -84,54 +77,5 @@ describe('editing and time travel', () => {
     const before = gold.amount.toNumber();
     fastForward(game, 3_600_000, 'offline');
     expect(gold.amount.toNumber()).toBeGreaterThanOrEqual(before);
-  });
-});
-
-describe('mountDevtools', () => {
-  it('renders the tree, applies edits, reports bad JSON and fast-forwards', () => {
-    const { game, counter } = make();
-    const container = document.createElement('div');
-    document.body.append(container);
-    const tools = mountDevtools(game, container, { refreshEveryTicks: 2 });
-    expect(container.textContent).toContain('Counter');
-    expect(container.textContent).toContain('Child (inactive)');
-
-    const area = container.querySelector('textarea') as HTMLTextAreaElement;
-    area.value = '{"value": 7}';
-    (container.querySelector('[data-action="apply"]') as HTMLElement).click();
-    expect(counter.value).toBe(7);
-
-    const again = container.querySelector('textarea') as HTMLTextAreaElement;
-    again.value = '{oops';
-    (container.querySelector('[data-action="apply"]') as HTMLElement).click();
-    expect(container.querySelector('.pj-error')?.textContent).not.toBe('');
-
-    (container.querySelector('[data-mode="steps"]') as HTMLElement).click();
-    expect(counter.value).toBeGreaterThan(600);
-    expect(container.querySelector('.pj-status')?.textContent).toContain('tick 600');
-
-    game.advance(200);
-    expect(container.querySelector('.pj-status')?.textContent).toContain('tick 602');
-
-    (container.querySelector('[data-mode="offline"]') as HTMLElement).click();
-    tools.dispose();
-    expect(container.children).toHaveLength(0);
-    game.advance(200);
-  });
-
-  it('does not redraw over a textarea being edited', () => {
-    const { game } = make();
-    const container = document.createElement('div');
-    document.body.append(container);
-    const tools = mountDevtools(game, container);
-    const area = container.querySelector('textarea') as HTMLTextAreaElement;
-    area.focus();
-    area.value = 'draft';
-    tools.refresh();
-    expect((container.querySelector('textarea') as HTMLTextAreaElement).value).toBe('draft');
-    area.blur();
-    tools.refresh();
-    expect((container.querySelector('textarea') as HTMLTextAreaElement).value).not.toBe('draft');
-    tools.dispose();
   });
 });

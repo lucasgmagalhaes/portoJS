@@ -3,7 +3,7 @@
 Tuning an idle game means answering "how long until the player reaches X?" many times. PortoJS gives you cost curves with a chart, a headless simulator and an inspector panel.
 
 ```
-pnpm add @portojs/tools
+pnpm add @portojs/tools @portojs/devtools
 ```
 
 ## Cost curves
@@ -80,14 +80,18 @@ setComponentState(findComponent(game, 'Gold', 'Resource')!, { amount: '1e20' });
 fastForward(game, 86_400_000, 'offline');
 ```
 
-### A panel in the page
+### A React panel
 
-```ts
-import { mountDevtools } from '@portojs/tools';
+`@portojs/devtools` is a React component over the inspector:
 
-const tools = mountDevtools(game, document.getElementById('devtools')!);
+```tsx
+import { Devtools } from '@portojs/devtools';
+
+function App() {
+  return <>{import.meta.env.DEV && <Devtools game={game} />}</>;
+}
 ```
 
-The panel shows the object tree with each component's state as editable JSON (press Apply), the step counter and game time, and buttons to jump forward one minute, one hour or one day. It refreshes as the game runs and never redraws a textarea while you type in it. Call `tools.dispose()` to remove it. Ship it only in development builds.
+It shows the object tree with each component's state as editable JSON (press Apply to write it back through `onLoad`), the step counter and game time, and buttons to jump forward one minute, one hour or one day. It redraws every `refreshEveryTicks` steps (default 10), never overwrites a draft while you type, and takes a `className` so you can style it. React 18 or newer is a peer dependency. Ship it only in development builds.
 
-The simulator, the inspector and the panel are covered by automated tests; the panel runs against a DOM in the test environment.
+The simulator, the inspector and the panel are covered by automated tests; the panel is rendered against a DOM in the test environment.

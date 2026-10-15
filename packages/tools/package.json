@@ -23,7 +23,7 @@
     "README.md",
     "LICENSE"
   ],
-  "description": "Developer tools for PortoJS: a headless balancing simulator and an inspector with a DOM panel.",
+  "description": "Developer tools for PortoJS: a headless balancing simulator and a game inspector.",
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
