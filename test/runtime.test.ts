@@ -215,7 +215,7 @@ describe('Components', () => {
     const object = game.createObject('Doomed');
     const recorder = object.addComponent(Recorder);
     object.destroy();
-    expect(recorder.destroyed).toBe(true);
+    expect(recorder.isDestroyed).toBe(true);
     game.advance(100);
     expect(recorder.log).not.toContain('update:0.1');
     expect(() => object.addComponent(Recorder)).toThrow(/is destroyed/);
@@ -335,7 +335,7 @@ describe('Game loop and time', () => {
     const recorder = game.createObject('R').addComponent(Recorder);
     game.dispose();
     expect(game.objects).toEqual([]);
-    expect(recorder.destroyed).toBe(true);
+    expect(recorder.isDestroyed).toBe(true);
     game.advance(100);
     expect(ticks).toBe(0);
   });

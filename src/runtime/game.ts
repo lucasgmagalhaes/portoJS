@@ -454,7 +454,7 @@ export class Game {
     insertSorted(this.componentList, component);
     if (typeof component.fixedUpdate === 'function') insertSorted(this.updatable, component);
     if (typeof component.start === 'function') this.pendingStart.push(component);
-    else component.started = true;
+    else component.startCalled = true;
     this.structure += 1;
     component.awake?.();
     if (component.isActive) {
@@ -471,7 +471,7 @@ export class Game {
       component.wasActive = false;
       component.onDisable?.();
     }
-    component.destroyed = true;
+    component.isDestroyed = true;
     component.onDestroy?.();
     removeFrom(this.componentList, component);
     removeFrom(this.updatable, component);
@@ -570,9 +570,9 @@ export class Game {
     const batch = this.pendingStart;
     this.pendingStart = [];
     for (const component of batch) {
-      if (component.destroyed) continue;
+      if (component.isDestroyed) continue;
       if (component.isActive) {
-        component.started = true;
+        component.startCalled = true;
         component.start?.();
       } else {
         this.pendingStart.push(component);

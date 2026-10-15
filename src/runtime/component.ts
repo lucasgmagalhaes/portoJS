@@ -47,12 +47,12 @@ export abstract class Component {
   /**
    * @internal Set by the game once `start` has run.
    */
-  started = false;
+  startCalled = false;
 
   /**
    * @internal Set by the game when the component is destroyed.
    */
-  destroyed = false;
+  isDestroyed = false;
 
   /**
    * @internal Last known effective activity, used to fire `onEnable` and `onDisable`.
@@ -90,7 +90,7 @@ export abstract class Component {
    * `true` when the component is enabled and its object is active in the hierarchy.
    */
   get isActive(): boolean {
-    return !this.destroyed && this.enabledFlag && this.gameObject.activeInHierarchy;
+    return !this.isDestroyed && this.enabledFlag && this.gameObject.activeInHierarchy;
   }
 
   /**
