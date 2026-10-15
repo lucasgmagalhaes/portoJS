@@ -81,6 +81,7 @@ Numbers vary by machine; run the benchmark yourself.
 - [Saves and migrations](docs/saves-and-migrations.md): versioning, export/import, corruption handling
 - [Prestige](docs/prestige.md): resets, formulas and permanent bonuses
 - [Writing plugins](docs/plugins.md): the game-agnostic core and how to extend it
+- [Engineering audit and roadmap](docs/roadmap.md): measured state, open findings and the release process
 - [Example game](examples/clicker): a small clicker running in the browser (Vite). Run it with `cd examples/clicker && pnpm install && pnpm dev`
 
 ## Development
