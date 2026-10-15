@@ -88,6 +88,9 @@ Numbers vary by machine; run the benchmark yourself.
 
 ## Documentation
 
+Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`. The same content as plain files:
+
+- [Getting started](docs/getting-started.md)
 - [Offline progress](docs/offline-progress.md): how away-time is computed, capped and credited
 - [Saves and migrations](docs/saves-and-migrations.md): versioning, export/import, corruption handling
 - [Prestige](docs/prestige.md): resets, formulas and permanent bonuses

@@ -44,7 +44,7 @@ src/mechanics/     plugins: resources (with generators and upgrades), prestige, 
 src/game.ts        createGame: the declarative convenience wrapper
 test/              Vitest unit and property tests
 bench/             benchmarks (pnpm bench)
-docs/              guides
+docs/              guides and the VitePress site (`pnpm docs:dev`, `pnpm docs:build`)
 examples/clicker/  browser example (Vite)
 ```
 

@@ -49,11 +49,11 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 
 ### Performance
 
-| #   | Finding                                                                                                       | Status                                                                                      |
-| --- | ------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| F1  | Each tick allocates BigNum objects per generator (`add`, `mul`, `mul`); at 10k generators this is GC pressure | open: cache `rate × multiplier × dt` per generator and skip unchanged work                  |
-| F2  | `save()` converts every BigNum to a string each call (~15 ms at 10k generators)                               | open: dirty-tracking or incremental serialization; autosave every few seconds is fine today |
-| F3  | Chained offline (24 ms at 10k) allocates polynomial arrays per generator                                      | open: reuse buffers; only worth it past ~100k generators                                    |
+| #   | Finding                                                                                                       | Status                                                                                          |
+| --- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| F1  | Each tick allocates BigNum objects per generator (`add`, `mul`, `mul`); at 10k generators this is GC pressure | **done** (cached `rate × multiplier × dt`; tick ~0.44 ms at 10k generators)                     |
+| F2  | `save()` converts every BigNum to a string each call (~15 ms at 10k generators)                               | **partly done** (generator JSON cached by identity, faster key sorting: `save()` ~11 ms at 10k) |
+| F3  | Chained offline (24 ms at 10k) allocates polynomial arrays per generator                                      | open: reuse buffers; only worth it past ~100k generators                                        |
 
 ### Test and quality gaps
 
