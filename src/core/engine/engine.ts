@@ -139,6 +139,15 @@ export class Engine {
   }
 
   /**
+   * Forgets accumulated time and re-bases the clock reading, so the next update measures from
+   * now. Used after loading a save: time before the load must not tick the loaded state.
+   */
+  discardPending(): void {
+    this.accumulator = 0;
+    this.guard.reset();
+  }
+
+  /**
    * Reads the clock and runs the whole steps that fit, up to `maxCatchUpTicks`.
    * A clock that went backwards contributes no time.
    *

@@ -380,3 +380,16 @@ describe('createCore: untrusted input limits', () => {
     );
   });
 });
+
+describe('createCore: loading discards pending loop time', () => {
+  it('does not tick the loaded state for time that passed before the load', () => {
+    const { clock, game } = make();
+    const save = game.save();
+    clock.advance(1000); // pending, not yet pumped
+    game.load(save, { offline: false });
+    expect(game.update()).toBe(0);
+    expect(game.count).toBe(0);
+    clock.advance(200);
+    expect(game.update()).toBe(2);
+  });
+});

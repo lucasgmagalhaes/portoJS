@@ -267,6 +267,7 @@ export class Core<Ev extends object = object> {
       }
       throw error;
     }
+    this.engine.discardPending();
     this.bus.emit('loaded', { save });
     if (!(options.offline ?? this.offlineOptions.onLoad ?? true)) return undefined;
     const report = resolveOffline(save.savedAt, this.clock.now(), this.offlineOptions);
