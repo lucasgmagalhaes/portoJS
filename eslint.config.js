@@ -1,6 +1,39 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 
+const ALLOWED_DIRECTIVES =
+  /^ *(eslint-|@vitest-environment|@ts-(expect-error|ignore|nocheck)|istanbul|v8 ignore)/;
+
+/**
+ * Local rule: the only comments allowed are JSDoc blocks, which document the public API, and
+ * tool directives. Plain line comments and plain block comments are rejected.
+ */
+const noPlainComments = {
+  meta: {
+    type: 'suggestion',
+    schema: [],
+    messages: {
+      plain:
+        'Plain comments are not allowed. Express intent with names and types, or use a JSDoc block.',
+    },
+  },
+  create(context) {
+    return {
+      Program() {
+        for (const comment of context.sourceCode.getAllComments()) {
+          if (comment.type === 'Shebang') continue;
+          if (comment.type === 'Block' && comment.value.startsWith('*')) continue;
+          if (ALLOWED_DIRECTIVES.test(comment.value)) continue;
+          context.report({ loc: comment.loc, messageId: 'plain' });
+        }
+      },
+    };
+  },
+};
+
+const INLINE_FUNCTION_MESSAGE =
+  'Inline functions are not allowed in library code. Declare a named function or a const and pass it by name.';
+
 export default tseslint.config(
   {
     ignores: [
@@ -11,6 +44,8 @@ export default tseslint.config(
       'docs/api',
       'docs/.vitepress/dist',
       'docs/.vitepress/cache',
+      'playwright-report',
+      'test-results',
     ],
   },
   js.configs.recommended,
@@ -23,6 +58,23 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/consistent-type-imports': 'error',
+    },
+  },
+  {
+    files: ['**/*.{ts,tsx,js,mjs}'],
+    plugins: { local: { rules: { 'no-plain-comments': noPlainComments } } },
+    rules: { 'local/no-plain-comments': 'error' },
+  },
+  {
+    files: ['src/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        { selector: 'CallExpression > ArrowFunctionExpression', message: INLINE_FUNCTION_MESSAGE },
+        { selector: 'CallExpression > FunctionExpression', message: INLINE_FUNCTION_MESSAGE },
+        { selector: 'NewExpression > ArrowFunctionExpression', message: INLINE_FUNCTION_MESSAGE },
+        { selector: 'NewExpression > FunctionExpression', message: INLINE_FUNCTION_MESSAGE },
+      ],
     },
   },
 );
