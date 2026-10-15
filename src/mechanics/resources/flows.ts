@@ -36,6 +36,12 @@ function evaluate(coefficients: readonly BigNum[], t: BigNum): BigNum {
   return value;
 }
 
+function evaluateAll(polynomials: readonly (readonly BigNum[])[], t: BigNum): BigNum[] {
+  const values: BigNum[] = [];
+  for (const polynomial of polynomials) values.push(evaluate(polynomial, t));
+  return values;
+}
+
 /**
  * Solves production exactly for a system where every generator emits at a constant rate
  * per unit held, optionally feeding other generators (chains such as "tier 2 makes tier 1").
@@ -71,12 +77,11 @@ export function solveFlows(
     if (kind === 'generator') indegree[index] = (indegree[index] ?? 0) + 1;
   }
 
-  // Kahn's algorithm: feeders are processed before the generators they feed.
   const queue: number[] = [];
   const depth: number[] = new Array<number>(size).fill(0);
-  indegree.forEach((degree, i) => {
-    if (degree === 0) queue.push(i);
-  });
+  for (let i = 0; i < indegree.length; i++) {
+    if (indegree[i] === 0) queue.push(i);
+  }
   const order: number[] = [];
   for (let head = 0; head < queue.length; head++) {
     const i = queue[head] as number;
@@ -87,11 +92,15 @@ export function solveFlows(
     indegree[index] = (indegree[index] ?? 0) - 1;
     if (indegree[index] === 0) queue.push(index);
   }
-  if (order.length !== size) return undefined; // feedback cycle
-  if (depth.some((d) => d + 1 > maxChain)) return undefined;
+  if (order.length !== size) return undefined;
+  for (const d of depth) {
+    if (d + 1 > maxChain) return undefined;
+  }
 
-  const counts: BigNum[][] = sources.map((s) => [s.initial]);
-  const gains: BigNum[][] = Array.from({ length: resourceCount }, () => []);
+  const counts: BigNum[][] = [];
+  for (const source of sources) counts.push([source.initial]);
+  const gains: BigNum[][] = [];
+  for (let r = 0; r < resourceCount; r++) gains.push([]);
   for (const i of order) {
     const source = sources[i] as FlowSource;
     const poly = counts[i] as BigNum[];
@@ -99,15 +108,11 @@ export function solveFlows(
       source.target.kind === 'generator'
         ? (counts[source.target.index] as BigNum[])
         : (gains[source.target.index] as BigNum[]);
-    // d/dt target = coefficient × count(t)  =>  integrate term by term.
-    poly.forEach((c, k) => {
-      addTerm(destination, k + 1, source.coefficient.mul(c).div(k + 1));
-    });
+    for (let k = 0; k < poly.length; k++) {
+      addTerm(destination, k + 1, source.coefficient.mul(poly[k] as BigNum).div(k + 1));
+    }
   }
 
   const t = BigNum.from(seconds);
-  return {
-    counts: counts.map((poly) => evaluate(poly, t)),
-    gains: gains.map((poly) => evaluate(poly, t)),
-  };
+  return { counts: evaluateAll(counts, t), gains: evaluateAll(gains, t) };
 }

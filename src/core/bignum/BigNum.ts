@@ -5,7 +5,13 @@
 export type BigNumLike = BigNum | number | string;
 
 /** Exact powers of ten that fit in a double (1e0 .. 1e22). */
-const POW10: readonly number[] = Array.from({ length: 23 }, (_, i) => Number(`1e${i}`));
+function buildPow10(): number[] {
+  const powers: number[] = [];
+  for (let i = 0; i <= 22; i++) powers.push(Number(`1e${i}`));
+  return powers;
+}
+
+const POW10: readonly number[] = buildPow10();
 
 /** Beyond this exponent gap the smaller addend cannot change a 53-bit mantissa. */
 const ADD_CUTOFF = 16;
@@ -51,8 +57,6 @@ export class BigNum {
     this.m = m;
     this.e = e;
   }
-
-  // ---------------------------------------------------------------- creation
 
   /**
    * Converts a number, numeric string or existing {@link BigNum} into a BigNum.
@@ -138,8 +142,6 @@ export class BigNum {
     return BigNum.normExact(m, e);
   }
 
-  // -------------------------------------------------------------- inspection
-
   /** `true` when the value is exactly zero. */
   isZero(): boolean {
     return this.m === 0;
@@ -187,8 +189,6 @@ export class BigNum {
   toJSON(): string {
     return this.toString();
   }
-
-  // -------------------------------------------------------------- arithmetic
 
   /** Returns `-this`. */
   neg(): BigNum {
@@ -318,8 +318,6 @@ export class BigNum {
     return this.log10() * Math.LN10;
   }
 
-  // -------------------------------------------------------------- comparison
-
   /** Three-way comparison: `-1` if `this < other`, `0` if equal, `1` if greater. */
   cmp(other: BigNumLike): -1 | 0 | 1 {
     const b = BigNum.from(other);
@@ -328,7 +326,6 @@ export class BigNum {
     if (sa !== sb) return sa < sb ? -1 : 1;
     if (sa === 0) return 0;
     if (this.e !== b.e) {
-      // Larger exponent means larger magnitude, so the order flips for negatives.
       const byExponent = this.e < b.e ? -1 : 1;
       return sa > 0 ? byExponent : byExponent === 1 ? -1 : 1;
     }
@@ -381,8 +378,6 @@ export class BigNum {
     return total;
   }
 
-  // ---------------------------------------------------------------- rounding
-
   /** Largest integer less than or equal to the value. */
   floor(): BigNum {
     return this.roundWith(Math.floor);
@@ -404,7 +399,6 @@ export class BigNum {
   }
 
   private roundWith(fn: (x: number) => number): BigNum {
-    // From 10^15 up a double mantissa has no fractional digits left: already an integer.
     if (this.m === 0 || this.e >= 15) return this;
     const x = this.e < -300 ? this.m * 1e-300 : this.toNumber();
     return BigNum.fromNumber(fn(x));

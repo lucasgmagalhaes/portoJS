@@ -1,8 +1,20 @@
-import { useCallback, useRef, useSyncExternalStore } from 'react';
+import { useRef, useSyncExternalStore } from 'react';
 import { sameValue, subscribeAll } from './shared.js';
-import type { Observable } from './shared.js';
+import type { Observable, Off } from './shared.js';
 
 export type { Observable } from './shared.js';
+
+const subscribers = new WeakMap<Observable, (notify: () => void) => Off>();
+
+/** One stable subscribe function per game, so React does not resubscribe on every render. */
+function subscriberFor(game: Observable): (notify: () => void) => Off {
+  let subscribe = subscribers.get(game);
+  if (subscribe === undefined) {
+    subscribe = (notify) => subscribeAll(game, notify);
+    subscribers.set(game, subscribe);
+  }
+  return subscribe;
+}
 
 /**
  * Reads a value from a game and re-renders the component when it changes.
@@ -27,8 +39,6 @@ export function useGame<G extends Observable, T>(
   latest.current = selector;
   const last = useRef<{ readonly value: T } | undefined>(undefined);
 
-  const subscribe = useCallback((notify: () => void) => subscribeAll(game, notify), [game]);
-
   const getSnapshot = (): T => {
     const next = latest.current(game);
     const previous = last.current;
@@ -37,5 +47,5 @@ export function useGame<G extends Observable, T>(
     return next;
   };
 
-  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
+  return useSyncExternalStore(subscriberFor(game), getSnapshot, getSnapshot);
 }

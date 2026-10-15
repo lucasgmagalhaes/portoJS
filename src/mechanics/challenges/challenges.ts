@@ -1,6 +1,6 @@
 import type { BigNumLike } from '../../core/bignum/index.js';
 import { definePlugin } from '../../core/plugin.js';
-import type { Plugin } from '../../core/plugin.js';
+import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { EffectTarget, ResetKeep, ResourcesApi } from '../resources/types.js';
@@ -83,7 +83,7 @@ export interface ChallengesApi<C extends string> {
 export function challenges<R extends string, G extends string = never, C extends string = string>(
   config: ChallengesConfig<R, G, C>,
 ): Plugin<ChallengesApi<C>, ChallengesEvents<C>> {
-  return definePlugin<ChallengesApi<C>, ChallengesEvents<C>>(CHALLENGES_PLUGIN, (kernel) => {
+  const setup = (kernel: Kernel<ChallengesEvents<C>>): ChallengesApi<C> => {
     const game = kernel.require<ResourcesApi<R, G, string>>(RESOURCES_PLUGIN);
     const ids = Object.keys(config.definitions) as C[];
     const defs = config.definitions as Readonly<Record<string, ChallengeDef<R, G>>>;
@@ -95,20 +95,25 @@ export function challenges<R extends string, G extends string = never, C extends
     const completed: C[] = [];
     let sinceCheck = 0;
 
-    // Handicaps and rewards are permanent modifiers whose value depends on state, so they
-    // never need to be re-registered after a load.
+    const whenActive = (id: C, multiplier: BigNumLike) => (): BigNumLike =>
+      active === id ? multiplier : 1;
+    const whenCompleted = (id: C, multiplier: BigNumLike) => (): BigNumLike =>
+      completed.includes(id) ? multiplier : 1;
+
     for (const id of ids) {
       const def = defs[id] as ChallengeDef<R, G>;
-      (def.modifiers ?? []).forEach((m, i) => {
-        game.setModifier(`${CHALLENGES_PLUGIN}:${id}:handicap:${i}`, m, () =>
-          active === id ? m.multiplier : 1,
-        );
-      });
-      (def.reward ?? []).forEach((m, i) => {
-        game.setModifier(`${CHALLENGES_PLUGIN}:${id}:reward:${i}`, m, () =>
-          completed.includes(id) ? m.multiplier : 1,
-        );
-      });
+      const handicaps = def.modifiers ?? [];
+      for (let i = 0; i < handicaps.length; i++) {
+        const handicap = handicaps[i] as ChallengeModifier<R, G>;
+        const name = `${CHALLENGES_PLUGIN}:${id}:handicap:${i}`;
+        game.setModifier(name, handicap, whenActive(id, handicap.multiplier));
+      }
+      const rewards = def.reward ?? [];
+      for (let i = 0; i < rewards.length; i++) {
+        const reward = rewards[i] as ChallengeModifier<R, G>;
+        const name = `${CHALLENGES_PLUGIN}:${id}:reward:${i}`;
+        game.setModifier(name, reward, whenCompleted(id, reward.multiplier));
+      }
     }
 
     const reset = (id: C): void => {
@@ -182,5 +187,6 @@ export function challenges<R extends string, G extends string = never, C extends
       isChallengeCompleted: (id) => completed.includes(id),
       completedChallenges: () => [...completed],
     };
-  });
+  };
+  return definePlugin<ChallengesApi<C>, ChallengesEvents<C>>(CHALLENGES_PLUGIN, setup);
 }

@@ -105,7 +105,7 @@ export class Core<Ev extends object = object> {
     this.maxSaveChars = options.maxSaveChars ?? DEFAULT_MAX_SAVE_CHARS;
     if (!(this.maxSaveChars > 0)) throw new RangeError('Core: maxSaveChars must be > 0');
     this.offlineOptions = options.offline ?? {};
-    resolveElapsed(0, this.offlineOptions); // validate eagerly
+    resolveElapsed(0, this.offlineOptions);
 
     this.engine = new Engine({
       clock: this.clock,
@@ -134,8 +134,6 @@ export class Core<Ev extends object = object> {
       this.pluginApis.set(plugin.name, plugin.setup(this.createKernel()));
     }
   }
-
-  // ------------------------------------------------------------------ loop
 
   /** `true` while the loop is running. */
   get running(): boolean {
@@ -209,8 +207,6 @@ export class Core<Ev extends object = object> {
     this.bus.clear();
   }
 
-  // ---------------------------------------------------------------- events
-
   /** Subscribes to an event. Returns a function that unsubscribes. */
   on<K extends keyof (CoreEvents & Ev)>(
     event: K,
@@ -226,8 +222,6 @@ export class Core<Ev extends object = object> {
   ): Unsubscribe {
     return this.bus.once(event, listener as Listener<unknown>);
   }
-
-  // ----------------------------------------------------------------- saves
 
   /** Captures the whole game state. */
   save(): SaveData {
@@ -257,15 +251,10 @@ export class Core<Ev extends object = object> {
       typeof input === 'string' ? decodeText(input, this.maxSaveChars) : parseSave(input);
     const save = migrateSave(parsed, this.version, this.migrations);
     const backup = this.collect();
-    try {
-      this.apply(save.data);
-    } catch (error) {
-      try {
-        this.apply(backup);
-      } catch {
-        // Best effort: the original error is the one worth reporting.
-      }
-      throw error;
+    const failures = this.applyAll(save.data);
+    if (failures.length > 0) {
+      this.applyAll(backup);
+      throw failures[0];
     }
     this.engine.discardPending();
     this.bus.emit('loaded', { save });
@@ -285,8 +274,6 @@ export class Core<Ev extends object = object> {
     this.apply({});
   }
 
-  // ------------------------------------------------------------- internals
-
   private collect(): JsonObject {
     const data: JsonObject = {};
     for (const system of this.systems) {
@@ -295,10 +282,22 @@ export class Core<Ev extends object = object> {
     return data;
   }
 
-  private apply(data: JsonObject): void {
+  /** Applies `data` to every system, collecting failures instead of stopping at the first. */
+  private applyAll(data: JsonObject): unknown[] {
+    const failures: unknown[] = [];
     for (const system of this.systems) {
-      system.deserialize?.(data[system.id] as JsonValue | undefined);
+      try {
+        system.deserialize?.(data[system.id] as JsonValue | undefined);
+      } catch (error) {
+        failures.push(error);
+      }
     }
+    return failures;
+  }
+
+  private apply(data: JsonObject): void {
+    const failures = this.applyAll(data);
+    if (failures.length > 0) throw failures[0];
   }
 
   private credit(report: OfflineReport, source: OfflineSource): void {
@@ -315,8 +314,10 @@ export class Core<Ev extends object = object> {
       stepMs: this.engine.stepMs,
       now: () => this.clock.now(),
       registerSystem: (system) => {
-        if (this.systems.some((existing) => existing.id === system.id)) {
-          throw new Error(`Core: system "${system.id}" is already registered`);
+        for (const existing of this.systems) {
+          if (existing.id === system.id) {
+            throw new Error(`Core: system "${system.id}" is already registered`);
+          }
         }
         this.systems.push(system);
       },

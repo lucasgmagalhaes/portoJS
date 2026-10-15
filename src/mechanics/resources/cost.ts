@@ -55,10 +55,15 @@ const MAX_ITERATION_LIMIT = 100_000;
  * Nudges a closed-form estimate to the exact answer: shrink while unaffordable, then grow
  * while one more still fits. Absorbs floating point error from logarithms and square roots.
  */
-function refine(estimate: BigNum, total: (count: BigNum) => BigNum, budget: BigNum): BigNum {
+function refine(
+  estimate: BigNum,
+  owned: BigNum,
+  total: (owned: BigNum, count: BigNum) => BigNum,
+  budget: BigNum,
+): BigNum {
   let count = estimate.isNegative() ? BigNum.ZERO : estimate.floor();
-  for (let i = 0; i < 8 && count.gt(0) && total(count).gt(budget); i++) count = count.sub(1);
-  for (let i = 0; i < 8 && total(count.add(1)).lte(budget); i++) count = count.add(1);
+  for (let i = 0; i < 8 && count.gt(0) && total(owned, count).gt(budget); i++) count = count.sub(1);
+  for (let i = 0; i < 8 && total(owned, count.add(1)).lte(budget); i++) count = count.add(1);
   return count;
 }
 
@@ -93,7 +98,7 @@ function compileExponential(curve: ExponentialCost): CostFunctions {
     const estimate = flat
       ? budget.div(first)
       : BigNum.from(Math.floor(budget.mul(growthMinusOne).div(first).add(1).log10() / logGrowth));
-    return refine(estimate, (count) => total(owned, count), budget);
+    return refine(estimate, owned, total, budget);
   };
   return { unit, total, max };
 }
@@ -107,21 +112,18 @@ function compileLinear(curve: LinearCost): CostFunctions {
   const unit = (owned: BigNum): BigNum => base.add(increment.mul(owned));
   const total = (owned: BigNum, count: BigNum): BigNum => {
     if (count.lte(0)) return BigNum.ZERO;
-    // n × first + increment × n(n-1)/2
     const triangle = increment.mul(count).mul(count.sub(1)).div(2);
     return count.mul(unit(owned)).add(triangle);
   };
   const max = (owned: BigNum, budget: BigNum): BigNum => {
     const first = unit(owned);
     if (budget.lt(first)) return BigNum.ZERO;
-    if (increment.isZero())
-      return refine(budget.div(first), (count) => total(owned, count), budget);
-    // Solve (inc/2)·n² + b·n − budget = 0 with the numerically stable root form.
+    if (increment.isZero()) return refine(budget.div(first), owned, total, budget);
     const a = increment.div(2);
     const b = first.sub(a);
     const root = b.mul(b).add(a.mul(budget).mul(4)).sqrt();
     const estimate = budget.mul(2).div(b.add(root));
-    return refine(estimate, (count) => total(owned, count), budget);
+    return refine(estimate, owned, total, budget);
   };
   return { unit, total, max };
 }
@@ -141,7 +143,7 @@ function compileCustom(curve: CustomCost): CostFunctions {
   const max = (owned: BigNum, budget: BigNum): BigNum => {
     if (curve.max) {
       const estimate = BigNum.from(curve.max(owned, budget));
-      return refine(estimate, (count) => total(owned, count), budget);
+      return refine(estimate, owned, total, budget);
     }
     let spent: BigNum = BigNum.ZERO;
     let count = 0;

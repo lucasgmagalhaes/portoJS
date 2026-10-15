@@ -1,9 +1,10 @@
 import { definePlugin } from '../../core/plugin.js';
-import type { Plugin } from '../../core/plugin.js';
+import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
-import type { ResourcesApi } from '../resources/types.js';
+import type { PurchaseTarget, ResourcesApi } from '../resources/types.js';
+import { idsByTime } from '../shared.js';
 
 /** Plugin name. */
 export const UNLOCKS_PLUGIN = 'unlocks';
@@ -73,7 +74,7 @@ export function unlocks<
   U extends string = never,
   K extends string = string,
 >(config: UnlocksConfig<R, G, U, K>): Plugin<UnlocksApi<K>, UnlocksEvents<K>> {
-  return definePlugin<UnlocksApi<K>, UnlocksEvents<K>>(UNLOCKS_PLUGIN, (kernel) => {
+  const setup = (kernel: Kernel<UnlocksEvents<K>>): UnlocksApi<K> => {
     const game = kernel.require<ResourcesApi<R, G, U>>(RESOURCES_PLUGIN);
     const ids = Object.keys(config.definitions) as K[];
     const defs = config.definitions as Readonly<Record<string, UnlockDef<R, G, U>>>;
@@ -84,7 +85,6 @@ export function unlocks<
     const earned = new Map<K, number>();
     let sinceCheck = 0;
 
-    // Which unlocks gate each target.
     const gatesOf = new Map<string, K[]>();
     for (const id of ids) {
       const def = defs[id] as UnlockDef<R, G, U>;
@@ -109,10 +109,11 @@ export function unlocks<
       return fresh;
     };
 
-    game.setPurchaseGuard(UNLOCKS_PLUGIN, (target) => {
+    const allowsPurchase = (target: PurchaseTarget<G, U>): boolean => {
       const gates = gatesOf.get(`${target.kind}:${target.id}`);
       return gates === undefined || gates.every(evaluate);
-    });
+    };
+    game.setPurchaseGuard(UNLOCKS_PLUGIN, allowsPurchase);
 
     kernel.registerSystem({
       id: UNLOCKS_PLUGIN,
@@ -147,10 +148,11 @@ export function unlocks<
     return {
       unlockIds: ids,
       isUnlocked: evaluate,
-      unlockedIds: () => [...earned.entries()].sort((a, b) => a[1] - b[1]).map(([id]) => id),
+      unlockedIds: () => idsByTime(earned),
       checkUnlocks: check,
     };
-  });
+  };
+  return definePlugin<UnlocksApi<K>, UnlocksEvents<K>>(UNLOCKS_PLUGIN, setup);
 }
 
 function push<K>(map: Map<string, K[]>, key: string, value: K): void {

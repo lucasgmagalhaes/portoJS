@@ -88,6 +88,10 @@ export class Engine {
   private stopLoop: (() => void) | undefined;
   private busy = false;
 
+  private readonly pump = (): void => {
+    this.update();
+  };
+
   /** @throws {RangeError} if `stepMs`, `maxCatchUpTicks` or `pollMs` is not a positive finite number. */
   constructor(options: EngineOptions) {
     this.stepMs = options.stepMs ?? 100;
@@ -127,9 +131,7 @@ export class Engine {
   start(): void {
     if (this.running) return;
     this.guard.reset();
-    this.stopLoop = this.scheduler.start(() => {
-      this.update();
-    }, this.pollMs);
+    this.stopLoop = this.scheduler.start(this.pump, this.pollMs);
   }
 
   /** Stops the loop. Pending accumulator time is kept. No-op when not running. */

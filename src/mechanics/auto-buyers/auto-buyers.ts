@@ -1,6 +1,6 @@
 import type { BigNum } from '../../core/bignum/index.js';
 import { definePlugin } from '../../core/plugin.js';
-import type { Plugin } from '../../core/plugin.js';
+import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
@@ -70,7 +70,7 @@ interface BuyerState<G extends string> {
 export function autoBuyers<G extends string, B extends string>(
   config: AutoBuyersConfig<G, B>,
 ): Plugin<AutoBuyersApi<B>, AutoBuyersEvents<G, B>> {
-  return definePlugin<AutoBuyersApi<B>, AutoBuyersEvents<G, B>>(AUTO_BUYERS_PLUGIN, (kernel) => {
+  const setup = (kernel: Kernel<AutoBuyersEvents<G, B>>): AutoBuyersApi<B> => {
     const game = kernel.require<ResourcesApi<string, G, string>>(RESOURCES_PLUGIN);
     const ids = Object.keys(config.buyers) as B[];
     const defs = config.buyers as Readonly<Record<string, AutoBuyerDef<G>>>;
@@ -152,5 +152,6 @@ export function autoBuyers<G extends string, B extends string>(
       },
       isAutoBuyerEnabled: (id) => buyer(id).enabled,
     };
-  });
+  };
+  return definePlugin<AutoBuyersApi<B>, AutoBuyersEvents<G, B>>(AUTO_BUYERS_PLUGIN, setup);
 }

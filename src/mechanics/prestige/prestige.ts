@@ -1,7 +1,7 @@
 import { BigNum } from '../../core/bignum/index.js';
 import type { BigNumLike } from '../../core/bignum/index.js';
 import { definePlugin } from '../../core/plugin.js';
-import type { Plugin } from '../../core/plugin.js';
+import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { EffectTarget, ResetKeep, ResourcesApi } from '../resources/types.js';
@@ -121,7 +121,7 @@ export function compileFormula(formula: PrestigeFormula): (runEarned: BigNum) =>
 export function prestige<R extends string, G extends string = never, U extends string = never>(
   config: PrestigeConfig<R, G, U>,
 ): Plugin<PrestigeApi, PrestigeEvents> {
-  return definePlugin<PrestigeApi, PrestigeEvents>(PRESTIGE_PLUGIN, (kernel) => {
+  const setup = (kernel: Kernel<PrestigeEvents>): PrestigeApi => {
     const game = kernel.require<ResourcesApi<R, G, U>>(RESOURCES_PLUGIN);
     const formula = compileFormula(config.gain);
     const minimum = BigNum.from(config.minimum ?? 1);
@@ -129,13 +129,15 @@ export function prestige<R extends string, G extends string = never, U extends s
     let lifetime: BigNum = BigNum.ZERO;
     let count = 0;
 
-    (config.bonuses ?? []).forEach((bonus, i) => {
-      const perPoint = 'perPoint' in bonus ? BigNum.from(bonus.perPoint) : undefined;
-      game.setModifier(`${PRESTIGE_PLUGIN}:${i}`, bonus.target, () => {
-        if (perPoint !== undefined) return points.mul(perPoint).add(1);
-        return 'multiplier' in bonus ? bonus.multiplier(points, lifetime) : 1;
-      });
-    });
+    const bonusValue = (bonus: PrestigeBonus<R, G>) => (): BigNumLike => {
+      if ('perPoint' in bonus) return points.mul(BigNum.from(bonus.perPoint)).add(1);
+      return bonus.multiplier(points, lifetime);
+    };
+    const bonuses = config.bonuses ?? [];
+    for (let i = 0; i < bonuses.length; i++) {
+      const bonus = bonuses[i] as PrestigeBonus<R, G>;
+      game.setModifier(`${PRESTIGE_PLUGIN}:${i}`, bonus.target, bonusValue(bonus));
+    }
 
     const pending = (): BigNum => {
       const value = formula(game.earned(config.basedOn)).floor();
@@ -193,5 +195,6 @@ export function prestige<R extends string, G extends string = never, U extends s
         return true;
       },
     };
-  });
+  };
+  return definePlugin<PrestigeApi, PrestigeEvents>(PRESTIGE_PLUGIN, setup);
 }

@@ -1,10 +1,11 @@
 import { BigNum } from '../../core/bignum/index.js';
 import type { BigNumLike } from '../../core/bignum/index.js';
 import { definePlugin } from '../../core/plugin.js';
-import type { Plugin } from '../../core/plugin.js';
+import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject } from '../../core/save/index.js';
 import { compileFormula } from '../prestige/prestige.js';
+import { indexOfIds } from '../shared.js';
 import type { PrestigeBonus, PrestigeFormula } from '../prestige/prestige.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { ResetKeep, ResourcesApi } from '../resources/types.js';
@@ -119,152 +120,160 @@ export function prestigeLayers<
   U extends string = never,
   L extends string = string,
 >(config: PrestigeLayersConfig<R, G, U, L>): Plugin<PrestigeLayersApi<L>, PrestigeLayersEvents<L>> {
-  return definePlugin<PrestigeLayersApi<L>, PrestigeLayersEvents<L>>(
-    PRESTIGE_LAYERS_PLUGIN,
-    (kernel) => {
-      const game = kernel.require<ResourcesApi<R, G, U>>(RESOURCES_PLUGIN);
-      const ids = Object.keys(config.layers) as L[];
-      const defs = config.layers as Readonly<Record<string, PrestigeLayerDef<R, G, U>>>;
-      const order = new Map<string, number>(ids.map((id, i) => [id, i]));
-      const states = new Map<L, LayerState>(ids.map((id) => [id, fresh()]));
-      const formulas = new Map<L, (basis: BigNum) => BigNum>();
-      const minimums = new Map<L, BigNum>();
+  const setup = (kernel: Kernel<PrestigeLayersEvents<L>>): PrestigeLayersApi<L> => {
+    const game = kernel.require<ResourcesApi<R, G, U>>(RESOURCES_PLUGIN);
+    const ids = Object.keys(config.layers) as L[];
+    const defs = config.layers as Readonly<Record<string, PrestigeLayerDef<R, G, U>>>;
+    const order = indexOfIds(ids);
+    const states = new Map<L, LayerState>();
+    for (const id of ids) states.set(id, fresh());
+    const formulas = new Map<L, (basis: BigNum) => BigNum>();
+    const minimums = new Map<L, BigNum>();
 
-      for (const id of ids) {
-        const def = defs[id] as PrestigeLayerDef<R, G, U>;
-        formulas.set(id, compileFormula(def.gain));
-        minimums.set(id, BigNum.from(def.minimum ?? 1));
-        if (typeof def.basedOn !== 'string') {
-          const base = order.get(def.basedOn.layer);
-          if (base === undefined || base >= (order.get(id) as number)) {
-            throw new Error(
-              `prestigeLayers: layer "${id}" is based on "${def.basedOn.layer}", which must be listed before it`,
-            );
-          }
+    for (const id of ids) {
+      const def = defs[id] as PrestigeLayerDef<R, G, U>;
+      formulas.set(id, compileFormula(def.gain));
+      minimums.set(id, BigNum.from(def.minimum ?? 1));
+      if (typeof def.basedOn !== 'string') {
+        const base = order.get(def.basedOn.layer);
+        if (base === undefined || base >= (order.get(id) as number)) {
+          throw new Error(
+            `prestigeLayers: layer "${id}" is based on "${def.basedOn.layer}", which must be listed before it`,
+          );
         }
       }
+    }
 
-      const state = (id: L): LayerState => {
-        const s = states.get(id);
-        if (s === undefined) throw new Error(`prestigeLayers: unknown layer "${id}"`);
-        return s;
-      };
+    const state = (id: L): LayerState => {
+      const s = states.get(id);
+      if (s === undefined) throw new Error(`prestigeLayers: unknown layer "${id}"`);
+      return s;
+    };
 
-      const basisOf = (id: L): BigNum => {
-        const { basedOn } = defs[id] as PrestigeLayerDef<R, G, U>;
-        return typeof basedOn === 'string'
-          ? game.earned(basedOn)
-          : state(basedOn.layer as L).runGained;
-      };
+    const basisOf = (id: L): BigNum => {
+      const { basedOn } = defs[id] as PrestigeLayerDef<R, G, U>;
+      return typeof basedOn === 'string'
+        ? game.earned(basedOn)
+        : state(basedOn.layer as L).runGained;
+    };
 
-      const pending = (id: L): BigNum => {
-        const value = (formulas.get(id) as (b: BigNum) => BigNum)(basisOf(id)).floor();
-        return value.lt(minimums.get(id) as BigNum) ? BigNum.ZERO : value;
-      };
+    const pending = (id: L): BigNum => {
+      const value = (formulas.get(id) as (b: BigNum) => BigNum)(basisOf(id)).floor();
+      return value.lt(minimums.get(id) as BigNum) ? BigNum.ZERO : value;
+    };
 
-      ids.forEach((id) => {
-        const def = defs[id] as PrestigeLayerDef<R, G, U>;
-        (def.bonuses ?? []).forEach((bonus, i) => {
-          const perPoint = 'perPoint' in bonus ? BigNum.from(bonus.perPoint) : undefined;
-          game.setModifier(`${PRESTIGE_LAYERS_PLUGIN}:${id}:${i}`, bonus.target, () => {
-            const s = state(id);
-            if (perPoint !== undefined) return s.points.mul(perPoint).add(1);
-            return 'multiplier' in bonus ? bonus.multiplier(s.points, s.lifetime) : 1;
-          });
-        });
-      });
+    const bonusValue = (id: L, bonus: PrestigeBonus<R, G>) => (): BigNumLike => {
+      const s = state(id);
+      if ('perPoint' in bonus) return s.points.mul(BigNum.from(bonus.perPoint)).add(1);
+      return bonus.multiplier(s.points, s.lifetime);
+    };
+    for (const id of ids) {
+      const bonuses = (defs[id] as PrestigeLayerDef<R, G, U>).bonuses ?? [];
+      for (let i = 0; i < bonuses.length; i++) {
+        const bonus = bonuses[i] as PrestigeBonus<R, G>;
+        game.setModifier(
+          `${PRESTIGE_LAYERS_PLUGIN}:${id}:${i}`,
+          bonus.target,
+          bonusValue(id, bonus),
+        );
+      }
+    }
 
-      kernel.registerSystem({
-        id: PRESTIGE_LAYERS_PLUGIN,
-        serialize: () => {
-          const out: JsonObject = {};
-          for (const [id, s] of states) {
-            out[id] = {
-              points: s.points.toJSON(),
-              lifetime: s.lifetime.toJSON(),
-              count: s.count,
-              runGained: s.runGained.toJSON(),
+    kernel.registerSystem({
+      id: PRESTIGE_LAYERS_PLUGIN,
+      serialize: () => {
+        const out: JsonObject = {};
+        for (const [id, s] of states) {
+          out[id] = {
+            points: s.points.toJSON(),
+            lifetime: s.lifetime.toJSON(),
+            count: s.count,
+            runGained: s.runGained.toJSON(),
+          };
+        }
+        return out;
+      },
+      deserialize: (data) => {
+        for (const id of ids) states.set(id, fresh());
+        if (data === undefined) return;
+        if (!isJsonObject(data)) {
+          throw new SaveCorruptedError('prestigeLayers: save entry must be an object');
+        }
+        for (const id of ids) {
+          const saved = data[id];
+          if (saved === undefined) continue;
+          if (!isJsonObject(saved)) {
+            throw new SaveCorruptedError(`prestigeLayers: invalid state for "${id}"`);
+          }
+          const count = saved['count'] ?? 0;
+          if (typeof count !== 'number' || !Number.isInteger(count) || count < 0) {
+            throw new SaveCorruptedError(`prestigeLayers: invalid count for "${id}"`);
+          }
+          try {
+            const next: LayerState = {
+              points: BigNum.fromJSON(saved['points'] ?? 0),
+              lifetime: BigNum.fromJSON(saved['lifetime'] ?? 0),
+              count,
+              runGained: BigNum.fromJSON(saved['runGained'] ?? 0),
             };
-          }
-          return out;
-        },
-        deserialize: (data) => {
-          for (const id of ids) states.set(id, fresh());
-          if (data === undefined) return;
-          if (!isJsonObject(data)) {
-            throw new SaveCorruptedError('prestigeLayers: save entry must be an object');
-          }
-          for (const id of ids) {
-            const saved = data[id];
-            if (saved === undefined) continue;
-            if (!isJsonObject(saved)) {
-              throw new SaveCorruptedError(`prestigeLayers: invalid state for "${id}"`);
+            if (
+              next.points.isNegative() ||
+              next.lifetime.isNegative() ||
+              next.runGained.isNegative()
+            ) {
+              throw new RangeError('negative');
             }
-            const count = saved['count'] ?? 0;
-            if (typeof count !== 'number' || !Number.isInteger(count) || count < 0) {
-              throw new SaveCorruptedError(`prestigeLayers: invalid count for "${id}"`);
-            }
-            try {
-              const next: LayerState = {
-                points: BigNum.fromJSON(saved['points'] ?? 0),
-                lifetime: BigNum.fromJSON(saved['lifetime'] ?? 0),
-                count,
-                runGained: BigNum.fromJSON(saved['runGained'] ?? 0),
-              };
-              if ([next.points, next.lifetime, next.runGained].some((v) => v.isNegative())) {
-                throw new RangeError('negative');
-              }
-              states.set(id, next);
-            } catch {
-              throw new SaveCorruptedError(`prestigeLayers: invalid numbers for "${id}"`);
-            }
+            states.set(id, next);
+          } catch {
+            throw new SaveCorruptedError(`prestigeLayers: invalid numbers for "${id}"`);
           }
-        },
-      });
+        }
+      },
+    });
 
-      return {
-        layerIds: ids,
-        layerPoints: (id) => state(id).points,
-        layerLifetime: (id) => state(id).lifetime,
-        layerCount: (id) => state(id).count,
-        pendingLayer: (id) => {
-          state(id);
-          return pending(id);
-        },
-        canAscend: (id) => {
-          state(id);
-          return !pending(id).isZero();
-        },
-        ascend: (id) => {
-          const s = state(id);
-          const gained = pending(id);
-          if (gained.isZero()) return undefined;
-          const def = defs[id] as PrestigeLayerDef<R, G, U>;
-          s.points = s.points.add(gained);
-          s.lifetime = s.lifetime.add(gained);
-          s.runGained = s.runGained.add(gained);
-          s.count += 1;
-          if (def.resetsLower ?? true) {
-            const index = order.get(id) as number;
-            ids.slice(0, index).forEach((lower) => {
-              const ls = state(lower);
-              ls.points = BigNum.ZERO;
-              ls.runGained = BigNum.ZERO;
-            });
+    return {
+      layerIds: ids,
+      layerPoints: (id) => state(id).points,
+      layerLifetime: (id) => state(id).lifetime,
+      layerCount: (id) => state(id).count,
+      pendingLayer: (id) => {
+        state(id);
+        return pending(id);
+      },
+      canAscend: (id) => {
+        state(id);
+        return !pending(id).isZero();
+      },
+      ascend: (id) => {
+        const s = state(id);
+        const gained = pending(id);
+        if (gained.isZero()) return undefined;
+        const def = defs[id] as PrestigeLayerDef<R, G, U>;
+        s.points = s.points.add(gained);
+        s.lifetime = s.lifetime.add(gained);
+        s.runGained = s.runGained.add(gained);
+        s.count += 1;
+        if (def.resetsLower ?? true) {
+          const index = order.get(id) as number;
+          for (const lower of ids.slice(0, index)) {
+            const lowerState = state(lower);
+            lowerState.points = BigNum.ZERO;
+            lowerState.runGained = BigNum.ZERO;
           }
-          game.resetRun(def.keep);
-          kernel.emit('ascended', { layer: id, gained, points: s.points, count: s.count });
-          return gained;
-        },
-        spendLayerPoints: (id, amount) => {
-          const s = state(id);
-          const value = BigNum.from(amount);
-          if (value.isNegative()) throw new RangeError('prestigeLayers: amount must be >= 0');
-          if (value.gt(s.points)) return false;
-          s.points = s.points.sub(value);
-          return true;
-        },
-      };
-    },
-  );
+        }
+        game.resetRun(def.keep);
+        kernel.emit('ascended', { layer: id, gained, points: s.points, count: s.count });
+        return gained;
+      },
+      spendLayerPoints: (id, amount) => {
+        const s = state(id);
+        const value = BigNum.from(amount);
+        if (value.isNegative()) throw new RangeError('prestigeLayers: amount must be >= 0');
+        if (value.gt(s.points)) return false;
+        s.points = s.points.sub(value);
+        return true;
+      },
+    };
+  };
+  return definePlugin<PrestigeLayersApi<L>, PrestigeLayersEvents<L>>(PRESTIGE_LAYERS_PLUGIN, setup);
 }

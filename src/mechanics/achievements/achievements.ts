@@ -1,4 +1,5 @@
 import { definePlugin } from '../../core/plugin.js';
+import { idsByTime } from '../shared.js';
 import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject } from '../../core/save/index.js';
@@ -67,7 +68,7 @@ export interface AchievementsApi<A extends string> {
 export function achievements<Ctx, A extends string>(
   config: AchievementsConfig<Ctx, A>,
 ): Plugin<AchievementsApi<A>, AchievementsEvents<A>> {
-  return definePlugin<AchievementsApi<A>, AchievementsEvents<A>>(ACHIEVEMENTS_PLUGIN, (kernel) => {
+  const setup = (kernel: Kernel<AchievementsEvents<A>>): AchievementsApi<A> => {
     const ids = Object.keys(config.definitions) as A[];
     const interval = config.checkIntervalMs ?? 1000;
     if (!Number.isFinite(interval) || interval <= 0) {
@@ -128,10 +129,10 @@ export function achievements<Ctx, A extends string>(
     return {
       achievementIds: ids,
       hasAchievement: (id) => unlocked.has(id),
-      unlockedAchievements: () =>
-        [...unlocked.entries()].sort((a, b) => a[1] - b[1]).map(([id]) => id),
+      unlockedAchievements: () => idsByTime(unlocked),
       achievementUnlockedAt: (id) => unlocked.get(id),
       checkAchievements: check,
     };
-  });
+  };
+  return definePlugin<AchievementsApi<A>, AchievementsEvents<A>>(ACHIEVEMENTS_PLUGIN, setup);
 }

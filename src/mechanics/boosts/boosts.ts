@@ -1,10 +1,10 @@
 import type { BigNumLike } from '../../core/bignum/index.js';
 import { definePlugin } from '../../core/plugin.js';
-import type { Plugin } from '../../core/plugin.js';
+import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
-import type { EffectTarget, ResourcesApi } from '../resources/types.js';
+import type { EffectTarget, ModifierContext, ResourcesApi } from '../resources/types.js';
 
 /** Plugin name. */
 export const BOOSTS_PLUGIN = 'boosts';
@@ -77,22 +77,26 @@ export interface BoostsApi<B extends string> {
 export function boosts<R extends string, G extends string = never, B extends string = string>(
   config: BoostsConfig<R, G, B>,
 ): Plugin<BoostsApi<B>, BoostsEvents<B>> {
-  return definePlugin<BoostsApi<B>, BoostsEvents<B>>(BOOSTS_PLUGIN, (kernel) => {
+  const setup = (kernel: Kernel<BoostsEvents<B>>): BoostsApi<B> => {
     const game = kernel.require<ResourcesApi<R, G, string>>(RESOURCES_PLUGIN);
     const ids = Object.keys(config.definitions) as B[];
     const defs = config.definitions as Readonly<Record<string, BoostDef<R, G>>>;
     const remaining = new Map<B, number>();
+
+    const whileActive =
+      (id: B, multiplier: BigNumLike) =>
+      ({ offline }: ModifierContext): BigNumLike =>
+        !offline && remaining.has(id) ? multiplier : 1;
 
     for (const id of ids) {
       const def = defs[id] as BoostDef<R, G>;
       if (!Number.isFinite(def.durationMs) || def.durationMs <= 0) {
         throw new RangeError(`boosts: durationMs of "${id}" must be a positive number`);
       }
-      def.effects.forEach((effect, i) => {
-        game.setModifier(`${BOOSTS_PLUGIN}:${id}:${i}`, effect, ({ offline }) =>
-          !offline && remaining.has(id) ? effect.multiplier : 1,
-        );
-      });
+      for (let i = 0; i < def.effects.length; i++) {
+        const effect = def.effects[i] as BoostEffect<R, G>;
+        game.setModifier(`${BOOSTS_PLUGIN}:${id}:${i}`, effect, whileActive(id, effect.multiplier));
+      }
     }
 
     const known = (id: B): BoostDef<R, G> => {
@@ -164,5 +168,6 @@ export function boosts<R extends string, G extends string = never, B extends str
       },
       activeBoosts: () => [...remaining.keys()],
     };
-  });
+  };
+  return definePlugin<BoostsApi<B>, BoostsEvents<B>>(BOOSTS_PLUGIN, setup);
 }

@@ -99,6 +99,9 @@ export type AnyPlugin = Plugin<object, object>;
 /**
  * Declares a plugin with full type inference.
  *
+ * The kernel a plugin receives also covers the `Deps` events: that is a compile-time promise by
+ * the plugin author, so `setup` is stored with the plain `Kernel<Ev>` type.
+ *
  * @typeParam Api methods and properties merged onto the game.
  * @typeParam Ev events the plugin emits.
  * @typeParam Deps events of other plugins the plugin listens to.
@@ -115,8 +118,6 @@ export function definePlugin<
   Ev extends object = object,
   Deps extends object = object,
 >(name: string, setup: (kernel: Kernel<Ev, Deps>) => Api): Plugin<Api, Ev> {
-  // A plugin only ever receives a kernel whose `on` also covers `Deps`; the extra
-  // dependency events are a compile-time promise by the plugin author.
   return { name, setup: setup as (kernel: Kernel<Ev>) => Api };
 }
 

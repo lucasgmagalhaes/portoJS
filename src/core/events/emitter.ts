@@ -27,7 +27,6 @@ export class Emitter<E extends object> {
       set = new Set();
       this.listeners.set(event, set);
     }
-    // Wrap so the same function can be registered more than once independently.
     const entry = ((payload: E[K]) => listener(payload)) as Listener<never>;
     set.add(entry);
     return () => {
@@ -37,10 +36,11 @@ export class Emitter<E extends object> {
 
   /** Subscribes to `event` for a single emission. */
   once<K extends keyof E>(event: K, listener: Listener<E[K]>): Unsubscribe {
-    const off = this.on(event, (payload) => {
+    const handler: Listener<E[K]> = (payload) => {
       off();
       listener(payload);
-    });
+    };
+    const off = this.on(event, handler);
     return off;
   }
 

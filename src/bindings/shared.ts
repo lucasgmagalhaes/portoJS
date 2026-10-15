@@ -16,7 +16,8 @@ export const REFRESH_EVENTS = ['tick', 'loaded', 'start', 'stop'] as const;
 
 /** Subscribes `listener` to every refresh event. Returns a function that removes them all. */
 export function subscribeAll(game: Observable, listener: () => void): Off {
-  const offs = REFRESH_EVENTS.map((event) => game.on(event, listener));
+  const offs: Off[] = [];
+  for (const event of REFRESH_EVENTS) offs.push(game.on(event, listener));
   return () => {
     for (const off of offs) off();
   };

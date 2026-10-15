@@ -14,13 +14,12 @@ export function isJsonObject(value: unknown): value is JsonObject {
 
 /**
  * `JSON.stringify` with object keys sorted, so equal data always yields equal text
- * regardless of key insertion order.
+ * regardless of key insertion order. Keys use the default sort (UTF-16 code units), which is the
+ * order wanted here and much faster than a comparator for objects with thousands of keys.
  */
 export function stableStringify(value: JsonValue): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
-  // Default sort compares UTF-16 code units, which is exactly the order we want and is much
-  // faster than a comparator for objects with thousands of keys.
   const keys = Object.keys(value).sort();
   let out = '{';
   for (let i = 0; i < keys.length; i++) {
@@ -61,7 +60,8 @@ export function toBase64(text: string): string {
 export function fromBase64(encoded: string): string {
   try {
     const binary = atob(encoded);
-    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
     throw new SaveCorruptedError('Save string is not valid Base64');

@@ -75,6 +75,9 @@ export type Game<
  * Creates a complete idle game from one declarative object: resources, generators,
  * upgrades, and optionally prestige and achievements, on top of the game-agnostic core.
  *
+ * The merged return type is asserted once, because the plugin list is assembled dynamically;
+ * the `Game` type mirrors exactly which plugins are added.
+ *
  * Add your own mechanics through the `plugins` option, or compose everything yourself with
  * {@link createCore}.
  *
@@ -129,7 +132,6 @@ export function createGame<
   if (achievementDefs !== undefined) {
     plugins.push(
       achievements<GameView<R, G, U, PR>, A>({
-        // Conditions see one flat object with the resources and prestige APIs.
         context: (kernel) =>
           Object.assign(
             {},
@@ -149,7 +151,5 @@ export function createGame<
     ...(offline === undefined ? {} : { offline }),
     plugins: [...plugins, ...(extraPlugins ?? [])],
   });
-  // `plugins` is assembled dynamically, so the merged type is asserted once here; the
-  // `Game` type mirrors exactly which plugins were added above.
   return core as unknown as Game<R, G, U, A, PR, X>;
 }
