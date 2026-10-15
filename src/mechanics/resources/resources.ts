@@ -12,6 +12,7 @@ import type { FlowSource } from './flows.js';
 import type {
   BulkAmount,
   EffectTarget,
+  ModifierContext,
   PurchaseGuard,
   PurchaseTarget,
   ResetKeep,
@@ -61,7 +62,7 @@ interface UpState {
 
 interface ModifierState {
   readonly target: Compiled;
-  readonly value: BigNum | (() => BigNumLike);
+  readonly value: BigNum | ((context: ModifierContext) => BigNumLike);
 }
 
 function affordable(price: BigNum, balance: BigNum): boolean {
@@ -231,6 +232,8 @@ export function resources<R extends string, G extends string = never, U extends 
         effDtFor = Number.NaN;
       };
 
+      let inOffline = false;
+
       const refreshModifiers = (): void => {
         if (modifiers.size === 0) return;
         modGen.fill(BigNum.ONE);
@@ -238,7 +241,9 @@ export function resources<R extends string, G extends string = never, U extends 
         modAll = BigNum.ONE;
         for (const modifier of modifiers.values()) {
           const value =
-            typeof modifier.value === 'function' ? BigNum.from(modifier.value()) : modifier.value;
+            typeof modifier.value === 'function'
+              ? BigNum.from(modifier.value({ offline: inOffline }))
+              : modifier.value;
           applyMultiplier(modifier.target, value, 'modifier');
         }
       };
@@ -306,6 +311,15 @@ export function resources<R extends string, G extends string = never, U extends 
       };
 
       const offlineCredit = (ms: number): void => {
+        inOffline = true;
+        try {
+          creditAway(ms);
+        } finally {
+          inOffline = false;
+        }
+      };
+
+      const creditAway = (ms: number): void => {
         const before = res.map((r) => r.amount);
         const seconds = ms / 1000;
         refreshModifiers();

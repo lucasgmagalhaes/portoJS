@@ -560,3 +560,22 @@ describe('resources: cached production stays correct', () => {
     expect(JSON.stringify(game.save().data)).toContain('"bought":"0"');
   });
 });
+
+describe('resources: modifier context', () => {
+  it('tells dynamic modifiers when away-time is being credited', () => {
+    const { game } = build(1000);
+    game.buy('miner', 2);
+    const seen: boolean[] = [];
+    game.setModifier('probe', { all: true }, ({ offline }) => {
+      seen.push(offline);
+      return offline ? 1 : 3;
+    });
+    expect(game.rate('gold').toNumber()).toBeCloseTo(6, 9); // live: x3
+    const before = game.amount('gold');
+    game.simulateOffline(10_000);
+    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(20, 6); // offline: x1
+    expect(seen).toContain(true);
+    expect(seen).toContain(false);
+    expect(game.rate('gold').toNumber()).toBeCloseTo(6, 9); // flag reset afterwards
+  });
+});

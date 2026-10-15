@@ -109,6 +109,12 @@ export interface ResourcesEvents<R extends string, G extends string, U extends s
   offlineGains: { readonly elapsedMs: number; readonly gains: Readonly<Record<R, BigNum>> };
 }
 
+/** Passed to dynamic modifier functions. */
+export interface ModifierContext {
+  /** `true` while away-time is being credited (a span the modifier cannot track tick by tick). */
+  readonly offline: boolean;
+}
+
 /** What a purchase guard is asked about. */
 export type PurchaseTarget<G extends string, U extends string> =
   { readonly kind: 'generator'; readonly id: G } | { readonly kind: 'upgrade'; readonly id: U };
@@ -170,12 +176,13 @@ export interface ResourcesApi<R extends string, G extends string, U extends stri
   multiplier(target: EffectTarget<R, G>): BigNum;
   /**
    * Registers (or replaces) a named multiplier from outside, e.g. a prestige bonus. Pass a
-   * function to have it re-read every tick.
+   * function to have it re-read every tick; it also receives whether away-time is being
+   * credited, so time-limited modifiers can step aside offline.
    */
   setModifier(
     id: string,
     target: EffectTarget<R, G>,
-    multiplier: BigNumLike | (() => BigNumLike),
+    multiplier: BigNumLike | ((context: ModifierContext) => BigNumLike),
   ): void;
   /** Removes a modifier. Returns whether it existed. */
   removeModifier(id: string): boolean;

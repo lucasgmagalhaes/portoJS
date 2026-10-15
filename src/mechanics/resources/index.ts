@@ -9,6 +9,7 @@ export type {
   EffectTarget,
   GeneratorDef,
   GeneratorPurchase,
+  ModifierContext,
   PurchaseGuard,
   PurchaseTarget,
   ResetKeep,
