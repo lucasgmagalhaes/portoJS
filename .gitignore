@@ -4,3 +4,4 @@ coverage
 *.tsbuildinfo
 .token-optimizer
 graphify-out
+temp

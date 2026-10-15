@@ -27,6 +27,7 @@ jobs:
       - run: pnpm build
       - run: pnpm check:package
       - run: pnpm size
+      - run: pnpm api:check
       - uses: actions/upload-artifact@v7
         if: matrix.node == 24
         with:

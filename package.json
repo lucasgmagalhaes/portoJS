@@ -70,7 +70,9 @@
     "smoke": "node scripts/smoke.mjs",
     "check:package": "publint && attw --pack .",
     "prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
-    "size": "size-limit"
+    "size": "size-limit",
+    "api:check": "api-extractor run",
+    "api:update": "pnpm build && api-extractor run --local"
   },
   "keywords": [
     "idle",
@@ -87,6 +89,7 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@eslint/js": "^10.0.1",
+    "@microsoft/api-extractor": "^7.59.4",
     "@size-limit/preset-small-lib": "^14.2.0",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.4",
