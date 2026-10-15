@@ -31,7 +31,7 @@ function mulberry32(seed: number): () => number {
   };
 }
 
-function drawTexture(round: boolean): HTMLCanvasElement {
+async function drawTexture(round: boolean): Promise<ImageBitmap> {
   const surface = document.createElement('canvas');
   surface.width = 16;
   surface.height = 16;
@@ -44,7 +44,7 @@ function drawTexture(round: boolean): HTMLCanvasElement {
   } else {
     context.fillRect(0, 0, 16, 16);
   }
-  return surface;
+  return createImageBitmap(surface);
 }
 
 interface Demo {
@@ -78,8 +78,8 @@ async function main(): Promise<void> {
   fit();
   window.addEventListener('resize', fit);
 
-  const disc: Texture = renderer.createTexture(drawTexture(true));
-  const box: Texture = renderer.createTexture(drawTexture(false));
+  const disc: Texture = renderer.createTexture(await drawTexture(true));
+  const box: Texture = renderer.createTexture(await drawTexture(false));
   const textures = new Map<number, Texture>([
     [disc.id, disc],
     [box.id, box],
