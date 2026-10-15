@@ -1,15 +1,15 @@
 {
-  "packages/core": "0.8.0",
-  "packages/runtime": "0.8.0",
-  "packages/idle": "0.8.0",
-  "packages/react": "0.8.0",
-  "packages/vue": "0.8.0",
-  "packages/portojs": "0.8.0",
-  "packages/ecs": "0.8.0",
-  "packages/render": "0.8.0",
-  "packages/input": "0.8.0",
-  "packages/audio": "0.8.0",
-  "packages/physics": "0.8.0",
-  "packages/svelte": "0.8.0",
-  "packages/solid": "0.8.0"
+  "packages/core": "0.9.0",
+  "packages/runtime": "0.9.0",
+  "packages/idle": "0.9.0",
+  "packages/react": "0.9.0",
+  "packages/vue": "0.9.0",
+  "packages/portojs": "0.9.0",
+  "packages/ecs": "0.9.0",
+  "packages/render": "0.9.0",
+  "packages/input": "0.9.0",
+  "packages/audio": "0.9.0",
+  "packages/physics": "0.9.0",
+  "packages/svelte": "0.9.0",
+  "packages/solid": "0.9.0"
 }
