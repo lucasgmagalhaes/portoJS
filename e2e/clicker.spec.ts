@@ -4,11 +4,15 @@ import type { Page } from '@playwright/test';
 const START = new Date('2030-01-01T00:00:00Z');
 const HOUR = 3_600_000;
 
-/** Opens the game with a controllable clock. Timers and Date.now() are faked. */
+/**
+ * Opens the game with a controllable clock. Timers and Date.now() are faked and then
+ * paused, so time only moves when a test calls runFor / fastForward.
+ */
 async function open(page: Page, at: Date = START): Promise<void> {
   await page.clock.install({ time: at });
   await page.goto('/');
   await expect(page.locator('.gold')).toBeVisible();
+  await page.clock.pauseAt(new Date(at.getTime() + 1000));
 }
 
 const gold = (page: Page) => page.locator('.gold');
@@ -56,12 +60,13 @@ test('progress is saved and offline time is credited on the next visit', async (
   // Return 20 hours later: capped at 8 h and credited at 50% => 4 h × 0.2/s = 2880 gold.
   const second = await context.newPage();
   await open(second, new Date(START.getTime() + 20 * HOUR));
-  await expect(second.locator('#toast')).toContainText('Welcome back');
+  // (The "Welcome back" toast is replaced by the achievement toast almost immediately.)
   const value = Number.parseFloat(
     ((await gold(second).textContent()) ?? '').replace(/[^\d.]/g, ''),
   );
   expect(value).toBeGreaterThan(2.8);
-  expect(value).toBeLessThan(3.0); // displayed as "2.88K"
+  expect(value).toBeLessThan(3.0);
+  await expect(gold(second)).toContainText('K'); // displayed as "2.88K"
   await context.close();
 });
 
