@@ -51,6 +51,43 @@ export type AnyPlugin = Plugin_2<object, object>;
 export type ApiOf<P extends readonly AnyPlugin[]> = UnionToIntersection<P[number] extends infer U ? (U extends Plugin_2<infer A, object> ? A : never) : never> & object;
 
 // @public
+export const AUTO_BUYERS_PLUGIN = "autoBuyers";
+
+// @public
+export interface AutoBuyerDef<G extends string> {
+    readonly amount?: BulkAmount;
+    readonly enabled?: boolean;
+    readonly everyMs?: number;
+    readonly generator: G;
+}
+
+// @public
+export function autoBuyers<G extends string, B extends string>(config: AutoBuyersConfig<G, B>): Plugin_2<AutoBuyersApi<B>, AutoBuyersEvents<G, B>>;
+
+// @public
+export interface AutoBuyersApi<B extends string> {
+    readonly autoBuyerIds: readonly B[];
+    isAutoBuyerEnabled(id: B): boolean;
+    setAutoBuyer(id: B, enabled: boolean): void;
+}
+
+// @public
+export interface AutoBuyersConfig<G extends string, B extends string> {
+    readonly buyers: {
+        readonly [id in B]: AutoBuyerDef<NoInfer<G>>;
+    };
+}
+
+// @public
+export interface AutoBuyersEvents<G extends string, B extends string> {
+    autoBuy: {
+        readonly id: B;
+        readonly generator: G;
+        readonly amount: BigNum;
+    };
+}
+
+// @public
 export class BigNum {
     [Symbol.toPrimitive](hint: string): string;
     abs(): BigNum;
@@ -98,6 +135,57 @@ export type BigNumLike = BigNum | number | string;
 
 // @public
 export type BulkAmount = number | 'max';
+
+// @public
+export interface ChallengeDef<R extends string, G extends string> {
+    readonly goal: (game: ResourcesApi<R, G, string>) => boolean;
+    readonly keep?: ResetKeep<R, G, string>;
+    readonly modifiers?: readonly ChallengeModifier<R, G>[];
+    readonly reward?: readonly ChallengeModifier<R, G>[];
+}
+
+// @public
+export type ChallengeModifier<R extends string, G extends string> = EffectTarget<R, G> & {
+    readonly multiplier: BigNumLike;
+};
+
+// @public
+export function challenges<R extends string, G extends string = never, C extends string = string>(config: ChallengesConfig<R, G, C>): Plugin_2<ChallengesApi<C>, ChallengesEvents<C>>;
+
+// @public
+export const CHALLENGES_PLUGIN = "challenges";
+
+// @public
+export interface ChallengesApi<C extends string> {
+    activeChallenge(): C | undefined;
+    readonly challengeIds: readonly C[];
+    completedChallenges(): C[];
+    exitChallenge(): boolean;
+    isChallengeCompleted(id: C): boolean;
+    startChallenge(id: C): boolean;
+}
+
+// @public
+export interface ChallengesConfig<R extends string, G extends string, C extends string> {
+    readonly checkIntervalMs?: number;
+    readonly definitions: {
+        readonly [id in C]: ChallengeDef<R, G>;
+    };
+}
+
+// @public
+export interface ChallengesEvents<C extends string> {
+    challengeCompleted: {
+        readonly id: C;
+        readonly firstTime: boolean;
+    };
+    challengeExited: {
+        readonly id: C;
+    };
+    challengeStarted: {
+        readonly id: C;
+    };
+}
 
 // @public
 export interface Clock {
@@ -510,6 +598,18 @@ export interface PrestigeEvents {
 export type PrestigeFormula = RootFormula | ((runEarned: BigNum) => BigNumLike);
 
 // @public
+export type PurchaseGuard<G extends string, U extends string> = (target: PurchaseTarget<G, U>) => boolean;
+
+// @public
+export type PurchaseTarget<G extends string, U extends string> = {
+    readonly kind: 'generator';
+    readonly id: G;
+} | {
+    readonly kind: 'upgrade';
+    readonly id: U;
+};
+
+// @public
 export interface ResetKeep<R extends string, G extends string, U extends string> {
     // (undocumented)
     readonly generators?: readonly G[];
@@ -553,9 +653,11 @@ export interface ResourcesApi<R extends string, G extends string, U extends stri
     multiplier(target: EffectTarget<R, G>): BigNum;
     rate(resource: R): BigNum;
     removeModifier(id: string): boolean;
+    removePurchaseGuard(name: string): boolean;
     resetRun(keep?: ResetKeep<R, G, U>): void;
     readonly resourceIds: readonly R[];
     setModifier(id: string, target: EffectTarget<R, G>, multiplier: BigNumLike | (() => BigNumLike)): void;
+    setPurchaseGuard(name: string, guard: PurchaseGuard<G, U>): void;
     spend(resource: R, amount: BigNumLike): boolean;
     upgradeCost(upgrade: U): BigNum | undefined;
     readonly upgradeIds: readonly U[];
@@ -670,6 +772,43 @@ export type TimeStatus = 'ok' | 'backward' | 'jump';
 
 // @public
 export function toBase64(text: string): string;
+
+// @public
+export interface UnlockDef<R extends string, G extends string, U extends string> {
+    readonly condition: (game: ResourcesApi<R, G, U>) => boolean;
+    readonly generators?: readonly G[];
+    readonly upgrades?: readonly U[];
+}
+
+// @public
+export function unlocks<R extends string, G extends string = never, U extends string = never, K extends string = string>(config: UnlocksConfig<R, G, U, K>): Plugin_2<UnlocksApi<K>, UnlocksEvents<K>>;
+
+// @public
+export const UNLOCKS_PLUGIN = "unlocks";
+
+// @public
+export interface UnlocksApi<K extends string> {
+    checkUnlocks(): K[];
+    isUnlocked(id: K): boolean;
+    unlockedIds(): K[];
+    readonly unlockIds: readonly K[];
+}
+
+// @public
+export interface UnlocksConfig<R extends string, G extends string, U extends string, K extends string> {
+    readonly checkIntervalMs?: number;
+    readonly definitions: {
+        readonly [id in K]: UnlockDef<R, G, U>;
+    };
+}
+
+// @public
+export interface UnlocksEvents<K extends string> {
+    unlocked: {
+        readonly id: K;
+        readonly at: number;
+    };
+}
 
 // @public
 export type Unsubscribe = () => void;

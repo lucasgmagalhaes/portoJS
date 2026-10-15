@@ -64,6 +64,54 @@ const game = createGame({
 game.bump(); // typed
 ```
 
+## Built-in plugins
+
+Everything below is a plugin on top of the core, imported from `portojs` or `portojs/mechanics`. Plugins that depend on `resources` must be installed after it. Because their types depend on your ids, pass the ids as generics.
+
+| Plugin         | Purpose                                                       | Notes                                           |
+| -------------- | ------------------------------------------------------------- | ----------------------------------------------- |
+| `resources`    | Resources, generators, upgrades, multipliers, purchase guards | Exact offline production                        |
+| `prestige`     | Reset for permanent points and bonuses                        | See [prestige](prestige.md)                     |
+| `achievements` | Condition-based achievements with persistent effects          |                                                 |
+| `unlocks`      | Gate generators and upgrades behind a condition               | Permanent, saved                                |
+| `autoBuyers`   | Buy generators on a timer                                     | Does not act while the player is away           |
+| `challenges`   | Restart with a handicap, earn a permanent reward              | Handicaps and rewards are `resources` modifiers |
+
+```ts
+const game = createGame({
+  resources: { gold: { initial: 10 } },
+  generators: {
+    miner: { cost: { resource: 'gold', base: 10, growth: 1.15 }, produces: 'gold', rate: 1 },
+    drill: { cost: { resource: 'gold', base: 500, growth: 1.2 }, produces: 'gold', rate: 20 },
+  },
+  plugins: [
+    unlocks<'gold', 'miner' | 'drill', never, 'deepMining'>({
+      definitions: {
+        deepMining: { condition: (g) => g.bought('miner').gte(10), generators: ['drill'] },
+      },
+    }),
+    autoBuyers({ buyers: { minerBot: { generator: 'miner', everyMs: 2000 } } }),
+    challenges<'gold', 'miner', 'slowGold'>({
+      definitions: {
+        slowGold: {
+          goal: (g) => g.earned('gold').gte(1e6),
+          modifiers: [{ resource: 'gold', multiplier: 0.1 }], // while active
+          reward: [{ resource: 'gold', multiplier: 2 }], // forever once beaten
+        },
+      },
+    }),
+  ],
+});
+
+game.canBuy('drill'); // false until 10 miners are owned
+game.setAutoBuyer('minerBot', true);
+game.startChallenge('slowGold'); // resets the run with the handicap
+```
+
+### Purchase guards
+
+`resources` exposes `setPurchaseGuard(name, guard)`. A purchase happens only if every guard allows it, and guarded targets report `canBuy` false and `maxAffordable` zero. `unlocks` is built on it; use it for your own rules (quests, tutorials, region locks).
+
 ## The `System` contract
 
 | Member               | Called when            | Notes                                                 |

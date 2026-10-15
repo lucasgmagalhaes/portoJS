@@ -155,7 +155,7 @@
       "name": "portojs (everything)",
       "path": "dist/index.js",
       "import": "*",
-      "limit": "12 KB"
+      "limit": "14 KB"
     }
   ]
 }

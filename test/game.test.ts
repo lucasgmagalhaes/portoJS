@@ -1,5 +1,12 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import { ManualClock, createGame, definePlugin } from '../src/index.js';
+import {
+  ManualClock,
+  autoBuyers,
+  challenges,
+  createGame,
+  definePlugin,
+  unlocks,
+} from '../src/index.js';
 import type { BigNum, ResourcesApi, Scheduler } from '../src/index.js';
 
 function fakeScheduler(): { scheduler: Scheduler; fire: () => void } {
@@ -266,5 +273,44 @@ describe('createGame: extra plugins', () => {
   it('still works without extra plugins', () => {
     const game = createGame({ clock: new ManualClock(0), resources: { gold: {} } });
     expect(game.amount('gold').isZero()).toBe(true);
+  });
+});
+
+describe('createGame: built-in extra plugins (docs/plugins.md example)', () => {
+  it('composes unlocks, autoBuyers and challenges with full types', () => {
+    const clock = new ManualClock(0);
+    const game = createGame({
+      clock,
+      resources: { gold: { initial: 10_000 } },
+      generators: {
+        miner: { cost: { resource: 'gold', base: 10, growth: 1.15 }, produces: 'gold', rate: 1 },
+        drill: { cost: { resource: 'gold', base: 500, growth: 1.2 }, produces: 'gold', rate: 20 },
+      },
+      plugins: [
+        unlocks<'gold', 'miner' | 'drill', never, 'deepMining'>({
+          definitions: {
+            deepMining: { condition: (g) => g.bought('miner').gte(10), generators: ['drill'] },
+          },
+        }),
+        autoBuyers({ buyers: { minerBot: { generator: 'miner', everyMs: 2000 } } }),
+        challenges<'gold', 'miner', 'slowGold'>({
+          definitions: {
+            slowGold: {
+              goal: (g) => g.earned('gold').gte(1e6),
+              modifiers: [{ resource: 'gold', multiplier: 0.1 }],
+              reward: [{ resource: 'gold', multiplier: 2 }],
+            },
+          },
+        }),
+      ],
+    });
+    expect(game.canBuy('drill')).toBe(false);
+    game.buy('miner', 10);
+    expect(game.canBuy('drill')).toBe(true);
+    game.setAutoBuyer('minerBot', true);
+    expect(game.isAutoBuyerEnabled('minerBot')).toBe(true);
+    expect(game.startChallenge('slowGold')).toBe(true);
+    expect(game.activeChallenge()).toBe('slowGold');
+    expectTypeOf(game.activeChallenge).returns.toEqualTypeOf<'slowGold' | undefined>();
   });
 });
