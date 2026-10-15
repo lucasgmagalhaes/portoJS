@@ -80,12 +80,11 @@ An earlier version used a functional plugin kernel (`createCore`, `definePlugin`
 **Idle mechanics**
 
 - Time-limited events and a calendar.
-- More cost curves and a cost-curve visualiser for balancing.
+- Done: polynomial and stepped cost curves and a cost chart.
 
 **Developer experience**
 
-- Balancing tools: a headless simulator that fast-forwards a game and reports time-to-milestone.
-- Devtools: inspect objects and components, edit values, fast-forward time.
+- Done: balancing simulator and devtools (`@portojs/tools`).
 - Done: Svelte and Solid bindings, and 2D physics on Rapier (`@portojs/physics`).
 
 **Documentation site (planned for the end)**

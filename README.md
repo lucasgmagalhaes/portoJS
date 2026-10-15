@@ -119,8 +119,9 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/input`   | Keyboard, pointer and gamepad input with named actions                 |
 | `@portojs/audio`   | Web Audio mixer with buses and playback control                        |
 | `@portojs/physics` | 2D rigid bodies and collision events on Rapier                         |
+| `@portojs/tools`   | Balancing simulator, inspector and in-page devtools panel              |
 
-`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -146,6 +147,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [Prestige](docs/prestige.md): resets, formulas, layers and permanent bonuses
 - [UI bindings](docs/bindings.md): `useGame` for React, Vue, Svelte and Solid
 - [Input and audio](docs/input-and-audio.md): `@portojs/input`, `@portojs/audio`
+- [Balancing and devtools](docs/balancing-and-devtools.md): cost curves, simulator, inspector
 - [Physics](docs/physics.md): `@portojs/physics`, rigid bodies and collisions
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
 - [Coming from Unity or Phaser](docs/from-unity.md): how the concepts map
@@ -169,12 +171,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] Coroutines for sequenced timed behavior
 - [x] Optional compressed save format
 - [x] Svelte and Solid bindings
-- [ ] More cost curves and a cost-curve visualiser for balancing
+- [x] More cost curves and a cost-curve visualiser for balancing
 - [x] Localisable number suffix sets
 - [ ] Off-main-thread simulation (Web Worker helper)
 - [ ] Decide on Rust/WebAssembly for hot spots such as physics (planned for the end)
 - [ ] Documentation site with its own theme, a component catalogue and tutorials (planned for the end)
-- [ ] Devtools: inspect objects and components, fast-forward time, edit values
+- [x] Devtools: inspect objects and components, fast-forward time, edit values
 
 ## License
 

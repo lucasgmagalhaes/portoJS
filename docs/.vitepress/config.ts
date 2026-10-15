@@ -28,6 +28,7 @@ export default defineConfig({
           { text: 'ECS and rendering', link: '/ecs-and-render' },
           { text: 'Input and audio', link: '/input-and-audio' },
           { text: 'Physics', link: '/physics' },
+          { text: 'Balancing and devtools', link: '/balancing-and-devtools' },
           { text: 'UI bindings', link: '/bindings' },
           { text: 'Coming from Unity or Phaser', link: '/from-unity' },
         ],
@@ -75,6 +76,9 @@ export default defineConfig({
         '@portojs/vue': fileURLToPath(new URL('../../packages/vue/src/index.ts', import.meta.url)),
         '@portojs/physics': fileURLToPath(
           new URL('../../packages/physics/src/index.ts', import.meta.url),
+        ),
+        '@portojs/tools': fileURLToPath(
+          new URL('../../packages/tools/src/index.ts', import.meta.url),
         ),
         portojs: fileURLToPath(new URL('../../packages/portojs/src/index.ts', import.meta.url)),
       },

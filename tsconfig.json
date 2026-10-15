@@ -15,6 +15,7 @@
       "@portojs/render": ["./packages/render/src/index.ts"],
       "@portojs/input": ["./packages/input/src/index.ts"],
       "@portojs/audio": ["./packages/audio/src/index.ts"],
+      "@portojs/tools": ["./packages/tools/src/index.ts"],
       "@portojs/physics": ["./packages/physics/src/index.ts"]
     }
   },
