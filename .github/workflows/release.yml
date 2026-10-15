@@ -31,5 +31,5 @@ jobs:
         if: ${{ steps.release.outputs.pr != '' }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          BRANCH: ${{ fromJSON(steps.release.outputs.pr).headBranchName }}
+          BRANCH: ${{ fromJSON(steps.release.outputs.pr || '{}').headBranchName }}
         run: gh workflow run ci.yml --repo "${{ github.repository }}" --ref "$BRANCH"
