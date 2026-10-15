@@ -14,6 +14,17 @@ Idle games look simple until they are not. Numbers outgrow `Number`. `setInterva
 
 It is also **deliberately game-agnostic**: the core knows about time, ticks, saves and offline progress, and nothing else. Resources, generators, prestige and achievements are plugins on top of it. Use the batteries-included `createGame`, or compose your own mechanics.
 
+## Entry points
+
+```ts
+import { createGame } from 'portojs'; // everything
+import { BigNum, format } from 'portojs/bignum'; // just the big-number type (~2 KB brotli)
+import { createCore, definePlugin } from 'portojs/core'; // the game-agnostic kernel (~5 KB)
+import { resources, prestige } from 'portojs/mechanics'; // the built-in plugins
+```
+
+All entries share one copy of each class, so `instanceof BigNum` works across them in both ESM and CJS.
+
 ## Minimal example
 
 ```ts
