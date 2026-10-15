@@ -1,7 +1,14 @@
 import { expect, test } from '@playwright/test';
 import type { Page } from '@playwright/test';
+import type * as BatchSource from '../packages/render/src/batch.ts';
+import type * as CameraSource from '../packages/render/src/camera.ts';
+import type * as WebGPUSource from '../packages/render/src/webgpu.ts';
 
 const BASE = 'http://localhost:4174/';
+
+type WebGPUModule = typeof WebGPUSource;
+type CameraModule = typeof CameraSource;
+type BatchModule = typeof BatchSource;
 
 type Backend = 'webgl2' | 'webgpu';
 
@@ -52,74 +59,73 @@ test.describe('WebGL2 renderer', () => {
 });
 
 test.describe('WebGPU renderer', () => {
-  test('draws a tinted sprite when WebGPU is available', async ({ page }) => {
+  test('draws a tinted sprite through the real pipeline', async ({ page }) => {
     await page.goto(`${BASE}?paused=1&count=0`);
-    const available = await page.evaluate(async () => {
-      const gpu = (navigator as { gpu?: { requestAdapter(): Promise<GPUAdapter | null> } }).gpu;
-      const adapter = await gpu?.requestAdapter();
-      if (adapter === undefined || adapter === null) return false;
+    const base = process.cwd().replaceAll(String.fromCharCode(92), '/');
+    const modules = {
+      webgpu: `/@fs/${base}/packages/render/src/webgpu.ts`,
+      camera: `/@fs/${base}/packages/render/src/camera.ts`,
+      batch: `/@fs/${base}/packages/render/src/batch.ts`,
+    };
+    const result = await page.evaluate(async (urls) => {
+      const adapter = await navigator.gpu.requestAdapter();
+      if (adapter === null) return { available: false, pixels: [] as number[] };
+      let device: GPUDevice;
       try {
-        (await adapter.requestDevice()).destroy();
-        return true;
+        device = await adapter.requestDevice();
       } catch {
-        return false;
+        return { available: false, pixels: [] as number[] };
       }
-    });
-    if (process.env['CI'] !== undefined) expect(available, 'WebGPU adapter in CI').toBe(true);
-    else test.skip(!available, 'WebGPU is not available in this browser');
-    page.on('console', (message) => console.log(`[page ${message.type()}] ${message.text()}`));
-    page.on('pageerror', (error) => console.log(`[page error] ${error.message}`));
-    await page.addInitScript(() => {
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      const original = GPUAdapter.prototype.requestDevice;
-      GPUAdapter.prototype.requestDevice = async function (this: GPUAdapter, descriptor) {
-        const device = await original.call(this, descriptor);
-        device.addEventListener('uncapturederror', (event) => {
-          console.error(`uncaptured: ${event.error.message}`);
-        });
-        console.log(
-          `adapter: ${this.info.vendor} ${this.info.architecture} ${this.info.description}`,
-        );
-        return device;
+      const [{ WebGPURenderer }, { Camera2D }, { SpriteBatch }] = await Promise.all([
+        import(urls.webgpu) as Promise<WebGPUModule>,
+        import(urls.camera) as Promise<CameraModule>,
+        import(urls.batch) as Promise<BatchModule>,
+      ]);
+      const size = 64;
+      const target = device.createTexture({
+        size: [size, size],
+        format: 'rgba8unorm',
+        usage: GPUTextureUsage.RENDER_ATTACHMENT | GPUTextureUsage.COPY_SRC,
+      });
+      const context = {
+        getCurrentTexture: () => target,
+        unconfigure: () => undefined,
+      } as unknown as GPUCanvasContext;
+      const canvas = document.createElement('canvas');
+      const renderer = new WebGPURenderer(canvas, device, context, 'rgba8unorm', [0, 0, 0, 1]);
+      const surface = document.createElement('canvas');
+      surface.width = 4;
+      surface.height = 4;
+      const paint = surface.getContext('2d') as CanvasRenderingContext2D;
+      paint.fillStyle = '#ffffff';
+      paint.fillRect(0, 0, 4, 4);
+      const texture = renderer.createTexture(await createImageBitmap(surface));
+      const batch = new SpriteBatch(8);
+      batch.add(texture, { x: 0, y: 0, width: 32, height: 32, color: 0x00ff00ff });
+      renderer.render(new Camera2D(size, size), batch.build());
+
+      const readback = device.createBuffer({
+        size: 256 * size,
+        usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+      });
+      const encoder = device.createCommandEncoder();
+      encoder.copyTextureToBuffer({ texture: target }, { buffer: readback, bytesPerRow: 256 }, [
+        size,
+        size,
+      ]);
+      device.queue.submit([encoder.finish()]);
+      await readback.mapAsync(GPUMapMode.READ);
+      const bytes = new Uint8Array(readback.getMappedRange());
+      const at = (x: number, y: number): number[] => {
+        const offset = y * 256 + x * 4;
+        return [bytes[offset] ?? -1, bytes[offset + 1] ?? -1, bytes[offset + 2] ?? -1];
       };
-    });
-    await open(page, 'webgpu', 0);
-    expect(await page.evaluate(() => window.__demo?.backend)).toBe('webgpu');
-    await page.evaluate(() => {
-      window.__demo?.spawnBox(0, 0, 100, 0x00ff00ff);
-    });
-    await page.evaluate(() => {
-      window.__demo?.frame(0);
-    });
-    await page.evaluate(
-      () =>
-        new Promise((resolve) => {
-          requestAnimationFrame(() => {
-            window.__demo?.frame(0);
-            requestAnimationFrame(() => setTimeout(resolve, 500));
-          });
-        }),
-    );
-    const shot = (await page.locator('#stage').screenshot()).toString('base64');
-    await test
-      .info()
-      .attach('webgpu.png', { body: Buffer.from(shot, 'base64'), contentType: 'image/png' });
-    const centre = await page.evaluate(async (data) => {
-      const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
-      const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
-      const surface = new OffscreenCanvas(bitmap.width, bitmap.height);
-      const context = surface.getContext('2d') as OffscreenCanvasRenderingContext2D;
-      context.drawImage(bitmap, 0, 0);
-      const all = context.getImageData(0, 0, bitmap.width, bitmap.height).data;
-      const seen = new Map<string, number>();
-      for (let i = 0; i < all.length; i += 4) {
-        const key = `${all[i]},${all[i + 1]},${all[i + 2]},${all[i + 3]}`;
-        seen.set(key, (seen.get(key) ?? 0) + 1);
-      }
-      console.log(`size ${bitmap.width}x${bitmap.height} ${JSON.stringify([...seen].slice(0, 8))}`);
-      return Array.from(context.getImageData(bitmap.width >> 1, bitmap.height >> 1, 1, 1).data);
-    }, shot);
-    expect(centre.slice(0, 3)).toEqual([0, 255, 0]);
+      return { available: true, pixels: [...at(32, 32), ...at(2, 2)] };
+    }, modules);
+
+    if (process.env['CI'] !== undefined) expect(result.available, 'WebGPU device in CI').toBe(true);
+    else test.skip(!result.available, 'WebGPU is not available in this browser');
+    expect(result.pixels).toEqual([0, 255, 0, 0, 0, 0]);
   });
 });
 
