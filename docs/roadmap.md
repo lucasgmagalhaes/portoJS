@@ -43,7 +43,7 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 | R5  | Chained generators use explicit Euler per tick; offline uses the exact polynomial, so they differ slightly        | accepted, documented in `docs/offline-progress.md`; option: sub-stepping for chains |
 | R6  | `Core.load` does not clear the engine's time accumulator; up to one step of pending time carries across a load    | open, minor                                                                         |
 | R7  | Save import has no size limit: a huge Base64 string is fully decoded and parsed                                   | **done** (`maxSaveChars`, default 10M characters)                                   |
-| R8  | `createGame` cannot install extra plugins with merged types                                                       | open: accept `plugins` and merge `ApiOf`/`EventsOf` into the return type            |
+| R8  | `createGame` cannot install extra plugins with merged types                                                       | **done** (`createGame({ plugins })` with merged types)                              |
 | R9  | Achievement `effect` re-runs on load, so non-idempotent effects double-apply                                      | documented; consider a stricter API (effects declared as modifiers)                 |
 | R10 | Offline `appliedMs` reflects the cap and efficiency but not time lost to `catch-up` dropping outside `background` | by design                                                                           |
 

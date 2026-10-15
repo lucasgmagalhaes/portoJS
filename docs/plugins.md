@@ -54,6 +54,16 @@ game.on('bumped', ({ count }) => console.log(count)); // fully typed
 
 The object returned from `setup` is merged onto the game with its types. A plugin API member that collides with a core member (`save`, `load`, `on`, ...) throws at creation.
 
+`createGame` accepts the same plugins, installed after the built-in ones so they can `kernel.require('resources')`, and merges their types too:
+
+```ts
+const game = createGame({
+  resources: { gold: { initial: 10 } },
+  plugins: [counter],
+});
+game.bump(); // typed
+```
+
 ## The `System` contract
 
 | Member               | Called when            | Notes                                                 |
