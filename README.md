@@ -168,6 +168,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [ ] More cost curves and a cost-curve visualiser for balancing
 - [ ] Localisable number suffix sets
 - [ ] Off-main-thread simulation (Web Worker helper)
+- [ ] Decide on Rust/WebAssembly for hot spots such as physics (planned for the end)
 - [ ] Documentation site with its own theme, a component catalogue and tutorials (planned for the end)
 - [ ] Devtools: inspect objects and components, fast-forward time, edit values
 

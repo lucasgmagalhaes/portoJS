@@ -98,6 +98,10 @@ The guides are static Markdown today. Once the packages settle, replace them wit
 - **Structure:** one section per package, cookbook recipes, migration notes from Unity and Phaser, and the playground.
 - **Tooling:** keep VitePress or move to a custom site; generate the API pages from the packages' API reports.
 
+**To decide at the end**
+
+- Rust and WebAssembly for hot spots. The core stays TypeScript (measured: 50,000 entities cost about 2 ms per frame in JS, and the umbrella package is about 13 KB). Candidates are optional packages only: physics through Rapier, and heavy CPU-bound work such as pathfinding or particle simulation, and only if a benchmark shows JavaScript is not enough.
+
 **Platform**
 
 - Web Worker helper to run the simulation off the main thread.
