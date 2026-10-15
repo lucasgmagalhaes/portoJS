@@ -91,7 +91,15 @@ test.describe('WebGPU renderer', () => {
     await page.evaluate(() => {
       window.__demo?.frame(0);
     });
-    await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
+    await page.evaluate(
+      () =>
+        new Promise((resolve) => {
+          requestAnimationFrame(() => {
+            window.__demo?.frame(0);
+            requestAnimationFrame(() => setTimeout(resolve, 500));
+          });
+        }),
+    );
     const shot = (await page.locator('#stage').screenshot()).toString('base64');
     await test
       .info()
