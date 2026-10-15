@@ -96,6 +96,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [Prestige](docs/prestige.md): resets, formulas and permanent bonuses
 - [Writing plugins](docs/plugins.md): the game-agnostic core and how to extend it
 - [UI bindings](docs/bindings.md): `useGame` for React and Vue
+- [Coming from Phaser](docs/from-phaser.md): how the concepts map
 - [Engineering audit and roadmap](docs/roadmap.md): measured state, open findings and the release process
 - [Example game](examples/clicker): a small clicker running in the browser (Vite). Run it with `cd examples/clicker && pnpm install && pnpm dev`
 

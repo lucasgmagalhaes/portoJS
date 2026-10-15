@@ -27,6 +27,7 @@ export default defineConfig({
           { text: 'Prestige', link: '/prestige' },
           { text: 'Writing plugins', link: '/plugins' },
           { text: 'UI bindings', link: '/bindings' },
+          { text: 'Coming from Phaser', link: '/from-phaser' },
         ],
       },
       {

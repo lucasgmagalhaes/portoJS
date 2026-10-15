@@ -57,14 +57,14 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 
 ### Test and quality gaps
 
-| #   | Finding                                                                                                        | Status                                                               |
-| --- | -------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| T1  | Uncovered branches remain in `core.ts` (lines 134, 209, 315), `flows.ts` validation, `resources.ts` (120, 358) | open: low-risk guard clauses                                         |
-| T2  | No property test asserting "ticking for T equals offline for T" on random linear configs                       | **done**                                                             |
-| T3  | No test in a real browser (visibility throttling, `localStorage`, `pagehide`)                                  | **done** (`pnpm e2e`: Playwright on the example, with a faked clock) |
-| T4  | ESLint is not type-aware (`recommendedTypeChecked`, `no-floating-promises`, `no-unnecessary-condition`)        | open                                                                 |
-| T5  | No mutation testing                                                                                            | open: Stryker on `bignum` and `save` first                           |
-| T6  | No fuzzing of `parseSave`/`importSave` with arbitrary strings                                                  | **done**                                                             |
+| #   | Finding                                                                                                        | Status                                                                                                                                                                                           |
+| --- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| T1  | Uncovered branches remain in `core.ts` (lines 134, 209, 315), `flows.ts` validation, `resources.ts` (120, 358) | **done** (100% of lines and functions covered, 96.9% of branches; the rest are defensive guards)                                                                                                 |
+| T2  | No property test asserting "ticking for T equals offline for T" on random linear configs                       | **done**                                                                                                                                                                                         |
+| T3  | No test in a real browser (visibility throttling, `localStorage`, `pagehide`)                                  | **done** (`pnpm e2e`: Playwright on the example, with a faked clock)                                                                                                                             |
+| T4  | ESLint is not type-aware (`recommendedTypeChecked`, `no-floating-promises`, `no-unnecessary-condition`)        | **done** (`recommendedTypeChecked` plus `no-unnecessary-condition` on source, tests and benchmarks)                                                                                              |
+| T5  | No mutation testing                                                                                            | tried, not adopted: Stryker 10 with Vitest 5 killed only 17% of mutants (0% in `save`) despite thorough tests, so the runner does not apply mutants correctly; revisit when it supports Vitest 5 |
+| T6  | No fuzzing of `parseSave`/`importSave` with arbitrary strings                                                  | **done**                                                                                                                                                                                         |
 
 ## 3. Feature roadmap
 
