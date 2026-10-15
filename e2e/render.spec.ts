@@ -70,11 +70,12 @@ test.describe('WebGPU renderer', () => {
     page.on('console', (message) => console.log(`[page ${message.type()}] ${message.text()}`));
     page.on('pageerror', (error) => console.log(`[page error] ${error.message}`));
     await page.addInitScript(() => {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       const original = GPUAdapter.prototype.requestDevice;
       GPUAdapter.prototype.requestDevice = async function (this: GPUAdapter, descriptor) {
         const device = await original.call(this, descriptor);
         device.addEventListener('uncapturederror', (event) => {
-          console.error(`uncaptured: ${(event as GPUUncapturedErrorEvent).error.message}`);
+          console.error(`uncaptured: ${event.error.message}`);
         });
         console.log(
           `adapter: ${this.info.vendor} ${this.info.architecture} ${this.info.description}`,
