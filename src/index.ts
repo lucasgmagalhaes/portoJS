@@ -1,10 +1,11 @@
 /**
- * PortoJS: a headless engine for idle and incremental games.
+ * PortoJS: a headless game engine for TypeScript, with a Unity-style Game / GameObject /
+ * Component model and optional idle-game mechanics.
  *
- * - {@link createGame} builds a complete game from one declarative object.
- * - {@link createCore} + plugins gives you the game-agnostic kernel to compose your own.
+ * - {@link Game} runs the fixed-timestep loop, saves and offline progress.
+ * - {@link Component} is the base class of behavior you attach to a {@link GameObject}.
+ * - The idle mechanics (resources, generators, upgrades, prestige and more) are components you
+ *   add only if you want them.
  */
 export * from './core/index.js';
-export * from './mechanics/index.js';
-export { createGame } from './game.js';
-export type { Game, GameConfig, GameView } from './game.js';
+export * from './idle/index.js';

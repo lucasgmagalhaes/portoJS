@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { BigNum } from '../src/core/bignum/index.js';
-import { compileCost } from '../src/mechanics/resources/cost.js';
+import { compileCost } from '../src/idle/cost.js';
 
 const n = (v: number | string): BigNum => BigNum.from(v);
 

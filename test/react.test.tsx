@@ -1,26 +1,26 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { BigNum, ManualClock, createGame, format } from '../src/index.js';
+import { BigNum, Game, Generator, ManualClock, Resource, format } from '../src/index.js';
 import { useGame } from '../src/bindings/react.js';
 
 function make() {
   const clock = new ManualClock(0);
-  const game = createGame({
-    clock,
-    resources: { gold: { initial: 10 } },
-    generators: {
-      miner: { cost: { resource: 'gold', base: 10, growth: 1 }, produces: 'gold', rate: 1 },
-    },
+  const game = new Game({ clock });
+  const gold = game.createObject('Gold').addComponent(Resource, { initial: 10 });
+  const miner = game.createObject('Miner').addComponent(Generator, {
+    cost: { resource: gold, base: 10, growth: 1 },
+    produces: gold,
+    rate: 1,
   });
-  return { clock, game };
+  return { clock, game, gold, miner };
 }
 
 describe('React binding: useGame', () => {
   it('returns the selected value and updates it after ticks', () => {
-    const { clock, game } = make();
-    game.buy('miner');
-    const { result } = renderHook(() => useGame(game, (g) => format(g.amount('gold'))));
+    const { clock, game, gold, miner } = make();
+    miner.buy();
+    const { result } = renderHook(() => useGame(game, () => format(gold.amount)));
     expect(result.current).toBe('0');
     act(() => {
       clock.advance(3000);
@@ -34,7 +34,7 @@ describe('React binding: useGame', () => {
     let renders = 0;
     renderHook(() => {
       renders++;
-      return useGame(game, (g) => g.upgradeIds.length);
+      return useGame(game, (g) => g.time.fixedDeltaTime);
     });
     const base = renders;
     act(() => {
@@ -45,12 +45,12 @@ describe('React binding: useGame', () => {
   });
 
   it('treats equal BigNum values as unchanged', () => {
-    const { clock, game } = make();
-    game.buy('miner');
+    const { clock, game, gold, miner } = make();
+    miner.buy();
     let renders = 0;
     const { result } = renderHook(() => {
       renders++;
-      return useGame(game, (g) => g.rate('gold'));
+      return useGame(game, () => gold.rate);
     });
     expect(result.current).toBeInstanceOf(BigNum);
     const base = renders;
@@ -62,13 +62,13 @@ describe('React binding: useGame', () => {
   });
 
   it('follows loads and accepts a custom equality function', () => {
-    const { game } = make();
+    const { game, gold } = make();
     const save = game.save();
-    game.add('gold', 5);
+    gold.add(5);
     const { result } = renderHook(() =>
       useGame(
         game,
-        (g) => ({ gold: g.amount('gold').toNumber() }),
+        () => ({ gold: gold.amount.toNumber() }),
         (a, b) => a.gold === b.gold,
       ),
     );

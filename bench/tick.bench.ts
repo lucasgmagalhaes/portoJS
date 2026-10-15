@@ -1,57 +1,60 @@
 import { Bench } from 'tinybench';
-import { ManualClock, createGame } from '../src/index.js';
-import type { GeneratorDef } from '../src/index.js';
+import { Game, Generator, ManualClock, Resource } from '../src/index.js';
 
 const COUNT = 10_000;
-const RESOURCES = ['gold', 'gems', 'wood', 'iron'] as const;
-type ResourceId = (typeof RESOURCES)[number];
+const RESOURCE_NAMES = ['gold', 'gems', 'wood', 'iron'] as const;
 
 function makeGame(chained: boolean) {
-  const generators: Record<string, GeneratorDef<ResourceId, string>> = {};
-  for (let i = 0; i < COUNT; i++) {
-    const feeds = chained && i % 10 !== 9 ? { generator: `g${i + 1}` } : undefined;
-    generators[`g${i}`] = {
-      cost: { resource: 'gold', base: 10 + i, growth: 1.05 },
-      produces: feeds ?? (RESOURCES[i % RESOURCES.length] as ResourceId),
+  const game = new Game({ clock: new ManualClock(0) });
+  const resources: Resource[] = [];
+  for (const name of RESOURCE_NAMES) {
+    const initial = name === 'gold' ? '1e30' : 0;
+    resources.push(game.createObject(name).addComponent(Resource, { initial }));
+  }
+  const gold = resources[0] as Resource;
+  const generators: Generator[] = new Array<Generator>(COUNT);
+  for (let i = COUNT - 1; i >= 0; i--) {
+    const next = generators[i + 1];
+    const feeds = chained && i % 10 !== 9 && next !== undefined ? next : undefined;
+    generators[i] = game.createObject(`g${i}`).addComponent(Generator, {
+      cost: { resource: gold, base: 10 + i, growth: 1.05 },
+      produces: feeds ?? (resources[i % resources.length] as Resource),
       rate: 1 + (i % 7),
       initial: 1 + (i % 5),
-    };
+    });
   }
-  return createGame({
-    clock: new ManualClock(0),
-    resources: { gold: { initial: '1e30' }, gems: {}, wood: {}, iron: {} },
-    generators,
-  });
+  return { game, generators };
 }
 
 const flat = makeGame(false);
 const chained = makeGame(true);
+const target = flat.generators[42] as Generator;
 
 const bench = new Bench({ time: 1000, warmupTime: 200 });
 bench
   .add(`tick: one 100 ms step, ${COUNT} generators feeding resources`, () => {
-    flat.advance(100);
+    flat.game.advance(100);
   })
   .add(`tick: one 100 ms step, ${COUNT} generators in chained tiers`, () => {
-    chained.advance(100);
+    chained.game.advance(100);
   })
   .add(`tick: one second of game time (10 steps), ${COUNT} generators`, () => {
-    flat.advance(1000);
+    flat.game.advance(1000);
   })
   .add('offline: 24 h, closed form (flat)', () => {
-    flat.simulateOffline(24 * 3_600_000);
+    flat.game.simulateOffline(24 * 3_600_000);
   })
   .add('offline: 24 h, closed form (chained tiers)', () => {
-    chained.simulateOffline(24 * 3_600_000);
+    chained.game.simulateOffline(24 * 3_600_000);
   })
   .add('buy: max of one generator', () => {
-    flat.buy('g42', 'max');
+    target.buy('max');
   })
   .add('save()', () => {
-    flat.save();
+    flat.game.save();
   })
   .add('exportSave() (JSON + checksum + base64)', () => {
-    flat.exportSave();
+    flat.game.exportSave();
   });
 
 await bench.run();

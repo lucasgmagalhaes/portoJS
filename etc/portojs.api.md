@@ -5,86 +5,59 @@
 ```ts
 
 // @public
-export interface AchievementDef<Ctx> {
-    readonly condition: (context: Ctx) => boolean;
-    readonly effect?: (context: Ctx) => void;
+export class Achievement extends Component {
+    constructor(gameObject: GameObject, options: AchievementOptions);
+    check(): boolean;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    get isUnlocked(): boolean;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue | undefined;
+    // (undocumented)
+    static typeId: string;
+    readonly unlocked: GameEvent<Achievement>;
+    get unlockedAt(): number | undefined;
 }
 
 // @public
-export function achievements<Ctx, A extends string>(config: AchievementsConfig<Ctx, A>): Plugin_2<AchievementsApi<A>, AchievementsEvents<A>>;
-
-// @public
-export const ACHIEVEMENTS_PLUGIN = "achievements";
-
-// @public
-export interface AchievementsApi<A extends string> {
-    readonly achievementIds: readonly A[];
-    achievementUnlockedAt(id: A): number | undefined;
-    checkAchievements(): A[];
-    hasAchievement(id: A): boolean;
-    unlockedAchievements(): A[];
-}
-
-// @public
-export interface AchievementsConfig<Ctx, A extends string> {
+export interface AchievementOptions {
     readonly checkIntervalMs?: number;
-    readonly context: (kernel: Kernel) => Ctx;
-    readonly definitions: {
-        readonly [K in A]: AchievementDef<Ctx>;
-    };
+    readonly condition: (game: Game) => boolean;
+    readonly effect?: (game: Game) => void;
 }
 
 // @public
-export interface AchievementsEvents<A extends string> {
-    achievementUnlocked: {
-        readonly id: A;
-        readonly at: number;
-    };
+export interface AutoBuy {
+    // (undocumented)
+    readonly amount: BigNum;
+    // (undocumented)
+    readonly autoBuyer: AutoBuyer;
 }
 
 // @public
-export type AnyPlugin = Plugin_2<object, object>;
+export class AutoBuyer extends Component {
+    constructor(gameObject: GameObject, options: AutoBuyerOptions);
+    readonly bought: GameEvent<AutoBuy>;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    // (undocumented)
+    onEnable(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    // (undocumented)
+    static typeId: string;
+}
 
-// Warning: (ae-forgotten-export) The symbol "UnionToIntersection" needs to be exported by the entry point index.d.ts
-//
 // @public
-export type ApiOf<P extends readonly AnyPlugin[]> = UnionToIntersection<P[number] extends infer U ? (U extends Plugin_2<infer A, object> ? A : never) : never> & object;
-
-// @public
-export const AUTO_BUYERS_PLUGIN = "autoBuyers";
-
-// @public
-export interface AutoBuyerDef<G extends string> {
+export interface AutoBuyerOptions {
     readonly amount?: BulkAmount;
     readonly enabled?: boolean;
     readonly everyMs?: number;
-    readonly generator: G;
-}
-
-// @public
-export function autoBuyers<G extends string, B extends string>(config: AutoBuyersConfig<G, B>): Plugin_2<AutoBuyersApi<B>, AutoBuyersEvents<G, B>>;
-
-// @public
-export interface AutoBuyersApi<B extends string> {
-    readonly autoBuyerIds: readonly B[];
-    isAutoBuyerEnabled(id: B): boolean;
-    setAutoBuyer(id: B, enabled: boolean): void;
-}
-
-// @public
-export interface AutoBuyersConfig<G extends string, B extends string> {
-    readonly buyers: {
-        readonly [id in B]: AutoBuyerDef<NoInfer<G>>;
-    };
-}
-
-// @public
-export interface AutoBuyersEvents<G extends string, B extends string> {
-    autoBuy: {
-        readonly id: B;
-        readonly generator: G;
-        readonly amount: BigNum;
-    };
+    readonly target: Generator_2;
 }
 
 // @public
@@ -134,103 +107,73 @@ export class BigNum {
 export type BigNumLike = BigNum | number | string;
 
 // @public
-export interface BoostDef<R extends string, G extends string> {
+export class Boost extends Component {
+    constructor(gameObject: GameObject, options: BoostOptions);
+    activate(): boolean;
+    // (undocumented)
+    awake(): void;
+    cancel(): boolean;
+    readonly ended: GameEvent<Boost>;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    // (undocumented)
+    onDestroy(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue | undefined;
+    get remainingMs(): number;
+    get running(): boolean;
+    readonly started: GameEvent<Boost>;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface BoostOptions {
     readonly durationMs: number;
-    readonly effects: readonly BoostEffect<R, G>[];
+    readonly effects: readonly TargetedMultiplier[];
     readonly onReactivate?: 'refresh' | 'extend' | 'ignore';
-}
-
-// @public
-export type BoostEffect<R extends string, G extends string> = EffectTarget<R, G> & {
-    readonly multiplier: BigNumLike;
-};
-
-// @public
-export function boosts<R extends string, G extends string = never, B extends string = string>(config: BoostsConfig<R, G, B>): Plugin_2<BoostsApi<B>, BoostsEvents<B>>;
-
-// @public
-export const BOOSTS_PLUGIN = "boosts";
-
-// @public
-export interface BoostsApi<B extends string> {
-    activateBoost(id: B): boolean;
-    activeBoosts(): B[];
-    readonly boostIds: readonly B[];
-    boostRemainingMs(id: B): number;
-    cancelBoost(id: B): boolean;
-    isBoostActive(id: B): boolean;
-}
-
-// @public
-export interface BoostsConfig<R extends string, G extends string, B extends string> {
-    readonly definitions: {
-        readonly [id in B]: BoostDef<R, G>;
-    };
-}
-
-// @public
-export interface BoostsEvents<B extends string> {
-    boostEnded: {
-        readonly id: B;
-    };
-    boostStarted: {
-        readonly id: B;
-        readonly remainingMs: number;
-    };
 }
 
 // @public
 export type BulkAmount = number | 'max';
 
 // @public
-export interface ChallengeDef<R extends string, G extends string> {
-    readonly goal: (game: ResourcesApi<R, G, string>) => boolean;
-    readonly keep?: ResetKeep<R, G, string>;
-    readonly modifiers?: readonly ChallengeModifier<R, G>[];
-    readonly reward?: readonly ChallengeModifier<R, G>[];
-}
-
-// @public
-export type ChallengeModifier<R extends string, G extends string> = EffectTarget<R, G> & {
-    readonly multiplier: BigNumLike;
-};
-
-// @public
-export function challenges<R extends string, G extends string = never, C extends string = string>(config: ChallengesConfig<R, G, C>): Plugin_2<ChallengesApi<C>, ChallengesEvents<C>>;
-
-// @public
-export const CHALLENGES_PLUGIN = "challenges";
-
-// @public
-export interface ChallengesApi<C extends string> {
-    activeChallenge(): C | undefined;
-    readonly challengeIds: readonly C[];
-    completedChallenges(): C[];
-    exitChallenge(): boolean;
-    isChallengeCompleted(id: C): boolean;
-    startChallenge(id: C): boolean;
-}
-
-// @public
-export interface ChallengesConfig<R extends string, G extends string, C extends string> {
-    readonly checkIntervalMs?: number;
-    readonly definitions: {
-        readonly [id in C]: ChallengeDef<R, G>;
-    };
-}
-
-// @public
-export interface ChallengesEvents<C extends string> {
-    challengeCompleted: {
-        readonly id: C;
+export class Challenge extends Component {
+    constructor(gameObject: GameObject, options: ChallengeOptions);
+    abandon(): boolean;
+    // (undocumented)
+    awake(): void;
+    begin(): boolean;
+    readonly completed: GameEvent<{
+        readonly challenge: Challenge;
         readonly firstTime: boolean;
-    };
-    challengeExited: {
-        readonly id: C;
-    };
-    challengeStarted: {
-        readonly id: C;
-    };
+    }>;
+    static current(game: Game): Challenge | undefined;
+    readonly exited: GameEvent<Challenge>;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    get isCompleted(): boolean;
+    get isRunning(): boolean;
+    // (undocumented)
+    onDestroy(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    readonly started: GameEvent<Challenge>;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface ChallengeOptions {
+    readonly checkIntervalMs?: number;
+    readonly goal: (game: Game) => boolean;
+    readonly handicaps?: readonly TargetedMultiplier[];
+    readonly keep?: ResetKeep;
+    readonly rewards?: readonly TargetedMultiplier[];
 }
 
 // @public
@@ -242,84 +185,43 @@ export interface Clock {
 export function compileCost(curve: CostCurve): CostFunctions;
 
 // @public
-export class Core<Ev extends object = object> {
-    constructor(options?: CoreOptions);
-    advance(ms: number): number;
-    readonly clock: Clock;
-    dispose(): void;
-    exportSave(): string;
-    importSave(encoded: string, options?: LoadOptions): OfflineReport | undefined;
-    load(input: SaveData | string, options?: LoadOptions): OfflineReport | undefined;
-    now(): number;
-    on<K extends keyof (CoreEvents & Ev)>(event: K, listener: Listener<(CoreEvents & Ev)[K]>): Unsubscribe;
-    once<K extends keyof (CoreEvents & Ev)>(event: K, listener: Listener<(CoreEvents & Ev)[K]>): Unsubscribe;
+export abstract class Component {
+    constructor(gameObject: GameObject);
+    awake?(): void;
+    destroy(): void;
+    get enabled(): boolean;
+    set enabled(value: boolean);
+    static executionOrder: number;
+    fixedUpdate?(deltaTime: number): void;
+    get game(): Game;
+    // (undocumented)
+    readonly gameObject: GameObject;
+    getComponent<C extends Component>(type: ComponentType<C>): C | undefined;
+    get isActive(): boolean;
     // @internal
-    readonly pluginApis: Map<string, object>;
-    reset(): void;
-    get running(): boolean;
-    save(): SaveData;
-    simulateOffline(ms: number): OfflineReport;
-    start(): void;
-    get stepMs(): number;
-    stop(): void;
-    get tickCount(): number;
-    update(): number;
-    readonly version: number;
+    isDestroyed: boolean;
+    onDestroy?(): void;
+    onDisable?(): void;
+    onEnable?(): void;
+    onLoad?(data: JsonValue | undefined): void;
+    onOffline?(elapsedMs: number): void;
+    onSave?(): JsonValue | undefined;
+    start?(): void;
+    // @internal
+    startCalled: boolean;
+    static typeId: string | undefined;
+    // @internal
+    wasActive: boolean;
 }
 
 // @public
-export interface CoreEvents {
-    loaded: {
-        save: SaveData;
-    };
-    offline: OfflineReport & {
-        source: OfflineSource;
-    };
-    overflow: {
-        droppedMs: number;
-    };
-    saved: {
-        save: SaveData;
-    };
-    start: {
-        at: number;
-    };
-    stop: {
-        at: number;
-    };
-    tick: {
-        dtMs: number;
-        tick: number;
-    };
-}
+export type ComponentConstructor<C extends Component = Component, O = never> = new (gameObject: GameObject, options: O) => C;
 
 // @public
-export interface CoreOfflineOptions extends OfflineOptions {
-    readonly background?: boolean;
-    readonly onLoad?: boolean;
-}
-
-// @public
-export interface CoreOptions<P extends readonly AnyPlugin[] = readonly AnyPlugin[]> {
-    readonly clock?: Clock;
-    readonly maxCatchUpTicks?: number;
-    readonly maxSaveChars?: number;
-    readonly migrations?: Migrations;
-    readonly offline?: CoreOfflineOptions;
-    readonly plugins?: P;
-    readonly pollMs?: number;
-    readonly scheduler?: Scheduler;
-    readonly stepMs?: number;
-    readonly version?: number;
-}
+export type ComponentType<C extends Component = Component> = abstract new (...args: never[]) => C;
 
 // @public
 export type CostCurve = ExponentialCost | LinearCost | CustomCost;
-
-// @public
-export type CostDef<R extends string> = CostCurve & {
-    readonly resource: R;
-};
 
 // @public
 export interface CostFunctions {
@@ -329,13 +231,13 @@ export interface CostFunctions {
 }
 
 // @public
-export function createCore<P extends readonly AnyPlugin[] = readonly []>(options?: CoreOptions<P>): Core<EventsOf<P>> & ApiOf<P>;
-
-// @public
-export function createGame<R extends string, G extends string = never, U extends string = never, A extends string = never, PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined = undefined, X extends readonly AnyPlugin[] = readonly []>(config: GameConfig<R, G, U, A, PR, X>): Game<R, G, U, A, PR, X>;
-
-// @public
 export function createIntervalScheduler(options?: IntervalSchedulerOptions): Scheduler;
+
+// @public
+export interface CreateObjectOptions {
+    readonly active?: boolean;
+    readonly parent?: GameObject;
+}
 
 // @public
 export function createSave(version: number, savedAt: number, data: JsonObject): SaveData;
@@ -350,19 +252,74 @@ export interface CustomCost {
 }
 
 // @public
+export class DataStore extends Component {
+    readonly changed: GameEvent<{
+        readonly key: string;
+        readonly value: JsonValue;
+    }>;
+    get(key: string): JsonValue | undefined;
+    has(key: string): boolean;
+    keys(): string[];
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    remove(key: string): boolean;
+    readonly removed: GameEvent<{
+        readonly key: string;
+    }>;
+    set(key: string, value: JsonValue): void;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
 export const DEFAULT_MAX_OFFLINE_MS: number;
 
 // @public
 export const DEFAULT_SUFFIXES: readonly string[];
 
 // @public
-export function definePlugin<Api extends object, Ev extends object = object, Deps extends object = object>(name: string, setup: (kernel: Kernel<Ev, Deps>) => Api): Plugin_2<Api, Ev>;
+export class Economy extends Component {
+    constructor(gameObject: GameObject, options?: EconomyOptions);
+    allows(target: Generator_2 | Upgrade): boolean;
+    // (undocumented)
+    static executionOrder: number;
+    static existing(game: Game): Economy | undefined;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    // @internal
+    invalidate(): void;
+    multiplierOf(target: EffectTarget): BigNum;
+    static of(game: Game): Economy;
+    readonly offlineGains: GameEvent<OfflineGains>;
+    // (undocumented)
+    onOffline(elapsedMs: number): void;
+    readonly purchased: GameEvent<Purchase>;
+    rateOf(resource: Resource): BigNum;
+    removeModifier(id: string): boolean;
+    removePurchaseGuard(name: string): boolean;
+    resetRun(keep?: ResetKeep): void;
+    setModifier(id: string, target: EffectTarget, value: ModifierValue): void;
+    setPurchaseGuard(name: string, guard: PurchaseGuard): void;
+    // (undocumented)
+    static typeId: string;
+}
 
 // @public
-export type EffectTarget<R extends string, G extends string> = {
-    readonly generator: G;
+export const ECONOMY_OBJECT = "[Economy]";
+
+// @public
+export interface EconomyOptions {
+    readonly maxChain?: number;
+    readonly maxSteps?: number;
+}
+
+// @public
+export type EffectTarget = {
+    readonly generator: Generator_2;
 } | {
-    readonly resource: R;
+    readonly resource: Resource;
 } | {
     readonly all: true;
 };
@@ -401,9 +358,6 @@ export interface EngineOptions {
     readonly scheduler?: Scheduler;
     readonly stepMs?: number;
 }
-
-// @public
-export type EventsOf<P extends readonly AnyPlugin[]> = UnionToIntersection<P[number] extends infer U ? (U extends Plugin_2<object, infer E> ? E : never) : never> & object;
 
 // @public
 export interface ExponentialCost {
@@ -455,44 +409,176 @@ export type Formatter = (value: BigNum, precision: number) => string;
 // @public
 export function fromBase64(encoded: string): string;
 
-// Warning: (ae-forgotten-export) The symbol "Optional" needs to be exported by the entry point index.d.ts
-//
 // @public
-export type Game<R extends string, G extends string, U extends string, A extends string, PR, X extends readonly AnyPlugin[] = readonly []> = Core<ResourcesEvents<R, G, U> & (PR extends undefined ? object : PrestigeEvents) & ([A] extends [never] ? object : AchievementsEvents<A>) & EventsOf<X>> & ResourcesApi<R, G, U> & Optional<PR extends undefined ? false : true, PrestigeApi> & ([A] extends [never] ? unknown : AchievementsApi<A>) & ApiOf<X>;
+export class Game {
+    constructor(options?: GameOptions);
+    advance(ms: number): number;
+    readonly clock: Clock;
+    createObject(name: string, options?: CreateObjectOptions): GameObject;
+    dispose(): void;
+    exportSave(): string;
+    find(name: string): GameObject | undefined;
+    findObjectOfType<C extends Component>(type: ComponentType<C>): C | undefined;
+    findObjectsOfType<C extends Component>(type: ComponentType<C>): C[];
+    importSave(encoded: string, options?: LoadOptions): OfflineReport | undefined;
+    load(input: SaveData | string, options?: LoadOptions): OfflineReport | undefined;
+    now(): number;
+    get objects(): readonly GameObject[];
+    on<K extends keyof GameEvents>(event: K, listener: Listener<GameEvents[K]>): Unsubscribe;
+    once<K extends keyof GameEvents>(event: K, listener: Listener<GameEvents[K]>): Unsubscribe;
+    // @internal
+    refreshActivity(target: GameObject | Component): void;
+    // @internal
+    registerComponent(component: Component): void;
+    reset(): void;
+    get running(): boolean;
+    save(): SaveData;
+    simulateOffline(ms: number): OfflineReport;
+    start(): void;
+    get stepMs(): number;
+    stop(): void;
+    get structureVersion(): number;
+    get tickCount(): number;
+    readonly time: Time;
+    // @internal
+    unregisterComponent(component: Component): void;
+    // @internal
+    unregisterObject(object: GameObject): void;
+    update(): number;
+    readonly version: number;
+}
 
 // @public
-export type GameConfig<R extends string, G extends string, U extends string, A extends string, PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined, X extends readonly AnyPlugin[] = readonly []> = Omit<ResourcesConfig<R, G, U>, 'offline'> & Omit<CoreOptions, 'plugins' | 'offline'> & {
-    readonly offline?: CoreOfflineOptions & ResourcesOfflineOptions;
-    readonly prestige?: PR;
-    readonly plugins?: X;
-    readonly achievements?: {
-        readonly [K in A]: AchievementDef<GameView<R, G, U, PR>>;
+export class GameEvent<T = undefined> {
+    addListener(listener: GameEventListener<T>): Unsubscribe;
+    addListenerOnce(listener: GameEventListener<T>): Unsubscribe;
+    invoke(...payload: [T] extends [undefined] ? [] : [T]): void;
+    get listenerCount(): number;
+    removeAllListeners(): void;
+}
+
+// @public
+export type GameEventListener<T> = (payload: T) => void;
+
+// @public
+export interface GameEvents {
+    loaded: {
+        save: SaveData;
     };
-    readonly achievementCheckIntervalMs?: number;
-};
+    objectCreated: {
+        object: GameObject;
+    };
+    objectDestroyed: {
+        object: GameObject;
+    };
+    offline: OfflineReport & {
+        source: OfflineSource;
+    };
+    overflow: {
+        droppedMs: number;
+    };
+    saved: {
+        save: SaveData;
+    };
+    start: {
+        at: number;
+    };
+    stop: {
+        at: number;
+    };
+    tick: {
+        dtMs: number;
+        tick: number;
+    };
+}
 
 // @public
-export type GameView<R extends string, G extends string, U extends string, PR> = ResourcesApi<R, G, U> & (PR extends undefined ? unknown : PrestigeApi);
+export class GameObject {
+    // @internal
+    constructor(game: Game, name: string, parent: GameObject | undefined, active: boolean);
+    get activeInHierarchy(): boolean;
+    get activeSelf(): boolean;
+    addComponent<C extends Component, O = undefined>(type: ComponentConstructor<C, O>, ...options: undefined extends O ? [options?: O] : [options: O]): C;
+    get children(): readonly GameObject[];
+    get components(): readonly Component[];
+    destroy(): void;
+    // (undocumented)
+    readonly game: Game;
+    getComponent<C extends Component>(type: ComponentType<C>): C | undefined;
+    getComponents<C extends Component>(type: ComponentType<C>): C[];
+    get isDestroyed(): boolean;
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly parent: GameObject | undefined;
+    removeComponent(component: Component): void;
+    requireComponent<C extends Component>(type: ComponentType<C>): C;
+    setActive(active: boolean): void;
+}
 
 // @public
-export interface GeneratorDef<R extends string, G extends string> {
-    readonly cost: CostDef<R>;
+export interface GameOfflineOptions extends OfflineOptions {
+    readonly background?: boolean;
+    readonly onLoad?: boolean;
+}
+
+// @public
+export interface GameOptions {
+    readonly clock?: Clock;
+    readonly maxCatchUpTicks?: number;
+    readonly maxSaveChars?: number;
+    readonly migrations?: Migrations;
+    readonly offline?: GameOfflineOptions;
+    readonly pollMs?: number;
+    readonly scheduler?: Scheduler;
+    readonly stepMs?: number;
+    readonly version?: number;
+}
+
+// @public
+class Generator_2 extends Component {
+    constructor(gameObject: GameObject, options: GeneratorOptions);
+    // (undocumented)
+    awake(): void;
+    get bought(): BigNum;
+    buy(amount?: BulkAmount): BigNum;
+    canBuy(amount?: BulkAmount): boolean;
+    costOf(amount?: BulkAmount): BigNum;
+    readonly costResource: Resource;
+    get count(): BigNum;
+    get free(): BigNum;
+    get maxAffordable(): BigNum;
+    get nextCost(): BigNum;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    readonly produces: Resource | Generator_2;
+    readonly purchased: GameEvent<GeneratorPurchase>;
+    readonly rate: BigNum;
+    // @internal
+    resetRun(keep: boolean): void;
+    // @internal
+    setHeld(bought: BigNum, free: BigNum): void;
+    // (undocumented)
+    static typeId: string;
+}
+export { Generator_2 as Generator }
+
+// @public
+export interface GeneratorOptions {
+    readonly cost: ResourceCost;
     readonly initial?: BigNumLike;
-    readonly produces: R | {
-        readonly generator: G;
-    };
+    readonly produces: Resource | Generator_2;
     readonly rate: BigNumLike;
 }
 
 // @public
-export interface GeneratorPurchase<R extends string, G extends string> {
+export interface GeneratorPurchase {
     readonly amount: BigNum;
     readonly cost: BigNum;
     // (undocumented)
-    readonly id: G;
-    // (undocumented)
-    readonly kind: 'generator';
-    readonly resource: R;
+    readonly generator: Generator_2;
 }
 
 // @public
@@ -518,17 +604,6 @@ export type JsonObject = {
 export type JsonValue = null | boolean | number | string | JsonValue[] | {
     [key: string]: JsonValue;
 };
-
-// @public
-export interface Kernel<Ev extends object = object, Deps extends object = object> {
-    readonly clock: Clock;
-    emit<K extends keyof Ev>(event: K, payload: Ev[K]): void;
-    now(): number;
-    on<K extends keyof (CoreEvents & Ev & Deps)>(event: K, listener: Listener<(CoreEvents & Ev & Deps)[K]>): Unsubscribe;
-    registerSystem(system: System): void;
-    require<A extends object>(plugin: string): A;
-    readonly stepMs: number;
-}
 
 // @public
 export interface LinearCost {
@@ -569,7 +644,16 @@ export interface ModifierContext {
 }
 
 // @public
+export type ModifierValue = BigNumLike | ((context: ModifierContext) => BigNumLike);
+
+// @public
 export type Notation = 'scientific' | 'engineering' | 'suffix';
+
+// @public
+export interface OfflineGains {
+    readonly elapsedMs: number;
+    readonly gains: ReadonlyMap<Resource, BigNum>;
+}
 
 // @public
 export interface OfflineOptions {
@@ -594,153 +678,78 @@ export type OfflineStatus = 'none' | 'applied' | 'capped' | 'backward';
 export function parseSave(input: unknown): SaveData;
 
 // @public
-interface Plugin_2<Api extends object = object, Ev extends object = object> {
-    readonly $events?: Ev;
-    readonly name: string;
-    setup(kernel: Kernel<Ev>): Api;
-}
-export { Plugin_2 as Plugin }
-
-// @public
-export function prestige<R extends string, G extends string = never, U extends string = never>(config: PrestigeConfig<R, G, U>): Plugin_2<PrestigeApi, PrestigeEvents>;
-
-// @public
-export const PRESTIGE_LAYERS_PLUGIN = "prestigeLayers";
-
-// @public
-export const PRESTIGE_PLUGIN = "prestige";
-
-// @public
-export interface PrestigeApi {
-    canPrestige(): boolean;
-    pendingPrestige(): BigNum;
-    prestige(): BigNum | undefined;
-    prestigeCount(): number;
-    prestigeLifetime(): BigNum;
-    prestigePoints(): BigNum;
-    spendPrestige(amount: BigNumLike): boolean;
+export class Prestige extends Component {
+    constructor(gameObject: GameObject, options: PrestigeOptions);
+    // (undocumented)
+    awake(): void;
+    get canPrestige(): boolean;
+    // @internal
+    clearPoints(): void;
+    get count(): number;
+    get gainedSinceReset(): BigNum;
+    get lifetime(): BigNum;
+    // (undocumented)
+    onDestroy(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    get pending(): BigNum;
+    perform(): BigNum | undefined;
+    readonly performed: GameEvent<PrestigeResult>;
+    get points(): BigNum;
+    spend(amount: BigNumLike): boolean;
+    // (undocumented)
+    static typeId: string;
 }
 
 // @public
-export type PrestigeBonus<R extends string, G extends string> = {
-    readonly target: EffectTarget<R, G>;
-} & ({
+export type PrestigeBonus = EffectTarget & ({
     readonly perPoint: BigNumLike;
 } | {
     readonly multiplier: (points: BigNum, lifetime: BigNum) => BigNumLike;
 });
 
 // @public
-export interface PrestigeConfig<R extends string, G extends string, U extends string> {
-    readonly basedOn: R;
-    readonly bonuses?: readonly PrestigeBonus<R, G>[];
+export type PrestigeFormula = RootFormula | ((basis: BigNum) => BigNumLike);
+
+// @public
+export interface PrestigeOptions {
+    readonly basedOn: Resource | Prestige;
+    readonly bonuses?: readonly PrestigeBonus[];
     readonly gain: PrestigeFormula;
-    readonly keep?: ResetKeep<R, G, U>;
-    readonly minimum?: BigNumLike;
-}
-
-// @public
-export interface PrestigeEvents {
-    prestige: {
-        readonly gained: BigNum;
-        readonly points: BigNum;
-        readonly count: number;
-    };
-}
-
-// @public
-export type PrestigeFormula = RootFormula | ((runEarned: BigNum) => BigNumLike);
-
-// @public
-export interface PrestigeLayerDef<R extends string, G extends string, U extends string> {
-    readonly basedOn: R | {
-        readonly layer: string;
-    };
-    readonly bonuses?: readonly PrestigeBonus<R, G>[];
-    readonly gain: PrestigeFormula;
-    readonly keep?: ResetKeep<R, G, U>;
+    readonly keep?: ResetKeep;
     readonly minimum?: BigNumLike;
     readonly resetsLower?: boolean;
 }
 
 // @public
-export function prestigeLayers<R extends string, G extends string = never, U extends string = never, L extends string = string>(config: PrestigeLayersConfig<R, G, U, L>): Plugin_2<PrestigeLayersApi<L>, PrestigeLayersEvents<L>>;
-
-// @public
-export interface PrestigeLayersApi<L extends string> {
-    ascend(layer: L): BigNum | undefined;
-    canAscend(layer: L): boolean;
-    layerCount(layer: L): number;
-    readonly layerIds: readonly L[];
-    layerLifetime(layer: L): BigNum;
-    layerPoints(layer: L): BigNum;
-    pendingLayer(layer: L): BigNum;
-    spendLayerPoints(layer: L, amount: BigNumLike): boolean;
+export interface PrestigeResult {
+    readonly count: number;
+    readonly gained: BigNum;
+    readonly points: BigNum;
+    // (undocumented)
+    readonly prestige: Prestige;
 }
 
 // @public
-export interface PrestigeLayersConfig<R extends string, G extends string, U extends string, L extends string> {
-    readonly layers: {
-        readonly [id in L]: PrestigeLayerDef<R, G, U>;
-    };
-}
-
-// @public
-export interface PrestigeLayersEvents<L extends string> {
-    ascended: {
-        readonly layer: L;
-        readonly gained: BigNum;
-        readonly points: BigNum;
-        readonly count: number;
-    };
-}
-
-// @public
-export type PurchaseGuard<G extends string, U extends string> = (target: PurchaseTarget<G, U>) => boolean;
-
-// @public
-export type PurchaseTarget<G extends string, U extends string> = {
+export type Purchase = ({
     readonly kind: 'generator';
-    readonly id: G;
-} | {
+} & GeneratorPurchase) | ({
     readonly kind: 'upgrade';
-    readonly id: U;
-};
+} & UpgradePurchase);
 
 // @public
-export function registry(): Plugin_2<RegistryApi, RegistryEvents>;
+export type PurchaseGuard = (target: Generator_2 | Upgrade) => boolean;
 
 // @public
-export const REGISTRY_PLUGIN = "registry";
-
-// @public
-export interface RegistryApi {
-    dataKeys(): string[];
-    getData(key: string): JsonValue | undefined;
-    hasData(key: string): boolean;
-    removeData(key: string): boolean;
-    setData(key: string, value: JsonValue): void;
-}
-
-// @public
-export interface RegistryEvents {
-    dataChanged: {
-        readonly key: string;
-        readonly value: JsonValue;
-    };
-    dataRemoved: {
-        readonly key: string;
-    };
-}
-
-// @public
-export interface ResetKeep<R extends string, G extends string, U extends string> {
+export interface ResetKeep {
     // (undocumented)
-    readonly generators?: readonly G[];
+    readonly generators?: readonly Generator_2[];
     // (undocumented)
-    readonly resources?: readonly R[];
+    readonly resources?: readonly Resource[];
     // (undocumented)
-    readonly upgrades?: readonly U[];
+    readonly upgrades?: readonly Upgrade[];
 }
 
 // @public
@@ -750,71 +759,37 @@ export function resolveElapsed(rawMs: number, options?: OfflineOptions): Offline
 export function resolveOffline(from: number, to: number, options?: OfflineOptions): OfflineReport;
 
 // @public
-export interface ResourceDef {
+export class Resource extends Component {
+    constructor(gameObject: GameObject, options?: ResourceOptions);
+    add(amount: BigNumLike): void;
+    get amount(): BigNum;
+    canAfford(amount: BigNumLike): boolean;
+    // @internal
+    credit(amount: BigNum): void;
+    get earned(): BigNum;
+    readonly initial: BigNum;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    // @internal
+    pay(price: BigNum): void;
+    get rate(): BigNum;
+    // @internal
+    resetRun(keepBalance: boolean): void;
+    spend(amount: BigNumLike): boolean;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export type ResourceCost = CostCurve & {
+    readonly resource: Resource;
+};
+
+// @public
+export interface ResourceOptions {
     readonly initial?: BigNumLike;
-}
-
-// @public
-export function resources<R extends string, G extends string = never, U extends string = never>(config: ResourcesConfig<R, G, U>): Plugin_2<ResourcesApi<R, G, U>, ResourcesEvents<R, G, U>>;
-
-// @public
-export const RESOURCES_PLUGIN = "resources";
-
-// @public
-export interface ResourcesApi<R extends string, G extends string, U extends string> {
-    add(resource: R, amount: BigNumLike): void;
-    amount(resource: R): BigNum;
-    bought(generator: G): BigNum;
-    buy(generator: G, amount?: BulkAmount): BigNum;
-    buyUpgrade(upgrade: U): boolean;
-    canBuy(generator: G, amount?: BulkAmount): boolean;
-    canBuyUpgrade(upgrade: U): boolean;
-    cost(generator: G, amount?: BulkAmount): BigNum;
-    count(generator: G): BigNum;
-    earned(resource: R): BigNum;
-    readonly generatorIds: readonly G[];
-    maxAffordable(generator: G): BigNum;
-    multiplier(target: EffectTarget<R, G>): BigNum;
-    rate(resource: R): BigNum;
-    removeModifier(id: string): boolean;
-    removePurchaseGuard(name: string): boolean;
-    resetRun(keep?: ResetKeep<R, G, U>): void;
-    readonly resourceIds: readonly R[];
-    setModifier(id: string, target: EffectTarget<R, G>, multiplier: BigNumLike | ((context: ModifierContext) => BigNumLike)): void;
-    setPurchaseGuard(name: string, guard: PurchaseGuard<G, U>): void;
-    spend(resource: R, amount: BigNumLike): boolean;
-    upgradeCost(upgrade: U): BigNum | undefined;
-    readonly upgradeIds: readonly U[];
-    upgradeLevel(upgrade: U): number;
-}
-
-// @public
-export interface ResourcesConfig<R extends string, G extends string, U extends string> {
-    readonly generators?: {
-        readonly [K in G]: GeneratorDef<NoInfer<R>, NoInfer<G>>;
-    };
-    readonly offline?: ResourcesOfflineOptions;
-    readonly resources: {
-        readonly [K in R]: ResourceDef;
-    };
-    readonly upgrades?: {
-        readonly [K in U]: UpgradeDef<NoInfer<R>, NoInfer<G>>;
-    };
-}
-
-// @public
-export interface ResourcesEvents<R extends string, G extends string, U extends string> {
-    offlineGains: {
-        readonly elapsedMs: number;
-        readonly gains: Readonly<Record<R, BigNum>>;
-    };
-    purchase: GeneratorPurchase<R, G> | UpgradePurchase<R, U>;
-}
-
-// @public
-export interface ResourcesOfflineOptions {
-    readonly maxChain?: number;
-    readonly maxSteps?: number;
 }
 
 // @public
@@ -862,16 +837,24 @@ export interface StepPlanOptions {
 }
 
 // @public
-export interface System {
-    deserialize?(data: JsonValue | undefined): void;
-    readonly id: string;
-    offline?(elapsedMs: number): void;
-    serialize?(): JsonValue;
-    tick?(dtMs: number): void;
-}
+export const systemClock: Clock;
 
 // @public
-export const systemClock: Clock;
+export type TargetedMultiplier = EffectTarget & {
+    readonly multiplier: BigNumLike;
+};
+
+// @public
+export class Time {
+    constructor(fixedDeltaTime: number);
+    advance(): void;
+    get deltaTime(): number;
+    // (undocumented)
+    readonly fixedDeltaTime: number;
+    get fixedTime(): number;
+    get tickCount(): number;
+    get time(): number;
+}
 
 // @public
 export class TimeGuard {
@@ -898,66 +881,72 @@ export type TimeStatus = 'ok' | 'backward' | 'jump';
 export function toBase64(text: string): string;
 
 // @public
-export interface UnlockDef<R extends string, G extends string, U extends string> {
-    readonly condition: (game: ResourcesApi<R, G, U>) => boolean;
-    readonly generators?: readonly G[];
-    readonly upgrades?: readonly U[];
+export class Unlock extends Component {
+    constructor(gameObject: GameObject, options: UnlockOptions);
+    // (undocumented)
+    awake(): void;
+    check(): boolean;
+    readonly earned: GameEvent<Unlock>;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    get isUnlocked(): boolean;
+    // (undocumented)
+    onDestroy(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue | undefined;
+    // (undocumented)
+    static typeId: string;
+    get unlockedAt(): number | undefined;
 }
 
 // @public
-export function unlocks<R extends string, G extends string = never, U extends string = never, K extends string = string>(config: UnlocksConfig<R, G, U, K>): Plugin_2<UnlocksApi<K>, UnlocksEvents<K>>;
-
-// @public
-export const UNLOCKS_PLUGIN = "unlocks";
-
-// @public
-export interface UnlocksApi<K extends string> {
-    checkUnlocks(): K[];
-    isUnlocked(id: K): boolean;
-    unlockedIds(): K[];
-    readonly unlockIds: readonly K[];
-}
-
-// @public
-export interface UnlocksConfig<R extends string, G extends string, U extends string, K extends string> {
+export interface UnlockOptions {
     readonly checkIntervalMs?: number;
-    readonly definitions: {
-        readonly [id in K]: UnlockDef<R, G, U>;
-    };
-}
-
-// @public
-export interface UnlocksEvents<K extends string> {
-    unlocked: {
-        readonly id: K;
-        readonly at: number;
-    };
+    readonly condition: (game: Game) => boolean;
+    readonly gates: readonly (Generator_2 | Upgrade)[];
 }
 
 // @public
 export type Unsubscribe = () => void;
 
 // @public
-export interface UpgradeDef<R extends string, G extends string> {
-    readonly cost: CostDef<R>;
-    readonly effects: readonly UpgradeEffect<R, G>[];
+export class Upgrade extends Component {
+    constructor(gameObject: GameObject, options: UpgradeOptions);
+    // (undocumented)
+    awake(): void;
+    buy(): boolean;
+    canBuy(): boolean;
+    get cost(): BigNum | undefined;
+    readonly effects: readonly TargetedMultiplier[];
+    get isMaxed(): boolean;
+    get level(): number;
+    readonly maxLevel: number;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    readonly purchased: GameEvent<UpgradePurchase>;
+    // @internal
+    setLevel(level: number): void;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface UpgradeOptions {
+    readonly cost: ResourceCost;
+    readonly effects: readonly TargetedMultiplier[];
     readonly maxLevel?: number;
 }
 
 // @public
-export type UpgradeEffect<R extends string, G extends string> = EffectTarget<R, G> & {
-    readonly multiplier: BigNumLike;
-};
-
-// @public
-export interface UpgradePurchase<R extends string, U extends string> {
+export interface UpgradePurchase {
     readonly cost: BigNum;
-    // (undocumented)
-    readonly id: U;
-    // (undocumented)
-    readonly kind: 'upgrade';
     readonly level: number;
-    readonly resource: R;
+    // (undocumented)
+    readonly upgrade: Upgrade;
 }
 
 // (No @packageDocumentation comment for this package)

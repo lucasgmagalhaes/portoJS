@@ -1,25 +1,25 @@
 import { effectScope, watch } from 'vue';
 import { describe, expect, it } from 'vitest';
-import { ManualClock, createGame, format } from '../src/index.js';
+import { Game, Generator, ManualClock, Resource, format } from '../src/index.js';
 import { useGame } from '../src/bindings/vue.js';
 
 function make() {
   const clock = new ManualClock(0);
-  const game = createGame({
-    clock,
-    resources: { gold: { initial: 10 } },
-    generators: {
-      miner: { cost: { resource: 'gold', base: 10, growth: 1 }, produces: 'gold', rate: 1 },
-    },
+  const game = new Game({ clock });
+  const gold = game.createObject('Gold').addComponent(Resource, { initial: 10 });
+  const miner = game.createObject('Miner').addComponent(Generator, {
+    cost: { resource: gold, base: 10, growth: 1 },
+    produces: gold,
+    rate: 1,
   });
-  return { clock, game };
+  return { clock, game, gold, miner };
 }
 
 describe('Vue binding: useGame', () => {
   it('exposes a ref that follows the game', () => {
-    const { clock, game } = make();
-    game.buy('miner');
-    const { value, stop } = useGame(game, (g) => format(g.amount('gold')));
+    const { clock, game, gold, miner } = make();
+    miner.buy();
+    const { value, stop } = useGame(game, () => format(gold.amount));
     expect(value.value).toBe('0');
     clock.advance(4000);
     game.update();
@@ -31,12 +31,12 @@ describe('Vue binding: useGame', () => {
   });
 
   it('only triggers watchers when the value really changes', () => {
-    const { clock, game } = make();
-    game.buy('miner');
+    const { clock, game, gold, miner } = make();
+    miner.buy();
     const scope = effectScope();
     let runs = 0;
     scope.run(() => {
-      const { value } = useGame(game, (g) => g.rate('gold'));
+      const { value } = useGame(game, () => gold.rate);
       watch(value, () => runs++, { flush: 'sync' });
     });
     clock.advance(1000);
@@ -46,10 +46,10 @@ describe('Vue binding: useGame', () => {
   });
 
   it('unsubscribes automatically when its effect scope is disposed', () => {
-    const { clock, game } = make();
-    game.buy('miner');
+    const { clock, game, gold, miner } = make();
+    miner.buy();
     const scope = effectScope();
-    const ref = scope.run(() => useGame(game, (g) => g.amount('gold').toNumber()).value);
+    const ref = scope.run(() => useGame(game, () => gold.amount.toNumber()).value);
     clock.advance(1000);
     game.update();
     expect(ref?.value).toBe(1);
@@ -60,10 +60,10 @@ describe('Vue binding: useGame', () => {
   });
 
   it('follows loads', () => {
-    const { game } = make();
+    const { game, gold } = make();
     const save = game.save();
-    game.add('gold', 5);
-    const { value } = useGame(game, (g) => g.amount('gold').toNumber());
+    gold.add(5);
+    const { value } = useGame(game, () => gold.amount.toNumber());
     expect(value.value).toBe(15);
     game.load(save, { offline: false });
     expect(value.value).toBe(10);

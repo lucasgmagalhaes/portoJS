@@ -5,7 +5,7 @@ export default defineConfig({
     index: 'src/index.ts',
     core: 'src/core/index.ts',
     bignum: 'src/core/bignum/index.ts',
-    mechanics: 'src/mechanics/index.ts',
+    idle: 'src/idle/index.ts',
     react: 'src/bindings/react.ts',
     vue: 'src/bindings/vue.ts',
   },

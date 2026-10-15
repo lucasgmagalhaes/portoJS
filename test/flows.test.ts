@@ -1,8 +1,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { BigNum } from '../src/core/bignum/index.js';
-import { solveFlows } from '../src/mechanics/resources/flows.js';
-import type { FlowSource } from '../src/mechanics/resources/flows.js';
+import { solveFlows } from '../src/idle/flows.js';
+import type { FlowSource } from '../src/idle/flows.js';
 
 const n = (v: number | string): BigNum => BigNum.from(v);
 const toResource = (initial: number, coefficient: number, index = 0): FlowSource => ({

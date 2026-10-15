@@ -1,7 +1,7 @@
 {
   "name": "portojs",
   "version": "0.4.0",
-  "description": "Headless TypeScript engine for idle and incremental games: big numbers, stable ticks, offline progress, prestige and versioned saves.",
+  "description": "A headless TypeScript game engine with a Unity-style Game / GameObject / Component model and optional idle-game mechanics: big numbers, a stable tick loop, offline progress and versioned saves.",
   "license": "MIT",
   "packageManager": "pnpm@10.34.7",
   "type": "module",
@@ -40,14 +40,14 @@
         "default": "./dist/bignum.cjs"
       }
     },
-    "./mechanics": {
+    "./idle": {
       "import": {
-        "types": "./dist/mechanics.d.ts",
-        "default": "./dist/mechanics.js"
+        "types": "./dist/idle.d.ts",
+        "default": "./dist/idle.js"
       },
       "require": {
-        "types": "./dist/mechanics.d.cts",
-        "default": "./dist/mechanics.cjs"
+        "types": "./dist/idle.d.cts",
+        "default": "./dist/idle.cjs"
       }
     },
     "./react": {
@@ -100,10 +100,13 @@
     "docs:preview": "vitepress preview docs"
   },
   "keywords": [
-    "idle",
-    "incremental",
     "game",
     "engine",
+    "headless",
+    "component",
+    "gameobject",
+    "idle",
+    "incremental",
     "bignum",
     "offline",
     "prestige"
@@ -167,14 +170,14 @@
       "bignum": [
         "./dist/bignum.d.ts"
       ],
-      "mechanics": [
-        "./dist/mechanics.d.ts"
-      ],
       "react": [
         "./dist/react.d.ts"
       ],
       "vue": [
         "./dist/vue.d.ts"
+      ],
+      "idle": [
+        "./dist/idle.d.ts"
       ]
     }
   },
