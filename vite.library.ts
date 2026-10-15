@@ -37,5 +37,11 @@ export function libraryConfig(entries: readonly string[]): UserConfig {
 }
 
 function isExternal(id: string): boolean {
-  return id.startsWith('@portojs/') || id === 'react' || id === 'vue' || id.startsWith('node:');
+  return (
+    id.startsWith('@portojs/') ||
+    id.startsWith('@dimforge/') ||
+    id === 'react' ||
+    id === 'vue' ||
+    id.startsWith('node:')
+  );
 }

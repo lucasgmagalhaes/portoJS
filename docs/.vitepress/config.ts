@@ -27,6 +27,7 @@ export default defineConfig({
           { text: 'Components and the game model', link: '/components' },
           { text: 'ECS and rendering', link: '/ecs-and-render' },
           { text: 'Input and audio', link: '/input-and-audio' },
+          { text: 'Physics', link: '/physics' },
           { text: 'UI bindings', link: '/bindings' },
           { text: 'Coming from Unity or Phaser', link: '/from-unity' },
         ],
@@ -66,6 +67,9 @@ export default defineConfig({
           new URL('../../packages/react/src/index.ts', import.meta.url),
         ),
         '@portojs/vue': fileURLToPath(new URL('../../packages/vue/src/index.ts', import.meta.url)),
+        '@portojs/physics': fileURLToPath(
+          new URL('../../packages/physics/src/index.ts', import.meta.url),
+        ),
         portojs: fileURLToPath(new URL('../../packages/portojs/src/index.ts', import.meta.url)),
       },
     },

@@ -116,8 +116,9 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/render`  | Camera, auto-batching sprites, WebGPU with WebGL2 fallback             |
 | `@portojs/input`   | Keyboard, pointer and gamepad input with named actions                 |
 | `@portojs/audio`   | Web Audio mixer with buses and playback control                        |
+| `@portojs/physics` | 2D rigid bodies and collision events on Rapier                         |
 
-`@portojs/ecs`, `@portojs/render`, `@portojs/input` and `@portojs/audio` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio` and `@portojs/physics` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -143,6 +144,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [Prestige](docs/prestige.md): resets, formulas, layers and permanent bonuses
 - [UI bindings](docs/bindings.md): `useGame` for React and Vue
 - [Input and audio](docs/input-and-audio.md): `@portojs/input`, `@portojs/audio`
+- [Physics](docs/physics.md): `@portojs/physics`, rigid bodies and collisions
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
 - [Coming from Unity or Phaser](docs/from-unity.md): how the concepts map
 - [Engineering audit and roadmap](docs/roadmap.md): measured state, open findings and the release process

@@ -8,5 +8,6 @@
   "packages/ecs": "0.8.0",
   "packages/render": "0.8.0",
   "packages/input": "0.8.0",
-  "packages/audio": "0.8.0"
+  "packages/audio": "0.8.0",
+  "packages/physics": "0.8.0"
 }

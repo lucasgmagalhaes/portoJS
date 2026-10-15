@@ -100,7 +100,7 @@ The guides are static Markdown today. Once the packages settle, replace them wit
 
 **To decide at the end**
 
-- Rust and WebAssembly for hot spots. The core stays TypeScript (measured: 50,000 entities cost about 2 ms per frame in JS, and the umbrella package is about 13 KB). Candidates are optional packages only: physics through Rapier, and heavy CPU-bound work such as pathfinding or particle simulation, and only if a benchmark shows JavaScript is not enough.
+- Rust and WebAssembly for hot spots of our own. (`@portojs/physics` already uses Rapier's prebuilt WebAssembly as an optional package; nothing of ours is written in Rust.) The core stays TypeScript (measured: 50,000 entities cost about 2 ms per frame in JS, and the umbrella package is about 13 KB). Candidates are optional packages only: physics through Rapier, and heavy CPU-bound work such as pathfinding or particle simulation, and only if a benchmark shows JavaScript is not enough.
 
 **Platform**
 

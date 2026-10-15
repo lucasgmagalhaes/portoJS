@@ -164,6 +164,19 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/physics:
+    dependencies:
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@dimforge/rapier2d-compat':
+        specifier: ^0.21.0
+        version: 0.21.0
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/portojs:
     dependencies:
       '@portojs/core':
@@ -380,6 +393,9 @@ packages:
   '@conventional-changelog/template@1.4.0':
     resolution: {integrity: sha512-aalGyl7dbB5PArRebDIX43ZvBlXrYm9uWzGJ26t+4SzJVPsOuvfILGGbw5X4yX7i50YEmJ8zvbiWnqH/AAnZqg==}
     engines: {node: '>=22'}
+
+  '@dimforge/rapier2d-compat@0.21.0':
+    resolution: {integrity: sha512-cMStLQZbY5D/ajAPjOwTwoYuAJAungTYB45MNFEa5B+LGaMiZfxLwjHsfpxH5B0sDa+gkmcQFJJKiHNKnlpMnA==}
 
   '@docsearch/css@3.8.2':
     resolution: {integrity: sha512-y05ayQFyUmCXze79+56v/4HpycYF3uFqB78pLPrSV5ZKAlDuIAAJNhaRi8tTdRNXh05yxX/TyNnzD6LwSM89vQ==}
@@ -4180,6 +4196,8 @@ snapshots:
       conventional-commits-parser: 7.1.2
 
   '@conventional-changelog/template@1.4.0': {}
+
+  '@dimforge/rapier2d-compat@0.21.0': {}
 
   '@docsearch/css@3.8.2': {}
 

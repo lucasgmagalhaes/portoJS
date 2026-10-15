@@ -1,0 +1,60 @@
+{
+  "name": "@portojs/physics",
+  "version": "0.8.0",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "author": "Lucas Gomes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasgmagalhaes/portojs.git",
+    "directory": "packages/physics"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasgmagalhaes/portojs/issues"
+  },
+  "homepage": "https://github.com/lucasgmagalhaes/portojs#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "description": "2D physics for PortoJS on Rapier: rigid bodies, colliders and collision events as components.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "vite build && tsc -p tsconfig.build.json && node ../../scripts/build-cjs-types.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:package": "publint && attw --pack .",
+    "api:check": "api-extractor run",
+    "api:update": "api-extractor run --local"
+  },
+  "dependencies": {
+    "@portojs/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@dimforge/rapier2d-compat": "^0.21.0",
+    "@portojs/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@dimforge/rapier2d-compat": ">=0.14"
+  }
+}

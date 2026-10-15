@@ -12,6 +12,7 @@ export default defineConfig({
       '@portojs/ecs': at('./packages/ecs/src/index.ts'),
       '@portojs/render': at('./packages/render/src/index.ts'),
       '@portojs/input': at('./packages/input/src/index.ts'),
+      '@portojs/physics': at('./packages/physics/src/index.ts'),
       '@portojs/audio': at('./packages/audio/src/index.ts'),
       '@portojs/idle': at('./packages/idle/src/index.ts'),
       '@portojs/react': at('./packages/react/src/index.ts'),
