@@ -66,6 +66,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter portojs-clicker-example build
+      - run: pnpm --filter portojs-sprites-example build
 
   # Real browser: the example game with a faked clock (timers, Date.now, background throttling).
   e2e:

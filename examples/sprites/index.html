@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PortoJS sprites</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        background: #101018;
+        color: #cfd3ff;
+        font:
+          14px/1.4 system-ui,
+          sans-serif;
+      }
+      canvas {
+        display: block;
+        width: 100vw;
+        height: 100vh;
+      }
+      #hud {
+        position: fixed;
+        top: 8px;
+        left: 12px;
+        pointer-events: none;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <div id="hud">starting...</div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
