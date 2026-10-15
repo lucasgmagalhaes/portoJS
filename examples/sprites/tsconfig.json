@@ -19,7 +19,8 @@
       "@portojs/runtime": ["../../packages/runtime/src/index.ts"],
       "@portojs/ecs": ["../../packages/ecs/src/index.ts"],
       "@portojs/render": ["../../packages/render/src/index.ts"]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "vite.config.ts"]
 }

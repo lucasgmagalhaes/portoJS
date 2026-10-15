@@ -21,7 +21,8 @@
       "@portojs/react": ["../../packages/react/src/index.ts"],
       "@portojs/vue": ["../../packages/vue/src/index.ts"],
       "portojs": ["../../packages/portojs/src/index.ts"]
-    }
+    },
+    "allowImportingTsExtensions": true
   },
   "include": ["src", "vite.config.ts"]
 }

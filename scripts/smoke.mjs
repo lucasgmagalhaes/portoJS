@@ -70,6 +70,7 @@ for (const [name, lib] of [
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 /**
  * Every .d.ts and .d.cts under `dir`. They must only point at files that exist, with
@@ -85,7 +86,7 @@ function declarationFiles(dir) {
   return found;
 }
 
-const packagesDir = resolve(import.meta.dirname, '../packages');
+const packagesDir = fileURLToPath(new URL('../packages', import.meta.url));
 let checked = 0;
 for (const pkg of readdirSync(packagesDir)) {
   const dist = join(packagesDir, pkg, 'dist');
