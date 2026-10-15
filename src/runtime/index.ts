@@ -1,5 +1,7 @@
 export { Component } from './component.js';
 export type { ComponentConstructor, ComponentType } from './component.js';
+export { Coroutine, WaitForSeconds, WaitUntil, WaitWhile, YieldInstruction } from './coroutine.js';
+export type { CoroutineYield } from './coroutine.js';
 export { Game } from './game.js';
 export type {
   CreateObjectOptions,

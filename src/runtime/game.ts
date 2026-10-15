@@ -17,6 +17,8 @@ import {
 } from '../core/save/index.js';
 import type { JsonObject, Migrations, SaveData } from '../core/save/index.js';
 import type { Component, ComponentType } from './component.js';
+import { Coroutine } from './coroutine.js';
+import type { CoroutineYield } from './coroutine.js';
 import { GameObject } from './game-object.js';
 import { Time } from './time.js';
 
@@ -167,6 +169,10 @@ function insertSorted(list: Component[], component: Component): void {
   list.splice(index, 0, component);
 }
 
+function isRunning(coroutine: Coroutine): boolean {
+  return coroutine.isRunning;
+}
+
 function removeFrom<T>(list: T[], item: T): void {
   const index = list.indexOf(item);
   if (index >= 0) list.splice(index, 1);
@@ -232,6 +238,7 @@ export class Game {
   private readonly componentList: Component[] = [];
   private readonly updatable: Component[] = [];
   private pendingStart: Component[] = [];
+  private coroutines: Coroutine[] = [];
   private structure = 0;
   private readonly typeCache = new Map<
     ComponentType,
@@ -248,6 +255,7 @@ export class Game {
     for (const component of [...this.updatable]) {
       if (component.isActive) component.fixedUpdate?.(dt);
     }
+    this.stepCoroutines(dt);
     this.bus.emit('tick', { dtMs, tick: this.engine.stepCount });
   };
 
@@ -472,6 +480,10 @@ export class Game {
       component.onDisable?.();
     }
     component.isDestroyed = true;
+    for (const coroutine of this.coroutines) {
+      if (coroutine.owner === component) coroutine.stop();
+    }
+    this.coroutines = this.coroutines.filter(isRunning);
     component.onDestroy?.();
     removeFrom(this.componentList, component);
     removeFrom(this.updatable, component);
@@ -563,6 +575,34 @@ export class Game {
   reset(): void {
     const failures = this.applyAll({});
     if (failures.length > 0) throw failures[0];
+  }
+
+  /**
+   * @internal Called by {@link Component.startCoroutine}.
+   */
+  startCoroutine(owner: Component, routine: Iterator<CoroutineYield>): Coroutine {
+    const coroutine = new Coroutine(owner, routine);
+    if (coroutine.isRunning) this.coroutines.push(coroutine);
+    return coroutine;
+  }
+
+  /**
+   * @internal Called by {@link Component.stopAllCoroutines}.
+   */
+  stopCoroutines(owner: Component): void {
+    for (const coroutine of this.coroutines) {
+      if (coroutine.owner === owner) coroutine.stop();
+    }
+    this.coroutines = this.coroutines.filter(isRunning);
+  }
+
+  private stepCoroutines(deltaTime: number): void {
+    if (this.coroutines.length === 0) return;
+    try {
+      for (const coroutine of [...this.coroutines]) coroutine.step(deltaTime);
+    } finally {
+      this.coroutines = this.coroutines.filter(isRunning);
+    }
   }
 
   private startPending(): void {

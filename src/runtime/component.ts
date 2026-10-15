@@ -1,4 +1,5 @@
 import type { JsonValue } from '../core/save/index.js';
+import type { Coroutine, CoroutineYield } from './coroutine.js';
 import type { Game } from './game.js';
 import type { GameObject } from './game-object.js';
 
@@ -146,6 +147,30 @@ export abstract class Component {
    */
   getComponent<C extends Component>(type: ComponentType<C>): C | undefined {
     return this.gameObject.getComponent(type);
+  }
+
+  /**
+   * Starts a coroutine owned by this component, like Unity's `StartCoroutine`. The generator
+   * runs its first segment immediately, then resumes after each `yield` is satisfied.
+   *
+   * @example
+   * *blink() {
+   *   while (true) {
+   *     this.visible = !this.visible;
+   *     yield new WaitForSeconds(0.5);
+   *   }
+   * }
+   * this.startCoroutine(this.blink());
+   */
+  startCoroutine(routine: Iterator<CoroutineYield>): Coroutine {
+    return this.game.startCoroutine(this, routine);
+  }
+
+  /**
+   * Stops every coroutine this component started.
+   */
+  stopAllCoroutines(): void {
+    this.game.stopCoroutines(this);
   }
 
   /**
