@@ -88,6 +88,16 @@ An earlier version used a functional plugin kernel (`createCore`, `definePlugin`
 - Devtools: inspect objects and components, edit values, fast-forward time.
 - Svelte and Solid bindings.
 
+**Documentation site (planned for the end)**
+
+The guides are static Markdown today. Once the packages settle, replace them with a proper documentation site. Decisions still to make:
+
+- **Theme and design:** visual identity, colours, typography, dark and light modes, logo.
+- **Catalogue:** a browsable list of every package, component, system and example, with live demos and the API of each.
+- **Tutorials:** a guided path from "hello game" to a complete idle game and a sprite game, with runnable steps.
+- **Structure:** one section per package, cookbook recipes, migration notes from Unity and Phaser, and the playground.
+- **Tooling:** keep VitePress or move to a custom site; generate the API pages from the packages' API reports.
+
 **Platform**
 
 - Web Worker helper to run the simulation off the main thread.

@@ -161,6 +161,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [ ] More cost curves and a cost-curve visualiser for balancing
 - [ ] Localisable number suffix sets
 - [ ] Off-main-thread simulation (Web Worker helper)
+- [ ] Documentation site with its own theme, a component catalogue and tutorials (planned for the end)
 - [ ] Devtools: inspect objects and components, fast-forward time, edit values
 
 ## License
