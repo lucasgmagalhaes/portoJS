@@ -162,6 +162,19 @@ importers:
         specifier: '>=18'
         version: 19.3.1
 
+  packages/render:
+    dependencies:
+      '@portojs/ecs':
+        specifier: workspace:*
+        version: link:../ecs
+    devDependencies:
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/runtime:
     dependencies:
       '@portojs/core':

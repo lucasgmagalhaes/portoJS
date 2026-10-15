@@ -9,7 +9,8 @@
       "@portojs/react": ["./packages/react/src/index.ts"],
       "@portojs/vue": ["./packages/vue/src/index.ts"],
       "portojs": ["./packages/portojs/src/index.ts"],
-      "@portojs/ecs": ["./packages/ecs/src/index.ts"]
+      "@portojs/ecs": ["./packages/ecs/src/index.ts"],
+      "@portojs/render": ["./packages/render/src/index.ts"]
     }
   },
   "include": [
