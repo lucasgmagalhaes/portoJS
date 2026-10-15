@@ -106,6 +106,4 @@ One-time setup on GitHub:
 - Settings → Actions → General → allow GitHub Actions to create pull requests.
 - Optionally set the PR merge method to "squash" so each PR title becomes one changelog line.
 
-`release-please-config.json` pins the first release with `"release-as": "0.1.0"`, because the breaking rename commit would otherwise propose `1.0.0`. **Remove that line after 0.1.0 is released**, or every later release would be forced to 0.1.0.
-
 When it is time to publish, add a job to `.github/workflows/release.yml` that runs after a release is created (`release_created` output), with an `NPM_TOKEN` secret and `pnpm publish --provenance`. The package already passes `publint` and `attw` (`pnpm check:package`).
