@@ -33,6 +33,10 @@ Every save carries a checksum computed over a key-order-independent form of its 
 
 > The checksum is FNV-1a: it catches accidents and casual edits, **not** determined tampering. Anyone can recompute it. If cheating matters, validate on a server.
 
+## Size limit
+
+Strings longer than `maxSaveChars` (default 10,000,000 characters) are rejected with `SaveCorruptedError` before any decoding, so an oversized paste or upload cannot exhaust memory. Raise or lower it when creating the game: `createGame({ maxSaveChars: 2_000_000, /* ... */ })`.
+
 ## Atomic loading
 
 `load` is all-or-nothing. If any system rejects the data, the previous state is restored and the error is rethrown, so a bad save never leaves you in a half-loaded state.

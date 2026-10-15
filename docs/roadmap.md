@@ -42,7 +42,7 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 | R4  | `BigNum` mantissa is a double: ~15 significant digits, and two doubles within 1 ulp can map to the same BigNum    | accepted, documented; revisit only if a game needs more precision                   |
 | R5  | Chained generators use explicit Euler per tick; offline uses the exact polynomial, so they differ slightly        | accepted, documented in `docs/offline-progress.md`; option: sub-stepping for chains |
 | R6  | `Core.load` does not clear the engine's time accumulator; up to one step of pending time carries across a load    | open, minor                                                                         |
-| R7  | Save import has no size limit: a huge Base64 string is fully decoded and parsed                                   | open: add `maxSaveBytes` to `Core` options                                          |
+| R7  | Save import has no size limit: a huge Base64 string is fully decoded and parsed                                   | **done** (`maxSaveChars`, default 10M characters)                                   |
 | R8  | `createGame` cannot install extra plugins with merged types                                                       | open: accept `plugins` and merge `ApiOf`/`EventsOf` into the return type            |
 | R9  | Achievement `effect` re-runs on load, so non-idempotent effects double-apply                                      | documented; consider a stricter API (effects declared as modifiers)                 |
 | R10 | Offline `appliedMs` reflects the cap and efficiency but not time lost to `catch-up` dropping outside `background` | by design                                                                           |
@@ -57,14 +57,14 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 
 ### Test and quality gaps
 
-| #   | Finding                                                                                                        | Status                                                                |
-| --- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
-| T1  | Uncovered branches remain in `core.ts` (lines 134, 209, 315), `flows.ts` validation, `resources.ts` (120, 358) | open: low-risk guard clauses                                          |
-| T2  | No property test asserting "ticking for T equals offline for T" on random linear configs                       | open: high value, cheap                                               |
-| T3  | No test in a real browser (visibility throttling, `localStorage`, `pagehide`)                                  | open: Playwright against the example                                  |
-| T4  | ESLint is not type-aware (`recommendedTypeChecked`, `no-floating-promises`, `no-unnecessary-condition`)        | open                                                                  |
-| T5  | No mutation testing                                                                                            | open: Stryker on `bignum` and `save` first                            |
-| T6  | No fuzzing of `parseSave`/`importSave` with arbitrary strings                                                  | open: fast-check `fc.string()` → must throw only `SaveCorruptedError` |
+| #   | Finding                                                                                                        | Status                                     |
+| --- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| T1  | Uncovered branches remain in `core.ts` (lines 134, 209, 315), `flows.ts` validation, `resources.ts` (120, 358) | open: low-risk guard clauses               |
+| T2  | No property test asserting "ticking for T equals offline for T" on random linear configs                       | **done**                                   |
+| T3  | No test in a real browser (visibility throttling, `localStorage`, `pagehide`)                                  | open: Playwright against the example       |
+| T4  | ESLint is not type-aware (`recommendedTypeChecked`, `no-floating-promises`, `no-unnecessary-condition`)        | open                                       |
+| T5  | No mutation testing                                                                                            | open: Stryker on `bignum` and `save` first |
+| T6  | No fuzzing of `parseSave`/`importSave` with arbitrary strings                                                  | **done**                                   |
 
 ## 3. Feature roadmap
 
