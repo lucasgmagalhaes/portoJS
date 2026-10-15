@@ -179,7 +179,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] More cost curves and a cost-curve visualiser for balancing
 - [x] Localisable number suffix sets
 - [x] Off-main-thread simulation (Web Worker helper)
-- [ ] Decide on Rust/WebAssembly for hot spots such as physics (planned for the end)
+- [x] Rust/WebAssembly: decided against code of our own; physics already uses Rapier's WebAssembly (see the roadmap)
 - [x] Documentation site with its own theme, a component catalogue and tutorials
 - [x] Devtools: inspect objects and components, fast-forward time, edit values
 
