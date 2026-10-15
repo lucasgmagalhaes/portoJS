@@ -134,6 +134,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [Saves and migrations](docs/saves-and-migrations.md): versioning, export/import, corruption handling
 - [Prestige](docs/prestige.md): resets, formulas, layers and permanent bonuses
 - [UI bindings](docs/bindings.md): `useGame` for React and Vue
+- [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
 - [Coming from Unity or Phaser](docs/from-unity.md): how the concepts map
 - [Engineering audit and roadmap](docs/roadmap.md): measured state, open findings and the release process
 - [Example game](examples/clicker): a small clicker running in the browser (Vite). Run it with `cd examples/clicker && pnpm install && pnpm dev`

@@ -25,6 +25,7 @@ export default defineConfig({
           { text: 'Saves and migrations', link: '/saves-and-migrations' },
           { text: 'Prestige', link: '/prestige' },
           { text: 'Components and the game model', link: '/components' },
+          { text: 'ECS and rendering', link: '/ecs-and-render' },
           { text: 'UI bindings', link: '/bindings' },
           { text: 'Coming from Unity or Phaser', link: '/from-unity' },
         ],
