@@ -180,3 +180,82 @@ describe('custom cost', () => {
     expect(cost.max(n(0), n('1e12')).toNumber()).toBe(100_000);
   });
 });
+
+describe('polynomial cost', () => {
+  const cost = compileCost({ type: 'polynomial', base: 10, power: 2 });
+
+  it('prices units as base × (owned + 1)^power', () => {
+    expect(cost.unit(n(0)).toNumber()).toBe(10);
+    expect(cost.unit(n(2)).toNumber()).toBeCloseTo(90, 9);
+  });
+
+  it('sums exactly for small batches and closely for large ones', () => {
+    expect(close(cost.total(n(0), n(10)), brute(cost.unit, 0, 10))).toBe(true);
+    expect(close(cost.total(n(0), n(5000)), brute(cost.unit, 0, 5000), 1e-6)).toBe(true);
+    expect(close(cost.total(n(300), n(100)), brute(cost.unit, 300, 100), 1e-6)).toBe(true);
+    expect(cost.total(n(1), n(0)).isZero()).toBe(true);
+  });
+
+  it('finds the max affordable amount', () => {
+    expect(cost.max(n(0), n(9)).toNumber()).toBe(0);
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 500 }),
+        fc.integer({ min: 10, max: 10_000_000 }),
+        (owned, budget) => {
+          const count = cost.max(n(owned), n(budget));
+          expect(cost.total(n(owned), count).lte(budget)).toBe(true);
+          expect(cost.total(n(owned), count.add(1)).gt(budget)).toBe(true);
+        },
+      ),
+    );
+  });
+
+  it('rejects bad parameters', () => {
+    expect(() => compileCost({ type: 'polynomial', base: 0, power: 2 })).toThrow(RangeError);
+    expect(() => compileCost({ type: 'polynomial', base: 1, power: -1 })).toThrow(RangeError);
+  });
+});
+
+describe('stepped cost', () => {
+  const cost = compileCost({ type: 'stepped', base: 10, growth: 2, every: 5 });
+
+  it('stays flat inside a block and jumps at its edge', () => {
+    expect([0, 4, 5, 9, 10].map((owned) => cost.unit(n(owned)).toNumber())).toEqual([
+      10, 10, 20, 20, 40,
+    ]);
+  });
+
+  it('sums across block boundaries', () => {
+    expect(close(cost.total(n(3), n(10)), brute(cost.unit, 3, 10))).toBe(true);
+    expect(close(cost.total(n(0), n(23)), brute(cost.unit, 0, 23))).toBe(true);
+    expect(cost.total(n(0), n(0)).isZero()).toBe(true);
+  });
+
+  it('finds the max affordable amount', () => {
+    expect(cost.max(n(0), n(9)).toNumber()).toBe(0);
+    fc.assert(
+      fc.property(
+        fc.integer({ min: 0, max: 60 }),
+        fc.integer({ min: 10, max: 5_000_000 }),
+        (owned, budget) => {
+          const count = cost.max(n(owned), n(budget));
+          expect(cost.total(n(owned), count).lte(budget)).toBe(true);
+          expect(cost.total(n(owned), count.add(1)).gt(budget)).toBe(true);
+        },
+      ),
+    );
+  });
+
+  it('rejects bad parameters', () => {
+    expect(() => compileCost({ type: 'stepped', base: 0, growth: 2, every: 5 })).toThrow(
+      RangeError,
+    );
+    expect(() => compileCost({ type: 'stepped', base: 1, growth: 0.5, every: 5 })).toThrow(
+      RangeError,
+    );
+    expect(() => compileCost({ type: 'stepped', base: 1, growth: 2, every: 0 })).toThrow(
+      RangeError,
+    );
+  });
+});

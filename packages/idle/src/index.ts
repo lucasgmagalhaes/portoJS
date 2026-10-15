@@ -16,7 +16,15 @@ export { Upgrade } from './upgrade.ts';
 export type { UpgradeOptions, UpgradePurchase } from './upgrade.ts';
 export type { BulkAmount, EffectTarget, ResetKeep, TargetedMultiplier } from './shared.ts';
 export { compileCost } from './cost.ts';
-export type { CostCurve, CostFunctions, CustomCost, ExponentialCost, LinearCost } from './cost.ts';
+export type {
+  CostCurve,
+  CostFunctions,
+  CustomCost,
+  ExponentialCost,
+  LinearCost,
+  PolynomialCost,
+  SteppedCost,
+} from './cost.ts';
 export { solveFlows } from './flows.ts';
 export type { FlowResult, FlowSource } from './flows.ts';
 export { Achievement } from './achievement.ts';
@@ -38,3 +46,5 @@ export type {
 } from './prestige.ts';
 export { Unlock } from './unlock.ts';
 export type { UnlockOptions } from './unlock.ts';
+export { costChartSvg, costTable } from './cost-chart.ts';
+export type { ChartSeries, CostChartOptions, CostRow, CostTableOptions } from './cost-chart.ts';

@@ -140,16 +140,50 @@ export interface ChallengeOptions {
 }
 
 // @public
+export interface ChartSeries {
+    readonly curve: CostCurve;
+    readonly label: string;
+}
+
+// @public
 export function compileCost(curve: CostCurve): CostFunctions;
 
 // @public
-export type CostCurve = ExponentialCost | LinearCost | CustomCost;
+export interface CostChartOptions {
+    readonly count?: number;
+    readonly from?: number;
+    readonly height?: number;
+    readonly metric?: 'unit' | 'cumulative';
+    readonly width?: number;
+}
+
+// @public
+export function costChartSvg(series: readonly ChartSeries[], options?: CostChartOptions): string;
+
+// @public
+export type CostCurve = ExponentialCost | LinearCost | PolynomialCost | SteppedCost | CustomCost;
 
 // @public
 export interface CostFunctions {
     max(owned: BigNum, budget: BigNum): BigNum;
     total(owned: BigNum, count: BigNum): BigNum;
     unit(owned: BigNum): BigNum;
+}
+
+// @public
+export interface CostRow {
+    readonly cumulative: BigNum;
+    readonly owned: number;
+    readonly unit: BigNum;
+}
+
+// @public
+export function costTable(curve: CostCurve, options: CostTableOptions): CostRow[];
+
+// @public
+export interface CostTableOptions {
+    readonly count: number;
+    readonly from?: number;
 }
 
 // @public
@@ -324,6 +358,14 @@ export interface OfflineGains {
 }
 
 // @public
+export interface PolynomialCost {
+    readonly base: BigNumLike;
+    readonly power: number;
+    // (undocumented)
+    readonly type: 'polynomial';
+}
+
+// @public
 export class Prestige extends Component {
     constructor(gameObject: GameObject, options: PrestigeOptions);
     // (undocumented)
@@ -441,6 +483,15 @@ export interface RootFormula {
 
 // @public
 export function solveFlows(sources: readonly FlowSource[], resourceCount: number, seconds: number, maxChain?: number): FlowResult | undefined;
+
+// @public
+export interface SteppedCost {
+    readonly base: BigNumLike;
+    readonly every: number;
+    readonly growth: BigNumLike;
+    // (undocumented)
+    readonly type: 'stepped';
+}
 
 // @public
 export type TargetedMultiplier = EffectTarget & {

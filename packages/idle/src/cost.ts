@@ -52,9 +52,46 @@ export interface CustomCost {
 }
 
 /**
+ * Cost grows as a power of the count: the n-th unit (from 0) costs `base � (n + 1)^power`.
+ * `power` 1 grows steadily, 2 quadratically, and so on. Batches under 33 units are summed
+ * exactly; larger ones use an integral estimate with a relative error far below 0.1%.
+ */
+export interface PolynomialCost {
+  readonly type: 'polynomial';
+  /**
+   * Price of the first unit. Must be > 0.
+   */
+  readonly base: BigNumLike;
+  /**
+   * Exponent of the count. Must be >= 0.
+   */
+  readonly power: number;
+}
+
+/**
+ * Cost steps up in blocks: the price is `base � growth^k` for the k-th block of `every` units,
+ * so it stays flat inside a block and jumps at its edge.
+ */
+export interface SteppedCost {
+  readonly type: 'stepped';
+  /**
+   * Price of the first block. Must be > 0.
+   */
+  readonly base: BigNumLike;
+  /**
+   * Multiplier applied per completed block. Must be >= 1.
+   */
+  readonly growth: BigNumLike;
+  /**
+   * Units per block. A positive integer.
+   */
+  readonly every: number;
+}
+
+/**
  * How the price of a purchasable scales with how many are owned.
  */
-export type CostCurve = ExponentialCost | LinearCost | CustomCost;
+export type CostCurve = ExponentialCost | LinearCost | PolynomialCost | SteppedCost | CustomCost;
 
 /**
  * Evaluators compiled from a {@link CostCurve}. All counts are BigNum.
@@ -158,6 +195,87 @@ function compileLinear(curve: LinearCost): CostFunctions {
   return { unit, total, max };
 }
 
+function compilePolynomial(curve: PolynomialCost): CostFunctions {
+  const base = BigNum.from(curve.base);
+  const power = curve.power;
+  if (!base.gt(0)) throw new RangeError('cost: base must be > 0');
+  if (!(power >= 0) || !Number.isFinite(power)) throw new RangeError('cost: power must be >= 0');
+
+  const unit = (owned: BigNum): BigNum => base.mul(owned.add(1).pow(power));
+  const total = (owned: BigNum, count: BigNum): BigNum => {
+    if (count.lte(0)) return BigNum.ZERO;
+    if (count.lte(SMALL_BATCH)) {
+      let sum: BigNum = BigNum.ZERO;
+      for (let i = 0, n = count.toNumber(); i < n; i++) sum = sum.add(unit(owned.add(i)));
+      return sum;
+    }
+    const low = owned.add(0.5);
+    const high = owned.add(count).add(0.5);
+    return base.mul(high.pow(power + 1).sub(low.pow(power + 1))).div(power + 1);
+  };
+  const max = (owned: BigNum, budget: BigNum): BigNum => {
+    const first = unit(owned);
+    if (budget.lt(first)) return BigNum.ZERO;
+    const low = owned.add(0.5).pow(power + 1);
+    const high = budget
+      .mul(power + 1)
+      .div(base)
+      .add(low);
+    const estimate = high
+      .pow(1 / (power + 1))
+      .sub(owned)
+      .sub(0.5);
+    return refine(estimate, owned, total, budget);
+  };
+  return { unit, total, max };
+}
+
+function compileStepped(curve: SteppedCost): CostFunctions {
+  const base = BigNum.from(curve.base);
+  const growth = BigNum.from(curve.growth);
+  const every = curve.every;
+  if (!base.gt(0)) throw new RangeError('cost: base must be > 0');
+  if (growth.lt(1)) throw new RangeError('cost: growth must be >= 1');
+  if (!Number.isInteger(every) || every < 1) {
+    throw new RangeError('cost: every must be a positive integer');
+  }
+  const size = BigNum.from(every);
+
+  const unit = (owned: BigNum): BigNum => base.mul(growth.pow(owned.div(size).floor()));
+  const total = (owned: BigNum, count: BigNum): BigNum => {
+    if (count.lte(0)) return BigNum.ZERO;
+    let sum: BigNum = BigNum.ZERO;
+    let position = owned;
+    let left = count;
+    while (left.gt(0)) {
+      const block = position.div(size).floor();
+      const room = block.add(1).mul(size).sub(position);
+      const take = BigNum.min(room, left);
+      sum = sum.add(base.mul(growth.pow(block)).mul(take));
+      position = position.add(take);
+      left = left.sub(take);
+    }
+    return sum;
+  };
+  const max = (owned: BigNum, budget: BigNum): BigNum => {
+    let remaining = budget;
+    let position = owned;
+    let bought: BigNum = BigNum.ZERO;
+    for (let i = 0; i < MAX_ITERATION_LIMIT; i++) {
+      const block = position.div(size).floor();
+      const price = base.mul(growth.pow(block));
+      const room = block.add(1).mul(size).sub(position);
+      const fits = remaining.div(price).floor();
+      if (fits.lt(room)) return bought.add(fits);
+      bought = bought.add(room);
+      remaining = remaining.sub(price.mul(room));
+      position = position.add(room);
+    }
+    return bought;
+  };
+  return { unit, total, max };
+}
+
 function compileCustom(curve: CustomCost): CostFunctions {
   const unit = (owned: BigNum): BigNum => BigNum.from(curve.cost(owned));
   const total = (owned: BigNum, count: BigNum): BigNum => {
@@ -203,6 +321,10 @@ export function compileCost(curve: CostCurve): CostFunctions {
   switch (curve.type) {
     case 'linear':
       return compileLinear(curve);
+    case 'polynomial':
+      return compilePolynomial(curve);
+    case 'stepped':
+      return compileStepped(curve);
     case 'custom':
       return compileCustom(curve);
     default:

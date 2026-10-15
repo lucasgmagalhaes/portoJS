@@ -94,7 +94,7 @@
       "name": "portojs (everything)",
       "path": "packages/portojs/dist/index.js",
       "import": "*",
-      "limit": "15 KB"
+      "limit": "16 KB"
     },
     {
       "name": "portojs/react",
