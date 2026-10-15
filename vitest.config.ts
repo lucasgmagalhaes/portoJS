@@ -20,6 +20,7 @@ export default defineConfig({
     include: ['packages/*/test/**/*.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',
+      reporter: ['text', 'html', 'lcov'],
       include: ['packages/*/src/**'],
       exclude: [
         'packages/render/src/webgl2.ts',

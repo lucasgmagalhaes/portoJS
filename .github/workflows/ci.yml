@@ -25,6 +25,12 @@ jobs:
       - run: pnpm format:check
       - run: pnpm typecheck
       - run: pnpm coverage
+      - uses: codecov/codecov-action@v5
+        if: matrix.node == 24
+        with:
+          files: coverage/lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: false
       - run: pnpm build
       - run: pnpm check:package
       - run: pnpm size

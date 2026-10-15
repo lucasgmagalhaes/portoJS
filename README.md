@@ -1,5 +1,7 @@
 # PortoJS
 
+[![CI](https://github.com/lucasgmagalhaes/portoJS/actions/workflows/ci.yml/badge.svg)](https://github.com/lucasgmagalhaes/portoJS/actions/workflows/ci.yml) [![codecov](https://codecov.io/gh/lucasgmagalhaes/portoJS/graph/badge.svg)](https://codecov.io/gh/lucasgmagalhaes/portoJS)
+
 A headless TypeScript game engine with a **Unity-style model**: a `Game` runs a stable fixed-timestep loop, you build it from **game objects** and **components**, and everything is saved, versioned and fast-forwarded for you. Idle and incremental mechanics (big numbers, generators, offline progress, prestige) are components you add only if you want them.
 
 It runs in browsers, Node and Electron, and has zero runtime dependencies.

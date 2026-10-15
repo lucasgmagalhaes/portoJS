@@ -1,0 +1,16 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: 80%
+ignore:
+  - 'packages/render/src/webgl2.ts'
+  - 'packages/render/src/webgpu.ts'
+  - 'packages/render/src/create-renderer.ts'
+  - 'examples/**'
+  - 'e2e/**'
+  - 'bench/**'
