@@ -1,5 +1,29 @@
 # Changelog
 
+## [0.5.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.4.0...v0.5.0) (2026-10-15)
+
+
+### ⚠ BREAKING CHANGES
+
+* replace the plugin API with a Unity-style Game, GameObject and Component model
+
+### Features
+
+* **examples:** port the clicker to the component API ([e7b1413](https://github.com/lucasgmagalhaes/portoJS/commit/e7b14135646bc8658c43048285ff38a1049792a9))
+* **idle:** add Prestige, Achievement, Unlock, AutoBuyer, Challenge, Boost and DataStore components ([32460d1](https://github.com/lucasgmagalhaes/portoJS/commit/32460d195a5a7cb6ddf047eb93f30a329262ffc8))
+* **idle:** add Resource, Generator, Upgrade and Economy components ([b7bbf31](https://github.com/lucasgmagalhaes/portoJS/commit/b7bbf3178e7c28b919caff82be616ee3f58f411c))
+* **runtime:** add Game, GameObject and Component with a Unity-style lifecycle ([84a7808](https://github.com/lucasgmagalhaes/portoJS/commit/84a78082173b31ef1a9353aa72277fedb469c5ae))
+
+
+### Refactoring
+
+* replace the plugin API with a Unity-style Game, GameObject and Component model ([bd6d8cc](https://github.com/lucasgmagalhaes/portoJS/commit/bd6d8ccf83ec1ce56c85022e8364c80560d8ffe1))
+
+
+### Documentation
+
+* rewrite the guides, README and playground for the Game, GameObject and Component model ([eb56edc](https://github.com/lucasgmagalhaes/portoJS/commit/eb56edc9255a8564106f076f4980e50e995b3b18))
+
 ## [0.4.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.3.0...v0.4.0) (2026-10-15)
 
 
