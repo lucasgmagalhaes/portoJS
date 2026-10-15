@@ -1,7 +1,9 @@
 import { BigNum } from './BigNum.js';
 import type { BigNumLike } from './BigNum.js';
 
-/** Built-in notations. */
+/**
+ * Built-in notations.
+ */
 export type Notation = 'scientific' | 'engineering' | 'suffix';
 
 /**
@@ -10,19 +12,31 @@ export type Notation = 'scientific' | 'engineering' | 'suffix';
  */
 export type Formatter = (value: BigNum, precision: number) => string;
 
-/** Options accepted by {@link format}. */
+/**
+ * Options accepted by {@link format}.
+ */
 export interface FormatOptions {
-  /** Built-in notation name or a custom {@link Formatter}. Default `'scientific'`. */
+  /**
+   * Built-in notation name or a custom {@link Formatter}. Default `'scientific'`.
+   */
   readonly notation?: Notation | Formatter;
-  /** Maximum decimals shown (trailing zeros are trimmed). Integer 0-15, default `2`. */
+  /**
+   * Maximum decimals shown (trailing zeros are trimmed). Integer 0-15, default `2`.
+   */
   readonly precision?: number;
-  /** Values with exponent below this are printed as plain numbers. Default `3` (below 1000). */
+  /**
+   * Values with exponent below this are printed as plain numbers. Default `3` (below 1000).
+   */
   readonly plainBelow?: number;
-  /** Suffix list for the `'suffix'` notation, starting at 10^3. Defaults to {@link DEFAULT_SUFFIXES}. */
+  /**
+   * Suffix list for the `'suffix'` notation, starting at 10^3. Defaults to {@link DEFAULT_SUFFIXES}.
+   */
   readonly suffixes?: readonly string[];
 }
 
-/** Short-scale suffixes from 10^3 (`K`) up to 10^63 (`Vg`). */
+/**
+ * Short-scale suffixes from 10^3 (`K`) up to 10^63 (`Vg`).
+ */
 export const DEFAULT_SUFFIXES: readonly string[] = [
   'K',
   'M',
@@ -47,7 +61,9 @@ export const DEFAULT_SUFFIXES: readonly string[] = [
   'Vg',
 ];
 
-/** Smallest exponent that still prints as a plain decimal (`0.001`). */
+/**
+ * Smallest exponent that still prints as a plain decimal (`0.001`).
+ */
 const MIN_PLAIN_EXPONENT = -3;
 
 function trim(text: string): string {

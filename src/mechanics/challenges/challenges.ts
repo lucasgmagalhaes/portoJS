@@ -5,60 +5,100 @@ import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { EffectTarget, ResetKeep, ResourcesApi } from '../resources/types.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const CHALLENGES_PLUGIN = 'challenges';
 
-/** A multiplier applied to a target. */
+/**
+ * A multiplier applied to a target.
+ */
 export type ChallengeModifier<R extends string, G extends string> = EffectTarget<R, G> & {
   readonly multiplier: BigNumLike;
 };
 
-/** Declares one challenge. */
+/**
+ * Declares one challenge.
+ */
 export interface ChallengeDef<R extends string, G extends string> {
-  /** Returns `true` when the player has beaten the challenge. Checked while it is active. */
+  /**
+   * Returns `true` when the player has beaten the challenge. Checked while it is active.
+   */
   readonly goal: (game: ResourcesApi<R, G, string>) => boolean;
-  /** Handicaps applied only while the challenge is active (for example `0.1` to cut output). */
+  /**
+   * Handicaps applied only while the challenge is active (for example `0.1` to cut output).
+   */
   readonly modifiers?: readonly ChallengeModifier<R, G>[];
-  /** Bonuses applied permanently once the challenge has been completed. */
+  /**
+   * Bonuses applied permanently once the challenge has been completed.
+   */
   readonly reward?: readonly ChallengeModifier<R, G>[];
-  /** What survives the reset when the challenge starts or is abandoned. Default: nothing. */
+  /**
+   * What survives the reset when the challenge starts or is abandoned. Default: nothing.
+   */
   readonly keep?: ResetKeep<R, G, string>;
 }
 
-/** Configuration of the {@link challenges} plugin. */
+/**
+ * Configuration of the {@link challenges} plugin.
+ */
 export interface ChallengesConfig<R extends string, G extends string, C extends string> {
-  /** Challenges by id. */
+  /**
+   * Challenges by id.
+   */
   readonly definitions: { readonly [id in C]: ChallengeDef<R, G> };
-  /** How often the active challenge's goal is polled, in ms of game time. Default `500`. */
+  /**
+   * How often the active challenge's goal is polled, in ms of game time. Default `500`.
+   */
   readonly checkIntervalMs?: number;
 }
 
-/** Events emitted by the {@link challenges} plugin. */
+/**
+ * Events emitted by the {@link challenges} plugin.
+ */
 export interface ChallengesEvents<C extends string> {
-  /** A challenge started (the run was reset). */
+  /**
+   * A challenge started (the run was reset).
+   */
   challengeStarted: { readonly id: C };
-  /** The active challenge was beaten. */
+  /**
+   * The active challenge was beaten.
+   */
   challengeCompleted: { readonly id: C; readonly firstTime: boolean };
-  /** The active challenge was abandoned. */
+  /**
+   * The active challenge was abandoned.
+   */
   challengeExited: { readonly id: C };
 }
 
-/** Methods the {@link challenges} plugin adds to the game. */
+/**
+ * Methods the {@link challenges} plugin adds to the game.
+ */
 export interface ChallengesApi<C extends string> {
-  /** Ids of all challenges. */
+  /**
+   * Ids of all challenges.
+   */
   readonly challengeIds: readonly C[];
   /**
    * Starts a challenge: resets the run (keeping what the definition lists) and applies its
    * handicaps. Returns `false` if a challenge is already active.
    */
   startChallenge(id: C): boolean;
-  /** Abandons the active challenge and resets the run. Returns `false` if none is active. */
+  /**
+   * Abandons the active challenge and resets the run. Returns `false` if none is active.
+   */
   exitChallenge(): boolean;
-  /** The active challenge, if any. */
+  /**
+   * The active challenge, if any.
+   */
   activeChallenge(): C | undefined;
-  /** Whether a challenge has been beaten at least once. */
+  /**
+   * Whether a challenge has been beaten at least once.
+   */
   isChallengeCompleted(id: C): boolean;
-  /** Ids of beaten challenges, in completion order. */
+  /**
+   * Ids of beaten challenges, in completion order.
+   */
   completedChallenges(): C[];
 }
 

@@ -10,23 +10,35 @@ import type { PrestigeBonus, PrestigeFormula } from '../prestige/prestige.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { ResetKeep, ResourcesApi } from '../resources/types.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const PRESTIGE_LAYERS_PLUGIN = 'prestigeLayers';
 
-/** Declares one prestige layer. */
+/**
+ * Declares one prestige layer.
+ */
 export interface PrestigeLayerDef<R extends string, G extends string, U extends string> {
   /**
    * What the reward is computed from: the total earned of a resource in the current run, or
    * `{ layer }` for the points a lower layer has produced since a higher layer last reset it.
    */
   readonly basedOn: R | { readonly layer: string };
-  /** Reward formula, see {@link PrestigeFormula}. */
+  /**
+   * Reward formula, see {@link PrestigeFormula}.
+   */
   readonly gain: PrestigeFormula;
-  /** Smallest reward that allows ascending. Default `1`. */
+  /**
+   * Smallest reward that allows ascending. Default `1`.
+   */
   readonly minimum?: BigNumLike;
-  /** What survives the run reset. Default: nothing. */
+  /**
+   * What survives the run reset. Default: nothing.
+   */
   readonly keep?: ResetKeep<R, G, U>;
-  /** Permanent bonuses derived from this layer's points. */
+  /**
+   * Permanent bonuses derived from this layer's points.
+   */
   readonly bonuses?: readonly PrestigeBonus<R, G>[];
   /**
    * Whether ascending this layer also clears the points of every lower layer. Default `true`,
@@ -35,20 +47,28 @@ export interface PrestigeLayerDef<R extends string, G extends string, U extends 
   readonly resetsLower?: boolean;
 }
 
-/** Configuration of the {@link prestigeLayers} plugin. */
+/**
+ * Configuration of the {@link prestigeLayers} plugin.
+ */
 export interface PrestigeLayersConfig<
   R extends string,
   G extends string,
   U extends string,
   L extends string,
 > {
-  /** Layers by id, **lowest first**. A layer may only be based on a layer listed before it. */
+  /**
+   * Layers by id, **lowest first**. A layer may only be based on a layer listed before it.
+   */
   readonly layers: { readonly [id in L]: PrestigeLayerDef<R, G, U> };
 }
 
-/** Events emitted by the {@link prestigeLayers} plugin. */
+/**
+ * Events emitted by the {@link prestigeLayers} plugin.
+ */
 export interface PrestigeLayersEvents<L extends string> {
-  /** A layer was ascended. */
+  /**
+   * A layer was ascended.
+   */
   ascended: {
     readonly layer: L;
     readonly gained: BigNum;
@@ -57,19 +77,33 @@ export interface PrestigeLayersEvents<L extends string> {
   };
 }
 
-/** Methods the {@link prestigeLayers} plugin adds to the game. */
+/**
+ * Methods the {@link prestigeLayers} plugin adds to the game.
+ */
 export interface PrestigeLayersApi<L extends string> {
-  /** Ids of all layers, lowest first. */
+  /**
+   * Ids of all layers, lowest first.
+   */
   readonly layerIds: readonly L[];
-  /** Points a layer currently holds. */
+  /**
+   * Points a layer currently holds.
+   */
   layerPoints(layer: L): BigNum;
-  /** Points a layer has gained over all time (spending and resets do not reduce it). */
+  /**
+   * Points a layer has gained over all time (spending and resets do not reduce it).
+   */
   layerLifetime(layer: L): BigNum;
-  /** Times a layer has been ascended. */
+  /**
+   * Times a layer has been ascended.
+   */
   layerCount(layer: L): number;
-  /** Points ascending a layer would grant now (`0` below the minimum). */
+  /**
+   * Points ascending a layer would grant now (`0` below the minimum).
+   */
   pendingLayer(layer: L): BigNum;
-  /** Whether ascending a layer now would grant at least the minimum. */
+  /**
+   * Whether ascending a layer now would grant at least the minimum.
+   */
   canAscend(layer: L): boolean;
   /**
    * Ascends a layer: resets the run, grants points, clears lower layers' points (unless the
@@ -78,7 +112,9 @@ export interface PrestigeLayersApi<L extends string> {
    * @returns points gained, or `undefined` (nothing happens) if the layer cannot ascend yet.
    */
   ascend(layer: L): BigNum | undefined;
-  /** Spends a layer's points. Returns `false` and changes nothing if short. */
+  /**
+   * Spends a layer's points. Returns `false` and changes nothing if short.
+   */
   spendLayerPoints(layer: L, amount: BigNumLike): boolean;
 }
 
@@ -86,7 +122,9 @@ interface LayerState {
   points: BigNum;
   lifetime: BigNum;
   count: number;
-  /** Points gained since a higher layer last reset this one; the basis for the layer above. */
+  /**
+   * Points gained since a higher layer last reset this one; the basis for the layer above.
+   */
   runGained: BigNum;
 }
 

@@ -13,6 +13,8 @@ const noPlainComments = {
     type: 'suggestion',
     schema: [],
     messages: {
+      singleLine:
+        'JSDoc blocks must span several lines: put the text between the /** and */ lines.',
       plain:
         'Plain comments are not allowed. Express intent with names and types, or use a JSDoc block.',
     },
@@ -22,7 +24,12 @@ const noPlainComments = {
       Program() {
         for (const comment of context.sourceCode.getAllComments()) {
           if (comment.type === 'Shebang') continue;
-          if (comment.type === 'Block' && comment.value.startsWith('*')) continue;
+          if (comment.type === 'Block' && comment.value.startsWith('*')) {
+            if (comment.loc.start.line === comment.loc.end.line) {
+              context.report({ loc: comment.loc, messageId: 'singleLine' });
+            }
+            continue;
+          }
           if (ALLOWED_DIRECTIVES.test(comment.value)) continue;
           context.report({ loc: comment.loc, messageId: 'plain' });
         }

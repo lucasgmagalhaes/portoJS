@@ -1,13 +1,19 @@
 import { SaveCorruptedError } from './errors.js';
 
-/** Any value representable in JSON. */
+/**
+ * Any value representable in JSON.
+ */
 export type JsonValue =
   null | boolean | number | string | JsonValue[] | { [key: string]: JsonValue };
 
-/** A JSON object. */
+/**
+ * A JSON object.
+ */
 export type JsonObject = { [key: string]: JsonValue };
 
-/** `true` for non-null, non-array objects. */
+/**
+ * `true` for non-null, non-array objects.
+ */
 export function isJsonObject(value: unknown): value is JsonObject {
   return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
@@ -30,7 +36,9 @@ export function stableStringify(value: JsonValue): string {
   return `${out}}`;
 }
 
-/** 32-bit FNV-1a hash of `text` as 8 hex digits. Detects accidents, not tampering. */
+/**
+ * 32-bit FNV-1a hash of `text` as 8 hex digits. Detects accidents, not tampering.
+ */
 export function fnv1a(text: string): string {
   let hash = 0x811c9dc5;
   for (let i = 0; i < text.length; i++) {
@@ -42,7 +50,9 @@ export function fnv1a(text: string): string {
 
 const CHUNK = 0x8000;
 
-/** Encodes text as UTF-8 then Base64. */
+/**
+ * Encodes text as UTF-8 then Base64.
+ */
 export function toBase64(text: string): string {
   const bytes = new TextEncoder().encode(text);
   let binary = '';

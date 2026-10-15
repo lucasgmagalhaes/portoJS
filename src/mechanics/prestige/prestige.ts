@@ -6,7 +6,9 @@ import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { EffectTarget, ResetKeep, ResourcesApi } from '../resources/types.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const PRESTIGE_PLUGIN = 'prestige';
 
 /**
@@ -14,11 +16,17 @@ export const PRESTIGE_PLUGIN = 'prestige';
  * With the defaults it is the classic square-root curve.
  */
 export interface RootFormula {
-  /** Run total at which prestige starts to pay out. */
+  /**
+   * Run total at which prestige starts to pay out.
+   */
   readonly threshold: BigNumLike;
-  /** Curve steepness, `0 < exponent`. Default `0.5`. */
+  /**
+   * Curve steepness, `0 < exponent`. Default `0.5`.
+   */
   readonly exponent?: number;
-  /** Multiplies the result. Default `1`. */
+  /**
+   * Multiplies the result. Default `1`.
+   */
   readonly scale?: BigNumLike;
 }
 
@@ -28,59 +36,101 @@ export interface RootFormula {
  */
 export type PrestigeFormula = RootFormula | ((runEarned: BigNum) => BigNumLike);
 
-/** A permanent bonus that grows with prestige points. */
+/**
+ * A permanent bonus that grows with prestige points.
+ */
 export type PrestigeBonus<R extends string, G extends string> = {
-  /** What gets multiplied. */
+  /**
+   * What gets multiplied.
+   */
   readonly target: EffectTarget<R, G>;
 } & (
   | {
-      /** Multiplier is `1 + perPoint × points`. */
+      /**
+       * Multiplier is `1 + perPoint × points`.
+       */
       readonly perPoint: BigNumLike;
     }
   | {
-      /** Multiplier computed from the point balance and the lifetime total. */
+      /**
+       * Multiplier computed from the point balance and the lifetime total.
+       */
       readonly multiplier: (points: BigNum, lifetime: BigNum) => BigNumLike;
     }
 );
 
-/** Configuration of the {@link prestige} plugin. */
+/**
+ * Configuration of the {@link prestige} plugin.
+ */
 export interface PrestigeConfig<R extends string, G extends string, U extends string> {
-  /** Resource whose total earned in the run determines the reward. */
+  /**
+   * Resource whose total earned in the run determines the reward.
+   */
   readonly basedOn: R;
-  /** Reward formula. */
+  /**
+   * Reward formula.
+   */
   readonly gain: PrestigeFormula;
-  /** Smallest reward that allows prestiging. Default `1`. */
+  /**
+   * Smallest reward that allows prestiging. Default `1`.
+   */
   readonly minimum?: BigNumLike;
-  /** What survives a prestige reset. Default: nothing. */
+  /**
+   * What survives a prestige reset. Default: nothing.
+   */
   readonly keep?: ResetKeep<R, G, U>;
-  /** Permanent bonuses derived from prestige points. */
+  /**
+   * Permanent bonuses derived from prestige points.
+   */
   readonly bonuses?: readonly PrestigeBonus<R, G>[];
 }
 
-/** Events emitted by the {@link prestige} plugin. */
+/**
+ * Events emitted by the {@link prestige} plugin.
+ */
 export interface PrestigeEvents {
-  /** A prestige reset happened. */
+  /**
+   * A prestige reset happened.
+   */
   prestige: {
-    /** Points gained by this reset. */
+    /**
+     * Points gained by this reset.
+     */
     readonly gained: BigNum;
-    /** Point balance afterwards. */
+    /**
+     * Point balance afterwards.
+     */
     readonly points: BigNum;
-    /** Prestiges done so far, including this one. */
+    /**
+     * Prestiges done so far, including this one.
+     */
     readonly count: number;
   };
 }
 
-/** Methods the {@link prestige} plugin adds to the game. */
+/**
+ * Methods the {@link prestige} plugin adds to the game.
+ */
 export interface PrestigeApi {
-  /** Prestige points currently held. */
+  /**
+   * Prestige points currently held.
+   */
   prestigePoints(): BigNum;
-  /** Prestige points gained over all time (spending does not reduce it). */
+  /**
+   * Prestige points gained over all time (spending does not reduce it).
+   */
   prestigeLifetime(): BigNum;
-  /** Number of prestiges performed. */
+  /**
+   * Number of prestiges performed.
+   */
   prestigeCount(): number;
-  /** Points a prestige would grant right now (`0` if below the minimum). */
+  /**
+   * Points a prestige would grant right now (`0` if below the minimum).
+   */
   pendingPrestige(): BigNum;
-  /** Whether prestiging now would grant at least the minimum. */
+  /**
+   * Whether prestiging now would grant at least the minimum.
+   */
   canPrestige(): boolean;
   /**
    * Resets the run, grants the pending points and keeps what the config says.
@@ -88,7 +138,9 @@ export interface PrestigeApi {
    * @returns points gained, or `undefined` (and nothing happens) if {@link PrestigeApi.canPrestige} is false.
    */
   prestige(): BigNum | undefined;
-  /** Spends points (for a prestige shop). Returns `false` and changes nothing if short. */
+  /**
+   * Spends points (for a prestige shop). Returns `false` and changes nothing if short.
+   */
   spendPrestige(amount: BigNumLike): boolean;
 }
 

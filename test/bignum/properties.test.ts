@@ -2,12 +2,16 @@ import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { BigNum } from '../../src/core/bignum/index.js';
 
-/** Non-zero doubles with magnitude in [1e-50, 1e50], either sign. */
+/**
+ * Non-zero doubles with magnitude in [1e-50, 1e50], either sign.
+ */
 const num = fc
   .tuple(fc.double({ min: 1e-50, max: 1e50, noNaN: true }), fc.boolean())
   .map(([x, negative]) => (negative ? -x : x));
 
-/** Arbitrary BigNum well beyond double range. */
+/**
+ * Arbitrary BigNum well beyond double range.
+ */
 const huge = fc
   .tuple(
     fc.double({ min: 1, max: 9.999999, noNaN: true }),

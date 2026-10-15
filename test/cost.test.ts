@@ -5,7 +5,9 @@ import { compileCost } from '../src/mechanics/resources/cost.js';
 
 const n = (v: number | string): BigNum => BigNum.from(v);
 
-/** Reference: add up unit prices one by one. */
+/**
+ * Reference: add up unit prices one by one.
+ */
 function brute(unit: (owned: BigNum) => BigNum, owned: number, count: number): BigNum {
   let sum: BigNum = BigNum.ZERO;
   for (let i = 0; i < count; i++) sum = sum.add(unit(n(owned + i)));

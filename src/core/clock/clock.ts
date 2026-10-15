@@ -4,11 +4,15 @@
  * to make time fully deterministic.
  */
 export interface Clock {
-  /** Current time in milliseconds. */
+  /**
+   * Current time in milliseconds.
+   */
   now(): number;
 }
 
-/** Clock backed by `Date.now()`. Wall-clock time, so it survives page reloads. */
+/**
+ * Clock backed by `Date.now()`. Wall-clock time, so it survives page reloads.
+ */
 export const systemClock: Clock = { now: () => Date.now() };
 
 /**
@@ -22,33 +26,47 @@ export const systemClock: Clock = { now: () => Date.now() };
 export class ManualClock implements Clock {
   private time: number;
 
-  /** @param start initial time in ms (default `0`). */
+  /**
+   * @param start initial time in ms (default `0`).
+   */
   constructor(start = 0) {
     this.time = start;
   }
 
-  /** Current manual time. */
+  /**
+   * Current manual time.
+   */
   now(): number {
     return this.time;
   }
 
-  /** Moves time forward (or backward when negative) by `ms`. */
+  /**
+   * Moves time forward (or backward when negative) by `ms`.
+   */
   advance(ms: number): void {
     this.time += ms;
   }
 
-  /** Sets time to an absolute value. */
+  /**
+   * Sets time to an absolute value.
+   */
   set(ms: number): void {
     this.time = ms;
   }
 }
 
-/** Classification of a time sample taken by {@link TimeGuard}. */
+/**
+ * Classification of a time sample taken by {@link TimeGuard}.
+ */
 export type TimeStatus = 'ok' | 'backward' | 'jump';
 
-/** Result of {@link TimeGuard.sample}. */
+/**
+ * Result of {@link TimeGuard.sample}.
+ */
 export interface TimeSample {
-  /** Milliseconds since the previous sample; never negative. */
+  /**
+   * Milliseconds since the previous sample; never negative.
+   */
   readonly delta: number;
   /**
    * `'ok'` normal progress, `'backward'` the clock went back (delta is `0`),
@@ -57,9 +75,13 @@ export interface TimeSample {
   readonly status: TimeStatus;
 }
 
-/** Options for {@link TimeGuard}. */
+/**
+ * Options for {@link TimeGuard}.
+ */
 export interface TimeGuardOptions {
-  /** A forward gap larger than this is reported as `'jump'`. Default `Infinity` (never). */
+  /**
+   * A forward gap larger than this is reported as `'jump'`. Default `Infinity` (never).
+   */
   readonly maxJumpMs?: number;
 }
 
@@ -74,7 +96,9 @@ export class TimeGuard {
   private last: number;
   private readonly maxJumpMs: number;
 
-  /** @param clock time source to read from. */
+  /**
+   * @param clock time source to read from.
+   */
   constructor(
     private readonly clock: Clock,
     options: TimeGuardOptions = {},
@@ -83,7 +107,9 @@ export class TimeGuard {
     this.last = clock.now();
   }
 
-  /** Reads the clock and returns the sanitized time elapsed since the last sample. */
+  /**
+   * Reads the clock and returns the sanitized time elapsed since the last sample.
+   */
   sample(): TimeSample {
     const now = this.clock.now();
     const raw = now - this.last;
@@ -93,7 +119,9 @@ export class TimeGuard {
     return { delta: raw, status: 'ok' };
   }
 
-  /** Forgets history so the next sample measures from "now". */
+  /**
+   * Forgets history so the next sample measures from "now".
+   */
   reset(): void {
     this.last = this.clock.now();
   }

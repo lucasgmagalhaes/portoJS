@@ -25,12 +25,18 @@ import {
 } from './save/index.js';
 import type { JsonObject, Migrations, SaveData } from './save/index.js';
 
-/** Default for {@link CoreOptions.maxSaveChars}. */
+/**
+ * Default for {@link CoreOptions.maxSaveChars}.
+ */
 const DEFAULT_MAX_SAVE_CHARS = 10_000_000;
 
-/** Offline behaviour of a game. */
+/**
+ * Offline behaviour of a game.
+ */
 export interface CoreOfflineOptions extends OfflineOptions {
-  /** Credit away-time automatically in {@link Core.load}. Default `true`. */
+  /**
+   * Credit away-time automatically in {@link Core.load}. Default `true`.
+   */
   readonly onLoad?: boolean;
   /**
    * Credit time the loop had to drop (for example a throttled background tab) as
@@ -39,36 +45,60 @@ export interface CoreOfflineOptions extends OfflineOptions {
   readonly background?: boolean;
 }
 
-/** Options for {@link createCore}. */
+/**
+ * Options for {@link createCore}.
+ */
 export interface CoreOptions<P extends readonly AnyPlugin[] = readonly AnyPlugin[]> {
-  /** Features to install, set up in array order. */
+  /**
+   * Features to install, set up in array order.
+   */
   readonly plugins?: P;
-  /** Time source. Default {@link systemClock}. Inject a `ManualClock` for tests. */
+  /**
+   * Time source. Default {@link systemClock}. Inject a `ManualClock` for tests.
+   */
   readonly clock?: Clock;
-  /** Loop driver. Default `setInterval`. */
+  /**
+   * Loop driver. Default `setInterval`.
+   */
   readonly scheduler?: Scheduler;
-  /** Fixed timestep in ms. Default `100`. */
+  /**
+   * Fixed timestep in ms. Default `100`.
+   */
   readonly stepMs?: number;
-  /** Maximum steps simulated per update before time is dropped. Default `100`. */
+  /**
+   * Maximum steps simulated per update before time is dropped. Default `100`.
+   */
   readonly maxCatchUpTicks?: number;
-  /** How often the scheduler wakes the loop, in ms. Default `stepMs`. */
+  /**
+   * How often the scheduler wakes the loop, in ms. Default `stepMs`.
+   */
   readonly pollMs?: number;
-  /** Current save schema version. Default `1`. Bump it when your save layout changes. */
+  /**
+   * Current save schema version. Default `1`. Bump it when your save layout changes.
+   */
   readonly version?: number;
-  /** Migrations from older save versions, see {@link Migrations}. */
+  /**
+   * Migrations from older save versions, see {@link Migrations}.
+   */
   readonly migrations?: Migrations;
   /**
    * Longest save string accepted by {@link Core.load} / {@link Core.importSave}, in
    * characters. Larger input is rejected before it is decoded or parsed. Default 10,000,000.
    */
   readonly maxSaveChars?: number;
-  /** Offline cap, efficiency and triggers. */
+  /**
+   * Offline cap, efficiency and triggers.
+   */
   readonly offline?: CoreOfflineOptions;
 }
 
-/** Options for {@link Core.load}. */
+/**
+ * Options for {@link Core.load}.
+ */
 export interface LoadOptions {
-  /** Override automatic offline crediting for this load. */
+  /**
+   * Override automatic offline crediting for this load.
+   */
   readonly offline?: boolean;
 }
 
@@ -80,9 +110,13 @@ export interface LoadOptions {
  * Create one with {@link createCore}, which also merges plugin APIs onto the instance.
  */
 export class Core<Ev extends object = object> {
-  /** The game clock. */
+  /**
+   * The game clock.
+   */
   readonly clock: Clock;
-  /** Current save schema version. */
+  /**
+   * Current save schema version.
+   */
   readonly version: number;
 
   private readonly engine: Engine;
@@ -91,10 +125,14 @@ export class Core<Ev extends object = object> {
   private readonly offlineOptions: CoreOfflineOptions;
   private readonly migrations: Migrations;
   private readonly maxSaveChars: number;
-  /** @internal Public APIs returned by plugins, keyed by plugin name. */
+  /**
+   * @internal Public APIs returned by plugins, keyed by plugin name.
+   */
   readonly pluginApis = new Map<string, object>();
 
-  /** @throws {RangeError} on invalid timing or offline options. */
+  /**
+   * @throws {RangeError} on invalid timing or offline options.
+   */
   constructor(options: CoreOptions = {}) {
     this.clock = options.clock ?? systemClock;
     this.version = options.version ?? 1;
@@ -135,34 +173,46 @@ export class Core<Ev extends object = object> {
     }
   }
 
-  /** `true` while the loop is running. */
+  /**
+   * `true` while the loop is running.
+   */
   get running(): boolean {
     return this.engine.running;
   }
 
-  /** Fixed steps executed so far. */
+  /**
+   * Fixed steps executed so far.
+   */
   get tickCount(): number {
     return this.engine.stepCount;
   }
 
-  /** Fixed step length in ms. */
+  /**
+   * Fixed step length in ms.
+   */
   get stepMs(): number {
     return this.engine.stepMs;
   }
 
-  /** Current clock time in ms. */
+  /**
+   * Current clock time in ms.
+   */
   now(): number {
     return this.clock.now();
   }
 
-  /** Starts the loop. No-op when already running. */
+  /**
+   * Starts the loop. No-op when already running.
+   */
   start(): void {
     if (this.engine.running) return;
     this.engine.start();
     this.bus.emit('start', { at: this.clock.now() });
   }
 
-  /** Stops the loop. No-op when not running. */
+  /**
+   * Stops the loop. No-op when not running.
+   */
   stop(): void {
     if (!this.engine.running) return;
     this.engine.stop();
@@ -207,7 +257,9 @@ export class Core<Ev extends object = object> {
     this.bus.clear();
   }
 
-  /** Subscribes to an event. Returns a function that unsubscribes. */
+  /**
+   * Subscribes to an event. Returns a function that unsubscribes.
+   */
   on<K extends keyof (CoreEvents & Ev)>(
     event: K,
     listener: Listener<(CoreEvents & Ev)[K]>,
@@ -215,7 +267,9 @@ export class Core<Ev extends object = object> {
     return this.bus.on(event, listener as Listener<unknown>);
   }
 
-  /** Subscribes to a single emission of an event. */
+  /**
+   * Subscribes to a single emission of an event.
+   */
   once<K extends keyof (CoreEvents & Ev)>(
     event: K,
     listener: Listener<(CoreEvents & Ev)[K]>,
@@ -223,14 +277,18 @@ export class Core<Ev extends object = object> {
     return this.bus.once(event, listener as Listener<unknown>);
   }
 
-  /** Captures the whole game state. */
+  /**
+   * Captures the whole game state.
+   */
   save(): SaveData {
     const save = createSave(this.version, this.clock.now(), this.collect());
     this.bus.emit('saved', { save });
     return save;
   }
 
-  /** Captures the state as a Base64 string, ready to copy or store. */
+  /**
+   * Captures the state as a Base64 string, ready to copy or store.
+   */
   exportSave(): string {
     return exportSave(this.save());
   }
@@ -264,12 +322,16 @@ export class Core<Ev extends object = object> {
     return report;
   }
 
-  /** Alias of {@link Core.load} for strings from {@link Core.exportSave}. */
+  /**
+   * Alias of {@link Core.load} for strings from {@link Core.exportSave}.
+   */
   importSave(encoded: string, options: LoadOptions = {}): OfflineReport | undefined {
     return this.load(encoded, options);
   }
 
-  /** Returns every system to its default state (as if loading an empty save). */
+  /**
+   * Returns every system to its default state (as if loading an empty save).
+   */
   reset(): void {
     this.apply({});
   }
@@ -282,7 +344,9 @@ export class Core<Ev extends object = object> {
     return data;
   }
 
-  /** Applies `data` to every system, collecting failures instead of stopping at the first. */
+  /**
+   * Applies `data` to every system, collecting failures instead of stopping at the first.
+   */
   private applyAll(data: JsonObject): unknown[] {
     const failures: unknown[] = [];
     for (const system of this.systems) {

@@ -1,7 +1,11 @@
-/** Function returned by {@link Emitter.on} that removes the listener. */
+/**
+ * Function returned by {@link Emitter.on} that removes the listener.
+ */
 export type Unsubscribe = () => void;
 
-/** Listener for an event with payload `T`. */
+/**
+ * Listener for an event with payload `T`.
+ */
 export type Listener<T> = (payload: T) => void;
 
 /**
@@ -20,7 +24,9 @@ export type Listener<T> = (payload: T) => void;
 export class Emitter<E extends object> {
   private readonly listeners = new Map<keyof E, Set<Listener<never>>>();
 
-  /** Subscribes to `event`. Returns a function that unsubscribes. */
+  /**
+   * Subscribes to `event`. Returns a function that unsubscribes.
+   */
   on<K extends keyof E>(event: K, listener: Listener<E[K]>): Unsubscribe {
     let set = this.listeners.get(event);
     if (set === undefined) {
@@ -34,7 +40,9 @@ export class Emitter<E extends object> {
     };
   }
 
-  /** Subscribes to `event` for a single emission. */
+  /**
+   * Subscribes to `event` for a single emission.
+   */
   once<K extends keyof E>(event: K, listener: Listener<E[K]>): Unsubscribe {
     const handler: Listener<E[K]> = (payload) => {
       off();
@@ -44,7 +52,9 @@ export class Emitter<E extends object> {
     return off;
   }
 
-  /** Synchronously notifies every listener of `event`. */
+  /**
+   * Synchronously notifies every listener of `event`.
+   */
   emit<K extends keyof E>(event: K, payload: E[K]): void {
     const set = this.listeners.get(event);
     if (set === undefined || set.size === 0) return;
@@ -62,12 +72,16 @@ export class Emitter<E extends object> {
     }
   }
 
-  /** Number of listeners currently subscribed to `event`. */
+  /**
+   * Number of listeners currently subscribed to `event`.
+   */
   listenerCount<K extends keyof E>(event: K): number {
     return this.listeners.get(event)?.size ?? 0;
   }
 
-  /** Removes all listeners of `event`, or of every event when omitted. */
+  /**
+   * Removes all listeners of `event`, or of every event when omitted.
+   */
   clear<K extends keyof E>(event?: K): void {
     if (event === undefined) this.listeners.clear();
     else this.listeners.delete(event);

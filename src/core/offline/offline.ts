@@ -1,11 +1,19 @@
-/** Default cap on credited offline time: 24 hours. */
+/**
+ * Default cap on credited offline time: 24 hours.
+ */
 export const DEFAULT_MAX_OFFLINE_MS = 24 * 60 * 60 * 1000;
 
-/** Settings that decide how much away-time is credited. */
+/**
+ * Settings that decide how much away-time is credited.
+ */
 export interface OfflineOptions {
-  /** Longest away-time credited, in ms. Default 24 hours. Use `Infinity` for no cap. */
+  /**
+   * Longest away-time credited, in ms. Default 24 hours. Use `Infinity` for no cap.
+   */
   readonly maxMs?: number;
-  /** Fraction of the away-time credited, `0..1`. Default `1`. `0.5` means "50% efficiency". */
+  /**
+   * Fraction of the away-time credited, `0..1`. Default `1`. `0.5` means "50% efficiency".
+   */
   readonly efficiency?: number;
 }
 
@@ -18,13 +26,21 @@ export interface OfflineOptions {
  */
 export type OfflineStatus = 'none' | 'applied' | 'capped' | 'backward';
 
-/** Result of resolving an away-time span. */
+/**
+ * Result of resolving an away-time span.
+ */
 export interface OfflineReport {
-  /** Real time that passed, never negative (`0` when the clock went backwards). */
+  /**
+   * Real time that passed, never negative (`0` when the clock went backwards).
+   */
   readonly elapsedMs: number;
-  /** Time actually credited after the cap and efficiency are applied. */
+  /**
+   * Time actually credited after the cap and efficiency are applied.
+   */
   readonly appliedMs: number;
-  /** How the span was treated. */
+  /**
+   * How the span was treated.
+   */
   readonly status: OfflineStatus;
 }
 
@@ -76,11 +92,17 @@ export function resolveOffline(
   return resolveElapsed(to - from, options);
 }
 
-/** Options for {@link forEachOfflineStep}. */
+/**
+ * Options for {@link forEachOfflineStep}.
+ */
 export interface StepPlanOptions {
-  /** Smallest step used, in ms. Default `1000`. */
+  /**
+   * Smallest step used, in ms. Default `1000`.
+   */
   readonly minStepMs?: number;
-  /** Upper bound on the number of steps. Default `1000`. */
+  /**
+   * Upper bound on the number of steps. Default `1000`.
+   */
   readonly maxSteps?: number;
 }
 

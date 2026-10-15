@@ -3,7 +3,9 @@ import { ManualClock } from '../src/core/clock/index.js';
 import { Engine, createIntervalScheduler } from '../src/core/engine/index.js';
 import type { Scheduler } from '../src/core/engine/index.js';
 
-/** Scheduler that never fires by itself; the test pumps it. */
+/**
+ * Scheduler that never fires by itself; the test pumps it.
+ */
 function fakeScheduler(): { scheduler: Scheduler; fire: () => void; active: () => boolean } {
   let callback: (() => void) | undefined;
   return {

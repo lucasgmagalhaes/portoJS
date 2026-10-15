@@ -9,16 +9,22 @@ import type { JsonValue, SaveData } from './save/index.js';
  * (resources, prestige, achievements...) is implemented as systems inside plugins.
  */
 export interface System {
-  /** Unique key. Also the key of this system's slice inside a save. */
+  /**
+   * Unique key. Also the key of this system's slice inside a save.
+   */
   readonly id: string;
-  /** Advances the system by one fixed step of `dtMs` milliseconds. */
+  /**
+   * Advances the system by one fixed step of `dtMs` milliseconds.
+   */
   tick?(dtMs: number): void;
   /**
    * Credits `elapsedMs` of away-time. The span is already capped and scaled by the
    * offline efficiency. Implement it with a closed form when possible.
    */
   offline?(elapsedMs: number): void;
-  /** Returns this system's state as JSON. Omit for systems with no persistent state. */
+  /**
+   * Returns this system's state as JSON. Omit for systems with no persistent state.
+   */
   serialize?(): JsonValue;
   /**
    * Restores state from {@link System.serialize} output. Receives `undefined` when the
@@ -28,24 +34,42 @@ export interface System {
   deserialize?(data: JsonValue | undefined): void;
 }
 
-/** Where a credited away-time span came from. */
+/**
+ * Where a credited away-time span came from.
+ */
 export type OfflineSource = 'load' | 'background' | 'manual';
 
-/** Events emitted by the core itself. Plugins add their own. */
+/**
+ * Events emitted by the core itself. Plugins add their own.
+ */
 export interface CoreEvents {
-  /** One fixed step finished. */
+  /**
+   * One fixed step finished.
+   */
   tick: { dtMs: number; tick: number };
-  /** The loop started. */
+  /**
+   * The loop started.
+   */
   start: { at: number };
-  /** The loop stopped. */
+  /**
+   * The loop stopped.
+   */
   stop: { at: number };
-  /** A save was created. */
+  /**
+   * A save was created.
+   */
   saved: { save: SaveData };
-  /** A save was loaded (after migrations). */
+  /**
+   * A save was loaded (after migrations).
+   */
   loaded: { save: SaveData };
-  /** Away-time was handled (also reported when it credited nothing, except for zero time). */
+  /**
+   * Away-time was handled (also reported when it credited nothing, except for zero time).
+   */
   offline: OfflineReport & { source: OfflineSource };
-  /** The loop fell too far behind and dropped time. */
+  /**
+   * The loop fell too far behind and dropped time.
+   */
   overflow: { droppedMs: number };
 }
 
@@ -56,13 +80,21 @@ export interface CoreEvents {
  * @typeParam Deps events from other plugins this plugin listens to.
  */
 export interface Kernel<Ev extends object = object, Deps extends object = object> {
-  /** The game clock. */
+  /**
+   * The game clock.
+   */
   readonly clock: Clock;
-  /** Fixed step length in ms. */
+  /**
+   * Fixed step length in ms.
+   */
   readonly stepMs: number;
-  /** Current clock time in ms. */
+  /**
+   * Current clock time in ms.
+   */
   now(): number;
-  /** Adds a system. Systems tick in registration order. */
+  /**
+   * Adds a system. Systems tick in registration order.
+   */
   registerSystem(system: System): void;
   /**
    * Returns the API of an already installed plugin. Plugins are set up in array order, so
@@ -71,9 +103,13 @@ export interface Kernel<Ev extends object = object, Deps extends object = object
    * @throws {Error} if no plugin with that name is installed yet.
    */
   require<A extends object>(plugin: string): A;
-  /** Emits one of this plugin's events. */
+  /**
+   * Emits one of this plugin's events.
+   */
   emit<K extends keyof Ev>(event: K, payload: Ev[K]): void;
-  /** Listens to a core event, one of this plugin's events, or a declared dependency's. */
+  /**
+   * Listens to a core event, one of this plugin's events, or a declared dependency's.
+   */
   on<K extends keyof (CoreEvents & Ev & Deps)>(
     event: K,
     listener: Listener<(CoreEvents & Ev & Deps)[K]>,
@@ -85,15 +121,23 @@ export interface Kernel<Ev extends object = object, Deps extends object = object
  * merged onto the game object.
  */
 export interface Plugin<Api extends object = object, Ev extends object = object> {
-  /** Unique name. Used by {@link Kernel.require}. */
+  /**
+   * Unique name. Used by {@link Kernel.require}.
+   */
   readonly name: string;
-  /** Registers systems and returns the API to expose on the game. */
+  /**
+   * Registers systems and returns the API to expose on the game.
+   */
   setup(kernel: Kernel<Ev>): Api;
-  /** Type-only marker that carries the event map. Never set at runtime. */
+  /**
+   * Type-only marker that carries the event map. Never set at runtime.
+   */
   readonly $events?: Ev;
 }
 
-/** Any plugin. */
+/**
+ * Any plugin.
+ */
 export type AnyPlugin = Plugin<object, object>;
 
 /**
@@ -127,13 +171,17 @@ type UnionToIntersection<U> = (U extends unknown ? (x: U) => void : never) exten
   ? I
   : never;
 
-/** Merged public API of a plugin list. */
+/**
+ * Merged public API of a plugin list.
+ */
 export type ApiOf<P extends readonly AnyPlugin[]> = UnionToIntersection<
   P[number] extends infer U ? (U extends Plugin<infer A, object> ? A : never) : never
 > &
   object;
 
-/** Merged event map of a plugin list. */
+/**
+ * Merged event map of a plugin list.
+ */
 export type EventsOf<P extends readonly AnyPlugin[]> = UnionToIntersection<
   P[number] extends infer U ? (U extends Plugin<object, infer E> ? E : never) : never
 > &

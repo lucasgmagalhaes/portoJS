@@ -17,7 +17,9 @@ import type {
   ResourcesOfflineOptions,
 } from './mechanics/resources/index.js';
 
-/** What achievement conditions can read: the resources API plus prestige when configured. */
+/**
+ * What achievement conditions can read: the resources API plus prestige when configured.
+ */
 export type GameView<R extends string, G extends string, U extends string, PR> = ResourcesApi<
   R,
   G,
@@ -25,7 +27,9 @@ export type GameView<R extends string, G extends string, U extends string, PR> =
 > &
   (PR extends undefined ? unknown : PrestigeApi);
 
-/** Options for {@link createGame}. */
+/**
+ * Options for {@link createGame}.
+ */
 export type GameConfig<
   R extends string,
   G extends string,
@@ -35,24 +39,34 @@ export type GameConfig<
   X extends readonly AnyPlugin[] = readonly [],
 > = Omit<ResourcesConfig<R, G, U>, 'offline'> &
   Omit<CoreOptions, 'plugins' | 'offline'> & {
-    /** Offline cap and efficiency, plus tuning for production that has no closed form. */
+    /**
+     * Offline cap and efficiency, plus tuning for production that has no closed form.
+     */
     readonly offline?: CoreOfflineOptions & ResourcesOfflineOptions;
-    /** Optional prestige layer. */
+    /**
+     * Optional prestige layer.
+     */
     readonly prestige?: PR;
     /**
      * Extra plugins, installed after the built-in ones so they can `kernel.require` them.
      * Their APIs and events are merged into the returned game with full types.
      */
     readonly plugins?: X;
-    /** Optional achievements; each condition receives the game API. */
+    /**
+     * Optional achievements; each condition receives the game API.
+     */
     readonly achievements?: { readonly [K in A]: AchievementDef<GameView<R, G, U, PR>> };
-    /** How often achievement conditions are checked, in ms of game time. Default `1000`. */
+    /**
+     * How often achievement conditions are checked, in ms of game time. Default `1000`.
+     */
     readonly achievementCheckIntervalMs?: number;
   };
 
 type Optional<Condition, T> = Condition extends true ? T : unknown;
 
-/** The object returned by {@link createGame}: the core plus every configured feature. */
+/**
+ * The object returned by {@link createGame}: the core plus every configured feature.
+ */
 export type Game<
   R extends string,
   G extends string,

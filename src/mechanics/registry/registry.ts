@@ -3,28 +3,48 @@ import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject, JsonValue } from '../../core/save/index.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const REGISTRY_PLUGIN = 'registry';
 
-/** Events emitted by the {@link registry} plugin. */
+/**
+ * Events emitted by the {@link registry} plugin.
+ */
 export interface RegistryEvents {
-  /** A key was set or changed. */
+  /**
+   * A key was set or changed.
+   */
   dataChanged: { readonly key: string; readonly value: JsonValue };
-  /** A key was removed. */
+  /**
+   * A key was removed.
+   */
   dataRemoved: { readonly key: string };
 }
 
-/** Methods the {@link registry} plugin adds to the game. */
+/**
+ * Methods the {@link registry} plugin adds to the game.
+ */
 export interface RegistryApi {
-  /** Reads a value, or `undefined` when the key is not set. */
+  /**
+   * Reads a value, or `undefined` when the key is not set.
+   */
   getData(key: string): JsonValue | undefined;
-  /** Stores a JSON value under `key` and emits `dataChanged`. Unchanged values emit nothing. */
+  /**
+   * Stores a JSON value under `key` and emits `dataChanged`. Unchanged values emit nothing.
+   */
   setData(key: string, value: JsonValue): void;
-  /** Whether a key is set. */
+  /**
+   * Whether a key is set.
+   */
   hasData(key: string): boolean;
-  /** Removes a key. Returns whether it existed. */
+  /**
+   * Removes a key. Returns whether it existed.
+   */
   removeData(key: string): boolean;
-  /** All keys currently set, in insertion order. */
+  /**
+   * All keys currently set, in insertion order.
+   */
   dataKeys(): string[];
 }
 

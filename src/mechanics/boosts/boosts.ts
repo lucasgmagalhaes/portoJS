@@ -6,19 +6,29 @@ import type { JsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { EffectTarget, ModifierContext, ResourcesApi } from '../resources/types.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const BOOSTS_PLUGIN = 'boosts';
 
-/** A multiplier applied while a boost is active. */
+/**
+ * A multiplier applied while a boost is active.
+ */
 export type BoostEffect<R extends string, G extends string> = EffectTarget<R, G> & {
   readonly multiplier: BigNumLike;
 };
 
-/** Declares one boost. */
+/**
+ * Declares one boost.
+ */
 export interface BoostDef<R extends string, G extends string> {
-  /** Multipliers applied while the boost is active. */
+  /**
+   * Multipliers applied while the boost is active.
+   */
   readonly effects: readonly BoostEffect<R, G>[];
-  /** How long it lasts, in ms of game time. */
+  /**
+   * How long it lasts, in ms of game time.
+   */
   readonly durationMs: number;
   /**
    * What activating an already active boost does: `'refresh'` restarts the full duration
@@ -27,33 +37,57 @@ export interface BoostDef<R extends string, G extends string> {
   readonly onReactivate?: 'refresh' | 'extend' | 'ignore';
 }
 
-/** Configuration of the {@link boosts} plugin. */
+/**
+ * Configuration of the {@link boosts} plugin.
+ */
 export interface BoostsConfig<R extends string, G extends string, B extends string> {
-  /** Boosts by id. */
+  /**
+   * Boosts by id.
+   */
   readonly definitions: { readonly [id in B]: BoostDef<R, G> };
 }
 
-/** Events emitted by the {@link boosts} plugin. */
+/**
+ * Events emitted by the {@link boosts} plugin.
+ */
 export interface BoostsEvents<B extends string> {
-  /** A boost was activated (or refreshed / extended). */
+  /**
+   * A boost was activated (or refreshed / extended).
+   */
   boostStarted: { readonly id: B; readonly remainingMs: number };
-  /** A boost ran out. */
+  /**
+   * A boost ran out.
+   */
   boostEnded: { readonly id: B };
 }
 
-/** Methods the {@link boosts} plugin adds to the game. */
+/**
+ * Methods the {@link boosts} plugin adds to the game.
+ */
 export interface BoostsApi<B extends string> {
-  /** Ids of all boosts. */
+  /**
+   * Ids of all boosts.
+   */
   readonly boostIds: readonly B[];
-  /** Activates a boost. Returns `false` if it was already active and set to `'ignore'`. */
+  /**
+   * Activates a boost. Returns `false` if it was already active and set to `'ignore'`.
+   */
   activateBoost(id: B): boolean;
-  /** Ends a boost early. Returns whether it was active. */
+  /**
+   * Ends a boost early. Returns whether it was active.
+   */
   cancelBoost(id: B): boolean;
-  /** Whether a boost is running. */
+  /**
+   * Whether a boost is running.
+   */
   isBoostActive(id: B): boolean;
-  /** Time left in ms (`0` when not active). */
+  /**
+   * Time left in ms (`0` when not active).
+   */
   boostRemainingMs(id: B): number;
-  /** Ids of running boosts. */
+  /**
+   * Ids of running boosts.
+   */
   activeBoosts(): B[];
 }
 

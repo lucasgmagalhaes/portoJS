@@ -23,7 +23,9 @@ import type {
   UpgradeEffect,
 } from './types.js';
 
-/** Plugin name, for `kernel.require('resources')`. */
+/**
+ * Plugin name, for `kernel.require('resources')`.
+ */
 export const RESOURCES_PLUGIN = 'resources';
 
 /**
@@ -49,7 +51,9 @@ interface GenState {
   readonly initialBought: BigNum;
   bought: BigNum;
   free: BigNum;
-  /** Last serialized form, reused while `bought` and `free` are the same objects (immutable). */
+  /**
+   * Last serialized form, reused while `bought` and `free` are the same objects (immutable).
+   */
   snapshot:
     { readonly bought: BigNum; readonly free: BigNum; readonly json: JsonObject } | undefined;
 }
@@ -238,7 +242,9 @@ export function resources<R extends string, G extends string = never, U extends 
       }
     };
 
-    /** `rate × multipliers × dt` per generator, valid while nothing that feeds it changes. */
+    /**
+     * `rate × multipliers × dt` per generator, valid while nothing that feeds it changes.
+     */
     let effDt: BigNum[] = [];
     let effDtFor = Number.NaN;
     let dtCache: { readonly seconds: number; readonly value: BigNum } | undefined;
@@ -289,7 +295,9 @@ export function resources<R extends string, G extends string = never, U extends 
     const pendingRes: BigNum[] = filled(res.length, BigNum.ZERO);
     const pendingGen: BigNum[] = filled(gens.length, BigNum.ZERO);
 
-    /** Computes what every generator emits over `dt` seconds, into the scratch arrays. */
+    /**
+     * Computes what every generator emits over `dt` seconds, into the scratch arrays.
+     */
     const produce = (dt: BigNum, cacheKey?: number): void => {
       pendingRes.fill(BigNum.ZERO);
       if (hasChains) pendingGen.fill(BigNum.ZERO);

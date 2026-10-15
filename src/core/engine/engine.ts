@@ -6,7 +6,9 @@ import type { Clock } from '../clock/index.js';
  * how the loop is pumped.
  */
 export interface Scheduler {
-  /** Starts calling `callback` every `intervalMs`. Returns a function that stops it. */
+  /**
+   * Starts calling `callback` every `intervalMs`. Returns a function that stops it.
+   */
   start(callback: () => void, intervalMs: number): () => void;
 }
 
@@ -23,7 +25,9 @@ function isUnrefable(handle: unknown): handle is Unrefable {
   );
 }
 
-/** Options for {@link createIntervalScheduler}. */
+/**
+ * Options for {@link createIntervalScheduler}.
+ */
 export interface IntervalSchedulerOptions {
   /**
    * In Node, `unref` the timer so a running game does not keep the process alive on its
@@ -32,7 +36,9 @@ export interface IntervalSchedulerOptions {
   readonly unref?: boolean;
 }
 
-/** Creates a `setInterval` based {@link Scheduler}. */
+/**
+ * Creates a `setInterval` based {@link Scheduler}.
+ */
 export function createIntervalScheduler(options: IntervalSchedulerOptions = {}): Scheduler {
   return {
     start(callback, intervalMs) {
@@ -44,24 +50,42 @@ export function createIntervalScheduler(options: IntervalSchedulerOptions = {}):
   };
 }
 
-/** Default scheduler, backed by `setInterval`. */
+/**
+ * Default scheduler, backed by `setInterval`.
+ */
 export const intervalScheduler: Scheduler = createIntervalScheduler();
 
-/** Options for {@link Engine}. */
+/**
+ * Options for {@link Engine}.
+ */
 export interface EngineOptions {
-  /** Called once per fixed step with the step length in ms. */
+  /**
+   * Called once per fixed step with the step length in ms.
+   */
   readonly onStep: (dtMs: number) => void;
-  /** Called when more time piled up than `maxCatchUpTicks` allows; receives the dropped ms. */
+  /**
+   * Called when more time piled up than `maxCatchUpTicks` allows; receives the dropped ms.
+   */
   readonly onOverflow?: (droppedMs: number) => void;
-  /** Fixed timestep in ms. Default `100`. */
+  /**
+   * Fixed timestep in ms. Default `100`.
+   */
   readonly stepMs?: number;
-  /** Maximum steps simulated per {@link Engine.update}. Default `100`. */
+  /**
+   * Maximum steps simulated per {@link Engine.update}. Default `100`.
+   */
   readonly maxCatchUpTicks?: number;
-  /** How often the scheduler wakes the loop. Default is `stepMs`. */
+  /**
+   * How often the scheduler wakes the loop. Default is `stepMs`.
+   */
   readonly pollMs?: number;
-  /** Time source. Default {@link systemClock}. */
+  /**
+   * Time source. Default {@link systemClock}.
+   */
   readonly clock?: Clock;
-  /** Loop driver. Default {@link intervalScheduler}. */
+  /**
+   * Loop driver. Default {@link intervalScheduler}.
+   */
   readonly scheduler?: Scheduler;
 }
 
@@ -78,9 +102,13 @@ export interface EngineOptions {
  * `clock.advance(n)` then {@link Engine.update}, or use {@link Engine.advance}.
  */
 export class Engine {
-  /** Fixed step length in ms. */
+  /**
+   * Fixed step length in ms.
+   */
   readonly stepMs: number;
-  /** Cap on steps per update. */
+  /**
+   * Cap on steps per update.
+   */
   readonly maxCatchUpTicks: number;
 
   private readonly guard: TimeGuard;
@@ -97,7 +125,9 @@ export class Engine {
     this.update();
   };
 
-  /** @throws {RangeError} if `stepMs`, `maxCatchUpTicks` or `pollMs` is not a positive finite number. */
+  /**
+   * @throws {RangeError} if `stepMs`, `maxCatchUpTicks` or `pollMs` is not a positive finite number.
+   */
   constructor(options: EngineOptions) {
     this.stepMs = options.stepMs ?? 100;
     this.maxCatchUpTicks = options.maxCatchUpTicks ?? 100;
@@ -117,29 +147,39 @@ export class Engine {
     this.guard = new TimeGuard(options.clock ?? systemClock);
   }
 
-  /** `true` between {@link Engine.start} and {@link Engine.stop}. */
+  /**
+   * `true` between {@link Engine.start} and {@link Engine.stop}.
+   */
   get running(): boolean {
     return this.stopLoop !== undefined;
   }
 
-  /** Total fixed steps executed so far. */
+  /**
+   * Total fixed steps executed so far.
+   */
   get stepCount(): number {
     return this.steps;
   }
 
-  /** Time (ms) waiting in the accumulator, always below `stepMs` after an update. */
+  /**
+   * Time (ms) waiting in the accumulator, always below `stepMs` after an update.
+   */
   get pending(): number {
     return this.accumulator;
   }
 
-  /** Starts the loop. Time before the call is ignored. No-op when already running. */
+  /**
+   * Starts the loop. Time before the call is ignored. No-op when already running.
+   */
   start(): void {
     if (this.running) return;
     this.guard.reset();
     this.stopLoop = this.scheduler.start(this.pump, this.pollMs);
   }
 
-  /** Stops the loop. Pending accumulator time is kept. No-op when not running. */
+  /**
+   * Stops the loop. Pending accumulator time is kept. No-op when not running.
+   */
   stop(): void {
     this.stopLoop?.();
     this.stopLoop = undefined;

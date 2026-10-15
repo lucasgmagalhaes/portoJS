@@ -1,33 +1,53 @@
 import { BigNum } from '../../core/bignum/index.js';
 
-/** One generator seen as a linear flow: it emits `coefficient` units per second per unit held. */
+/**
+ * One generator seen as a linear flow: it emits `coefficient` units per second per unit held.
+ */
 export interface FlowSource {
-  /** Units held at time zero. */
+  /**
+   * Units held at time zero.
+   */
   readonly initial: BigNum;
-  /** Output per second per unit held, multipliers already included. */
+  /**
+   * Output per second per unit held, multipliers already included.
+   */
   readonly coefficient: BigNum;
-  /** Where the output goes: another generator (its count grows) or a resource (gain). */
+  /**
+   * Where the output goes: another generator (its count grows) or a resource (gain).
+   */
   readonly target: { readonly kind: 'generator' | 'resource'; readonly index: number };
 }
 
-/** Result of {@link solveFlows}. */
+/**
+ * Result of {@link solveFlows}.
+ */
 export interface FlowResult {
-  /** Units held by each source after the span. */
+  /**
+   * Units held by each source after the span.
+   */
   readonly counts: readonly BigNum[];
-  /** Amount gained by each resource over the span. */
+  /**
+   * Amount gained by each resource over the span.
+   */
   readonly gains: readonly BigNum[];
 }
 
-/** Default limit on the length of generator chains solved in closed form. */
+/**
+ * Default limit on the length of generator chains solved in closed form.
+ */
 export const DEFAULT_MAX_CHAIN = 64;
 
-/** Adds `delta` into `poly[index]`, growing the polynomial when needed. */
+/**
+ * Adds `delta` into `poly[index]`, growing the polynomial when needed.
+ */
 function addTerm(poly: BigNum[], index: number, delta: BigNum): void {
   while (poly.length <= index) poly.push(BigNum.ZERO);
   poly[index] = (poly[index] ?? BigNum.ZERO).add(delta);
 }
 
-/** Horner evaluation of `Σ coefficients[k] × t^k`. */
+/**
+ * Horner evaluation of `Σ coefficients[k] × t^k`.
+ */
 function evaluate(coefficients: readonly BigNum[], t: BigNum): BigNum {
   let value: BigNum = BigNum.ZERO;
   for (let k = coefficients.length - 1; k >= 0; k--) {

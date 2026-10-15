@@ -6,7 +6,9 @@ export type { Observable } from './shared.js';
 
 const subscribers = new WeakMap<Observable, (notify: () => void) => Off>();
 
-/** One stable subscribe function per game, so React does not resubscribe on every render. */
+/**
+ * One stable subscribe function per game, so React does not resubscribe on every render.
+ */
 function subscriberFor(game: Observable): (notify: () => void) => Off {
   let subscribe = subscribers.get(game);
   if (subscribe === undefined) {

@@ -4,12 +4,18 @@ import type { Kernel, Plugin } from '../../core/plugin.js';
 import { SaveCorruptedError, isJsonObject } from '../../core/save/index.js';
 import type { JsonObject } from '../../core/save/index.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const ACHIEVEMENTS_PLUGIN = 'achievements';
 
-/** Declares one achievement. */
+/**
+ * Declares one achievement.
+ */
 export interface AchievementDef<Ctx> {
-  /** Returns `true` once the achievement is earned. Checked while it is still locked. */
+  /**
+   * Returns `true` once the achievement is earned. Checked while it is still locked.
+   */
   readonly condition: (context: Ctx) => boolean;
   /**
    * Runs when the achievement unlocks, and again after a save is loaded so that permanent
@@ -18,36 +24,58 @@ export interface AchievementDef<Ctx> {
   readonly effect?: (context: Ctx) => void;
 }
 
-/** Configuration of the {@link achievements} plugin. */
+/**
+ * Configuration of the {@link achievements} plugin.
+ */
 export interface AchievementsConfig<Ctx, A extends string> {
   /**
    * Builds the value passed to every condition. Called once during setup, so it can
    * `kernel.require(...)` other plugins. Use it to expose whatever your conditions read.
    */
   readonly context: (kernel: Kernel) => Ctx;
-  /** Achievements by id. */
+  /**
+   * Achievements by id.
+   */
   readonly definitions: { readonly [K in A]: AchievementDef<Ctx> };
-  /** How often conditions are evaluated, in ms of game time. Default `1000`. */
+  /**
+   * How often conditions are evaluated, in ms of game time. Default `1000`.
+   */
   readonly checkIntervalMs?: number;
 }
 
-/** Events emitted by the {@link achievements} plugin. */
+/**
+ * Events emitted by the {@link achievements} plugin.
+ */
 export interface AchievementsEvents<A extends string> {
-  /** An achievement was unlocked. */
+  /**
+   * An achievement was unlocked.
+   */
   achievementUnlocked: { readonly id: A; readonly at: number };
 }
 
-/** Methods the {@link achievements} plugin adds to the game. */
+/**
+ * Methods the {@link achievements} plugin adds to the game.
+ */
 export interface AchievementsApi<A extends string> {
-  /** Ids of all achievements. */
+  /**
+   * Ids of all achievements.
+   */
   readonly achievementIds: readonly A[];
-  /** Whether an achievement is unlocked. */
+  /**
+   * Whether an achievement is unlocked.
+   */
   hasAchievement(id: A): boolean;
-  /** Ids of unlocked achievements, in unlock order. */
+  /**
+   * Ids of unlocked achievements, in unlock order.
+   */
   unlockedAchievements(): A[];
-  /** Clock time (ms) when it unlocked, or `undefined` if still locked. */
+  /**
+   * Clock time (ms) when it unlocked, or `undefined` if still locked.
+   */
   achievementUnlockedAt(id: A): number | undefined;
-  /** Evaluates every locked condition now. Returns the ids unlocked by this call. */
+  /**
+   * Evaluates every locked condition now. Returns the ids unlocked by this call.
+   */
   checkAchievements(): A[];
 }
 

@@ -6,47 +6,77 @@ import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { PurchaseTarget, ResourcesApi } from '../resources/types.js';
 import { idsByTime } from '../shared.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const UNLOCKS_PLUGIN = 'unlocks';
 
-/** Declares one unlock: a condition and what it opens. */
+/**
+ * Declares one unlock: a condition and what it opens.
+ */
 export interface UnlockDef<R extends string, G extends string, U extends string> {
-  /** Returns `true` once the player has earned the unlock. Checked while it is locked. */
+  /**
+   * Returns `true` once the player has earned the unlock. Checked while it is locked.
+   */
   readonly condition: (game: ResourcesApi<R, G, U>) => boolean;
-  /** Generators that cannot be bought until this unlock is earned. */
+  /**
+   * Generators that cannot be bought until this unlock is earned.
+   */
   readonly generators?: readonly G[];
-  /** Upgrades that cannot be bought until this unlock is earned. */
+  /**
+   * Upgrades that cannot be bought until this unlock is earned.
+   */
   readonly upgrades?: readonly U[];
 }
 
-/** Configuration of the {@link unlocks} plugin. */
+/**
+ * Configuration of the {@link unlocks} plugin.
+ */
 export interface UnlocksConfig<
   R extends string,
   G extends string,
   U extends string,
   K extends string,
 > {
-  /** Unlocks by id. */
+  /**
+   * Unlocks by id.
+   */
   readonly definitions: { readonly [id in K]: UnlockDef<R, G, U> };
-  /** How often locked conditions are polled, in ms of game time. Default `500`. */
+  /**
+   * How often locked conditions are polled, in ms of game time. Default `500`.
+   */
   readonly checkIntervalMs?: number;
 }
 
-/** Events emitted by the {@link unlocks} plugin. */
+/**
+ * Events emitted by the {@link unlocks} plugin.
+ */
 export interface UnlocksEvents<K extends string> {
-  /** An unlock was earned. */
+  /**
+   * An unlock was earned.
+   */
   unlocked: { readonly id: K; readonly at: number };
 }
 
-/** Methods the {@link unlocks} plugin adds to the game. */
+/**
+ * Methods the {@link unlocks} plugin adds to the game.
+ */
 export interface UnlocksApi<K extends string> {
-  /** Ids of all unlocks. */
+  /**
+   * Ids of all unlocks.
+   */
   readonly unlockIds: readonly K[];
-  /** Whether an unlock has been earned. Evaluates the condition on demand while locked. */
+  /**
+   * Whether an unlock has been earned. Evaluates the condition on demand while locked.
+   */
   isUnlocked(id: K): boolean;
-  /** Ids earned so far, in the order they were earned. */
+  /**
+   * Ids earned so far, in the order they were earned.
+   */
   unlockedIds(): K[];
-  /** Evaluates every locked condition now. Returns the ids earned by this call. */
+  /**
+   * Evaluates every locked condition now. Returns the ids earned by this call.
+   */
   checkUnlocks(): K[];
 }
 

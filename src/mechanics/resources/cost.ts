@@ -1,21 +1,33 @@
 import { BigNum } from '../../core/bignum/index.js';
 import type { BigNumLike } from '../../core/bignum/index.js';
 
-/** Cost grows geometrically: the n-th unit (from 0) costs `base × growth^n`. */
+/**
+ * Cost grows geometrically: the n-th unit (from 0) costs `base × growth^n`.
+ */
 export interface ExponentialCost {
   readonly type?: 'exponential';
-  /** Price of the first unit. Must be > 0. */
+  /**
+   * Price of the first unit. Must be > 0.
+   */
   readonly base: BigNumLike;
-  /** Multiplier applied per unit owned. Must be >= 1. */
+  /**
+   * Multiplier applied per unit owned. Must be >= 1.
+   */
   readonly growth: BigNumLike;
 }
 
-/** Cost grows by a fixed amount: the n-th unit costs `base + increment × n`. */
+/**
+ * Cost grows by a fixed amount: the n-th unit costs `base + increment × n`.
+ */
 export interface LinearCost {
   readonly type: 'linear';
-  /** Price of the first unit. Must be > 0. */
+  /**
+   * Price of the first unit. Must be > 0.
+   */
   readonly base: BigNumLike;
-  /** Added per unit owned. Must be >= 0. */
+  /**
+   * Added per unit owned. Must be >= 0.
+   */
   readonly increment: BigNumLike;
 }
 
@@ -25,28 +37,46 @@ export interface LinearCost {
  */
 export interface CustomCost {
   readonly type: 'custom';
-  /** Price of the next unit when `owned` are already held. */
+  /**
+   * Price of the next unit when `owned` are already held.
+   */
   readonly cost: (owned: BigNum) => BigNumLike;
-  /** Total price of `count` units starting at `owned`. */
+  /**
+   * Total price of `count` units starting at `owned`.
+   */
   readonly sum?: (owned: BigNum, count: BigNum) => BigNumLike;
-  /** Largest `count` whose total price fits in `budget`. */
+  /**
+   * Largest `count` whose total price fits in `budget`.
+   */
   readonly max?: (owned: BigNum, budget: BigNum) => BigNumLike;
 }
 
-/** How the price of a purchasable scales with how many are owned. */
+/**
+ * How the price of a purchasable scales with how many are owned.
+ */
 export type CostCurve = ExponentialCost | LinearCost | CustomCost;
 
-/** Evaluators compiled from a {@link CostCurve}. All counts are BigNum. */
+/**
+ * Evaluators compiled from a {@link CostCurve}. All counts are BigNum.
+ */
 export interface CostFunctions {
-  /** Price of the next single unit when `owned` are held. */
+  /**
+   * Price of the next single unit when `owned` are held.
+   */
   unit(owned: BigNum): BigNum;
-  /** Total price of `count` units bought in one go. `0` for `count <= 0`. */
+  /**
+   * Total price of `count` units bought in one go. `0` for `count <= 0`.
+   */
   total(owned: BigNum, count: BigNum): BigNum;
-  /** Most units affordable with `budget` (whole number, `0` when none). */
+  /**
+   * Most units affordable with `budget` (whole number, `0` when none).
+   */
   max(owned: BigNum, budget: BigNum): BigNum;
 }
 
-/** Below this many units, exponential totals are summed term by term for exactness. */
+/**
+ * Below this many units, exponential totals are summed term by term for exactness.
+ */
 const SMALL_BATCH = 32;
 const SUM_ITERATION_LIMIT = 1_000_000;
 const MAX_ITERATION_LIMIT = 100_000;

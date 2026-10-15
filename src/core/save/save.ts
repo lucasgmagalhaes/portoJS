@@ -2,19 +2,31 @@ import { fnv1a, fromBase64, isJsonObject, stableStringify, toBase64 } from './co
 import type { JsonObject } from './codec.js';
 import { SaveCorruptedError, SaveVersionError } from './errors.js';
 
-/** A serialized game state with metadata and an integrity checksum. */
+/**
+ * A serialized game state with metadata and an integrity checksum.
+ */
 export interface SaveData {
-  /** Schema version of `data`. Integer >= 1. */
+  /**
+   * Schema version of `data`. Integer >= 1.
+   */
   readonly version: number;
-  /** Clock time (ms) when the save was created. Used as the offline reference point. */
+  /**
+   * Clock time (ms) when the save was created. Used as the offline reference point.
+   */
   readonly savedAt: number;
-  /** Game state, one entry per system. */
+  /**
+   * Game state, one entry per system.
+   */
   readonly data: JsonObject;
-  /** Checksum over `version`, `savedAt` and `data`. */
+  /**
+   * Checksum over `version`, `savedAt` and `data`.
+   */
   readonly checksum: string;
 }
 
-/** Upgrades the data of a save by exactly one version. */
+/**
+ * Upgrades the data of a save by exactly one version.
+ */
 export type Migration = (data: JsonObject) => JsonObject;
 
 /**
@@ -27,7 +39,9 @@ function checksumOf(version: number, savedAt: number, data: JsonObject): string 
   return fnv1a(stableStringify({ version, savedAt, data }));
 }
 
-/** Builds a {@link SaveData} and computes its checksum. */
+/**
+ * Builds a {@link SaveData} and computes its checksum.
+ */
 export function createSave(version: number, savedAt: number, data: JsonObject): SaveData {
   return { version, savedAt, data, checksum: checksumOf(version, savedAt, data) };
 }
@@ -62,7 +76,9 @@ export function parseSave(input: unknown): SaveData {
   return { version, savedAt, data, checksum };
 }
 
-/** Serializes a save to a Base64 string that is safe to copy, paste or store. */
+/**
+ * Serializes a save to a Base64 string that is safe to copy, paste or store.
+ */
 export function exportSave(save: SaveData): string {
   return toBase64(JSON.stringify(save));
 }

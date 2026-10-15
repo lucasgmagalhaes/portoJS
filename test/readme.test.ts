@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { ManualClock, createGame, format } from '../src/index.js';
 
-/** Keeps the README example honest: it must keep compiling and behaving as documented. */
+/**
+ * Keeps the README example honest: it must keep compiling and behaving as documented.
+ */
 describe('README example', () => {
   it('runs as written', () => {
     const store = new Map<string, string>();

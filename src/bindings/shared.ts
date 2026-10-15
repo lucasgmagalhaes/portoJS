@@ -1,6 +1,8 @@
 import { BigNum } from '../core/bignum/index.js';
 
-/** Remove a listener. */
+/**
+ * Remove a listener.
+ */
 export type Off = () => void;
 
 /**
@@ -11,10 +13,14 @@ export interface Observable {
   on(event: 'tick' | 'loaded' | 'start' | 'stop', listener: () => void): Off;
 }
 
-/** Events after which a selector may produce a new value. */
+/**
+ * Events after which a selector may produce a new value.
+ */
 export const REFRESH_EVENTS = ['tick', 'loaded', 'start', 'stop'] as const;
 
-/** Subscribes `listener` to every refresh event. Returns a function that removes them all. */
+/**
+ * Subscribes `listener` to every refresh event. Returns a function that removes them all.
+ */
 export function subscribeAll(game: Observable, listener: () => void): Off {
   const offs: Off[] = [];
   for (const event of REFRESH_EVENTS) offs.push(game.on(event, listener));

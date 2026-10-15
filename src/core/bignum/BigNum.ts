@@ -4,7 +4,9 @@
  */
 export type BigNumLike = BigNum | number | string;
 
-/** Exact powers of ten that fit in a double (1e0 .. 1e22). */
+/**
+ * Exact powers of ten that fit in a double (1e0 .. 1e22).
+ */
 function buildPow10(): number[] {
   const powers: number[] = [];
   for (let i = 0; i <= 22; i++) powers.push(Number(`1e${i}`));
@@ -13,10 +15,14 @@ function buildPow10(): number[] {
 
 const POW10: readonly number[] = buildPow10();
 
-/** Beyond this exponent gap the smaller addend cannot change a 53-bit mantissa. */
+/**
+ * Beyond this exponent gap the smaller addend cannot change a 53-bit mantissa.
+ */
 const ADD_CUTOFF = 16;
 
-/** Largest absolute integer exponent handled by repeated squaring in {@link BigNum.pow}. */
+/**
+ * Largest absolute integer exponent handled by repeated squaring in {@link BigNum.pow}.
+ */
 const SQUARING_LIMIT = 1024;
 
 const DECIMAL_PATTERN = /^([+-])?(?:(\d+)(?:\.(\d*))?|\.(\d+))(?:[eE]([+-]?\d+))?$/;
@@ -41,16 +47,26 @@ function pow10(n: number): number {
  * a.mul(2).toString(); // "3e12"
  */
 export class BigNum {
-  /** The number zero. */
+  /**
+   * The number zero.
+   */
   static readonly ZERO: BigNum = new BigNum(0, 0);
-  /** The number one. */
+  /**
+   * The number one.
+   */
   static readonly ONE: BigNum = new BigNum(1, 0);
-  /** The number ten. */
+  /**
+   * The number ten.
+   */
   static readonly TEN: BigNum = new BigNum(1, 1);
 
-  /** Signed mantissa, `1 <= |m| < 10`, or `0` for zero. */
+  /**
+   * Signed mantissa, `1 <= |m| < 10`, or `0` for zero.
+   */
   readonly m: number;
-  /** Base-10 exponent (integer). */
+  /**
+   * Base-10 exponent (integer).
+   */
   readonly e: number;
 
   private constructor(m: number, e: number) {
@@ -117,7 +133,9 @@ export class BigNum {
     return BigNum.normExact(negative ? -Number(mantissaText) : Number(mantissaText), exponent);
   }
 
-  /** Normalizes using the exact (string based) path; correct for any mantissa. */
+  /**
+   * Normalizes using the exact (string based) path; correct for any mantissa.
+   */
   private static normExact(m: number, e: number): BigNum {
     if (!Number.isFinite(m) || !Number.isFinite(e)) {
       throw new RangeError('BigNum: mantissa and exponent must be finite');
@@ -127,7 +145,9 @@ export class BigNum {
     return new BigNum(Number(mantissaText), e + Number(exponentText));
   }
 
-  /** Fast normalization for results of arithmetic, where `m` is within a factor 100 of range. */
+  /**
+   * Fast normalization for results of arithmetic, where `m` is within a factor 100 of range.
+   */
   private static norm(m: number, e: number): BigNum {
     if (m === 0) return BigNum.ZERO;
     const a = Math.abs(m);
@@ -142,17 +162,23 @@ export class BigNum {
     return BigNum.normExact(m, e);
   }
 
-  /** `true` when the value is exactly zero. */
+  /**
+   * `true` when the value is exactly zero.
+   */
   isZero(): boolean {
     return this.m === 0;
   }
 
-  /** `true` when the value is strictly less than zero. */
+  /**
+   * `true` when the value is strictly less than zero.
+   */
   isNegative(): boolean {
     return this.m < 0;
   }
 
-  /** `-1`, `0` or `1` according to the sign of the value. */
+  /**
+   * `-1`, `0` or `1` according to the sign of the value.
+   */
   sign(): -1 | 0 | 1 {
     return this.m < 0 ? -1 : this.m > 0 ? 1 : 0;
   }
@@ -167,7 +193,9 @@ export class BigNum {
     return Number(`${this.m}e${this.e}`);
   }
 
-  /** Scientific string that {@link BigNum.from} parses back to an identical value, e.g. `"1.5e12"`. */
+  /**
+   * Scientific string that {@link BigNum.from} parses back to an identical value, e.g. `"1.5e12"`.
+   */
   toString(): string {
     return this.m === 0 ? '0' : `${this.m}e${this.e}`;
   }
@@ -185,22 +213,30 @@ export class BigNum {
     );
   }
 
-  /** JSON representation: the same string as {@link BigNum.toString}. */
+  /**
+   * JSON representation: the same string as {@link BigNum.toString}.
+   */
   toJSON(): string {
     return this.toString();
   }
 
-  /** Returns `-this`. */
+  /**
+   * Returns `-this`.
+   */
   neg(): BigNum {
     return this.m === 0 ? this : new BigNum(-this.m, this.e);
   }
 
-  /** Returns `|this|`. */
+  /**
+   * Returns `|this|`.
+   */
   abs(): BigNum {
     return this.m < 0 ? new BigNum(-this.m, this.e) : this;
   }
 
-  /** Returns `this + other`. */
+  /**
+   * Returns `this + other`.
+   */
   add(other: BigNumLike): BigNum {
     const b = BigNum.from(other);
     if (this.m === 0) return b;
@@ -212,12 +248,16 @@ export class BigNum {
     return BigNum.norm(b.m + this.m / pow10(-gap), b.e);
   }
 
-  /** Returns `this - other`. */
+  /**
+   * Returns `this - other`.
+   */
   sub(other: BigNumLike): BigNum {
     return this.add(BigNum.from(other).neg());
   }
 
-  /** Returns `this × other`. */
+  /**
+   * Returns `this × other`.
+   */
   mul(other: BigNumLike): BigNum {
     const b = BigNum.from(other);
     return BigNum.norm(this.m * b.m, this.e + b.e);
@@ -273,7 +313,9 @@ export class BigNum {
     return BigNum.norm(negative ? -mantissa : mantissa, whole);
   }
 
-  /** Exponentiation by squaring for a non-negative integer `n`. */
+  /**
+   * Exponentiation by squaring for a non-negative integer `n`.
+   */
   private static powInteger(base: BigNum, n: number): BigNum {
     let result: BigNum = BigNum.ONE;
     let factor = base;
@@ -318,7 +360,9 @@ export class BigNum {
     return this.log10() * Math.LN10;
   }
 
-  /** Three-way comparison: `-1` if `this < other`, `0` if equal, `1` if greater. */
+  /**
+   * Three-way comparison: `-1` if `this < other`, `0` if equal, `1` if greater.
+   */
   cmp(other: BigNumLike): -1 | 0 | 1 {
     const b = BigNum.from(other);
     const sa = this.sign();
@@ -332,68 +376,92 @@ export class BigNum {
     return this.m < b.m ? -1 : this.m > b.m ? 1 : 0;
   }
 
-  /** `this === other` by value. */
+  /**
+   * `this === other` by value.
+   */
   eq(other: BigNumLike): boolean {
     return this.cmp(other) === 0;
   }
 
-  /** `this < other`. */
+  /**
+   * `this < other`.
+   */
   lt(other: BigNumLike): boolean {
     return this.cmp(other) < 0;
   }
 
-  /** `this <= other`. */
+  /**
+   * `this <= other`.
+   */
   lte(other: BigNumLike): boolean {
     return this.cmp(other) <= 0;
   }
 
-  /** `this > other`. */
+  /**
+   * `this > other`.
+   */
   gt(other: BigNumLike): boolean {
     return this.cmp(other) > 0;
   }
 
-  /** `this >= other`. */
+  /**
+   * `this >= other`.
+   */
   gte(other: BigNumLike): boolean {
     return this.cmp(other) >= 0;
   }
 
-  /** The smaller of the two values. */
+  /**
+   * The smaller of the two values.
+   */
   static min(a: BigNumLike, b: BigNumLike): BigNum {
     const x = BigNum.from(a);
     const y = BigNum.from(b);
     return x.lte(y) ? x : y;
   }
 
-  /** The larger of the two values. */
+  /**
+   * The larger of the two values.
+   */
   static max(a: BigNumLike, b: BigNumLike): BigNum {
     const x = BigNum.from(a);
     const y = BigNum.from(b);
     return x.gte(y) ? x : y;
   }
 
-  /** Sum of a list of values (`0` when empty). */
+  /**
+   * Sum of a list of values (`0` when empty).
+   */
   static sum(values: Iterable<BigNumLike>): BigNum {
     let total: BigNum = BigNum.ZERO;
     for (const v of values) total = total.add(v);
     return total;
   }
 
-  /** Largest integer less than or equal to the value. */
+  /**
+   * Largest integer less than or equal to the value.
+   */
   floor(): BigNum {
     return this.roundWith(Math.floor);
   }
 
-  /** Smallest integer greater than or equal to the value. */
+  /**
+   * Smallest integer greater than or equal to the value.
+   */
   ceil(): BigNum {
     return this.roundWith(Math.ceil);
   }
 
-  /** Nearest integer; halves round toward `+∞` like `Math.round`. */
+  /**
+   * Nearest integer; halves round toward `+∞` like `Math.round`.
+   */
   round(): BigNum {
     return this.roundWith(Math.round);
   }
 
-  /** Integer part, discarding the fraction (rounds toward zero). */
+  /**
+   * Integer part, discarding the fraction (rounds toward zero).
+   */
   trunc(): BigNum {
     return this.roundWith(Math.trunc);
   }

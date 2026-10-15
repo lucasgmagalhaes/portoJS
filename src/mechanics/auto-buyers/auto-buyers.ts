@@ -6,40 +6,68 @@ import type { JsonObject } from '../../core/save/index.js';
 import { RESOURCES_PLUGIN } from '../resources/resources.js';
 import type { BulkAmount, ResourcesApi } from '../resources/types.js';
 
-/** Plugin name. */
+/**
+ * Plugin name.
+ */
 export const AUTO_BUYERS_PLUGIN = 'autoBuyers';
 
-/** Declares one auto-buyer. */
+/**
+ * Declares one auto-buyer.
+ */
 export interface AutoBuyerDef<G extends string> {
-  /** Generator it buys. */
+  /**
+   * Generator it buys.
+   */
   readonly generator: G;
-  /** How much to buy each time: a count or `'max'`. Default `'max'`. */
+  /**
+   * How much to buy each time: a count or `'max'`. Default `'max'`.
+   */
   readonly amount?: BulkAmount;
-  /** Time between purchases, in ms of game time. Default `1000`. */
+  /**
+   * Time between purchases, in ms of game time. Default `1000`.
+   */
   readonly everyMs?: number;
-  /** Whether it starts switched on in a new game. Default `false`. */
+  /**
+   * Whether it starts switched on in a new game. Default `false`.
+   */
   readonly enabled?: boolean;
 }
 
-/** Configuration of the {@link autoBuyers} plugin. */
+/**
+ * Configuration of the {@link autoBuyers} plugin.
+ */
 export interface AutoBuyersConfig<G extends string, B extends string> {
-  /** Auto-buyers by id. */
+  /**
+   * Auto-buyers by id.
+   */
   readonly buyers: { readonly [id in B]: AutoBuyerDef<NoInfer<G>> };
 }
 
-/** Events emitted by the {@link autoBuyers} plugin. */
+/**
+ * Events emitted by the {@link autoBuyers} plugin.
+ */
 export interface AutoBuyersEvents<G extends string, B extends string> {
-  /** An auto-buyer bought something. */
+  /**
+   * An auto-buyer bought something.
+   */
   autoBuy: { readonly id: B; readonly generator: G; readonly amount: BigNum };
 }
 
-/** Methods the {@link autoBuyers} plugin adds to the game. */
+/**
+ * Methods the {@link autoBuyers} plugin adds to the game.
+ */
 export interface AutoBuyersApi<B extends string> {
-  /** Ids of all auto-buyers. */
+  /**
+   * Ids of all auto-buyers.
+   */
   readonly autoBuyerIds: readonly B[];
-  /** Switches an auto-buyer on or off. */
+  /**
+   * Switches an auto-buyer on or off.
+   */
   setAutoBuyer(id: B, enabled: boolean): void;
-  /** Whether an auto-buyer is on. */
+  /**
+   * Whether an auto-buyer is on.
+   */
   isAutoBuyerEnabled(id: B): boolean;
 }
 

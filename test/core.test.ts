@@ -19,7 +19,9 @@ interface CounterApi {
   add(n: number): void;
 }
 
-/** Tiny plugin: accumulates tick time and offline time into a counter. */
+/**
+ * Tiny plugin: accumulates tick time and offline time into a counter.
+ */
 const counter = definePlugin<CounterApi, { bump: { count: number } }>('counter', (kernel) => {
   let count = 0;
   kernel.registerSystem({
