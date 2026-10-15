@@ -4,3 +4,6 @@ coverage
 pnpm-lock.yaml
 .token-optimizer
 etc
+docs/api
+docs/.vitepress/dist
+docs/.vitepress/cache
