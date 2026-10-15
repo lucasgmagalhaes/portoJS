@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.9.0](https://github.com/lucasgmagalhaes/portoJS/compare/vue-v0.8.0...vue-v0.9.0) (2026-10-15)
+
+
+### Chores
+
+* **vue:** Synchronize portojs versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.9.0
+
 ## [0.8.0](https://github.com/lucasgmagalhaes/portoJS/compare/vue-v0.7.0...vue-v0.8.0) (2026-10-15)
 
 

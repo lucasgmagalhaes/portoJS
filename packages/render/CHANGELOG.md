@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.9.0](https://github.com/lucasgmagalhaes/portoJS/compare/render-v0.8.0...render-v0.9.0) (2026-10-15)
+
+
+### Bug Fixes
+
+* **render:** derive WebGPU quad corners from the vertex index ([c3e1e8f](https://github.com/lucasgmagalhaes/portoJS/commit/c3e1e8f4ce3b7bf166d2b8447d62ca4440071bf4))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/ecs bumped to 0.9.0
+  * devDependencies
+    * @portojs/core bumped to 0.9.0
+    * @portojs/runtime bumped to 0.9.0
+
 ## [0.8.0](https://github.com/lucasgmagalhaes/portoJS/compare/render-v0.7.0...render-v0.8.0) (2026-10-15)
 
 
