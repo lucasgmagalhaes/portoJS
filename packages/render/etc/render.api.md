@@ -4,6 +4,10 @@
 
 ```ts
 
+import { ComponentDef } from '@portojs/ecs';
+import type { System } from '@portojs/ecs';
+import type { World } from '@portojs/ecs';
+
 // @public
 export interface BatchResult {
     readonly count: number;
@@ -29,11 +33,29 @@ export class Camera2D {
 }
 
 // @public
+export type ClearColor = readonly [number, number, number, number];
+
+// @public
+export function createRenderer(canvas: HTMLCanvasElement | OffscreenCanvas, options?: RendererOptions): Promise<Renderer>;
+
+// @public
+export function createSpriteSystem(world: World, textures: ReadonlyMap<number, Texture>, batch: SpriteBatch): System;
+
+// @public
+export function createWebGL2Renderer(canvas: HTMLCanvasElement | OffscreenCanvas, clearColor: ClearColor): WebGL2Renderer | undefined;
+
+// @public
+export function createWebGPURenderer(canvas: HTMLCanvasElement | OffscreenCanvas, clearColor: ClearColor): Promise<WebGPURenderer | undefined>;
+
+// @public
 export interface DrawGroup {
     readonly count: number;
     readonly start: number;
     readonly texture: Texture;
 }
+
+// @public
+export const INSTANCE_BYTES = 48;
 
 // @public
 export const INSTANCE_FLOATS = 12;
@@ -45,6 +67,62 @@ export interface Point {
     // (undocumented)
     readonly y: number;
 }
+
+// @public
+export interface Renderer {
+    readonly backend: RendererBackend;
+    readonly canvas: HTMLCanvasElement | OffscreenCanvas;
+    createTexture(source: TextureSource): Texture;
+    deleteTexture(texture: Texture): void;
+    destroy(): void;
+    render(camera: Camera2D, batch: BatchResult): void;
+    resize(width: number, height: number): void;
+}
+
+// @public
+export type RendererBackend = 'webgpu' | 'webgl2';
+
+// @public
+export interface RendererOptions {
+    readonly backend?: 'auto' | RendererBackend;
+    readonly clearColor?: ClearColor;
+}
+
+// @public
+export function spawnSprite(world: World, texture: Texture, options?: SpawnSpriteOptions): number;
+
+// @public
+export interface SpawnSpriteOptions {
+    readonly color?: number;
+    readonly height?: number;
+    readonly layer?: number;
+    // (undocumented)
+    readonly rotation?: number;
+    // (undocumented)
+    readonly scaleX?: number;
+    // (undocumented)
+    readonly scaleY?: number;
+    readonly width?: number;
+    // (undocumented)
+    readonly x?: number;
+    // (undocumented)
+    readonly y?: number;
+}
+
+// @public
+export const Sprite: ComponentDef<    {
+texture: "u32";
+width: "f32";
+height: "f32";
+originX: "f32";
+originY: "f32";
+u: "f32";
+v: "f32";
+uWidth: "f32";
+vHeight: "f32";
+color: "u32";
+layer: "i16";
+}>;
 
 // @public
 export class SpriteBatch {
@@ -78,6 +156,56 @@ export interface Texture {
     readonly height: number;
     readonly id: number;
     readonly width: number;
+}
+
+// @public
+export type TextureSource = ImageBitmap | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
+
+// @public
+export const Transform: ComponentDef<    {
+x: "f32";
+y: "f32";
+rotation: "f32";
+scaleX: "f32";
+scaleY: "f32";
+}>;
+
+// @public
+export class WebGL2Renderer implements Renderer {
+    constructor(canvas: HTMLCanvasElement | OffscreenCanvas, gl: WebGL2RenderingContext, clearColor: ClearColor);
+    // (undocumented)
+    readonly backend: "webgl2";
+    // (undocumented)
+    readonly canvas: HTMLCanvasElement | OffscreenCanvas;
+    // (undocumented)
+    createTexture(source: TextureSource): Texture;
+    // (undocumented)
+    deleteTexture(texture: Texture): void;
+    // (undocumented)
+    destroy(): void;
+    // (undocumented)
+    render(camera: Camera2D, batch: BatchResult): void;
+    // (undocumented)
+    resize(width: number, height: number): void;
+}
+
+// @public
+export class WebGPURenderer implements Renderer {
+    constructor(canvas: HTMLCanvasElement | OffscreenCanvas, device: GPUDevice, context: GPUCanvasContext, format: GPUTextureFormat, clearColor: ClearColor);
+    // (undocumented)
+    readonly backend: "webgpu";
+    // (undocumented)
+    readonly canvas: HTMLCanvasElement | OffscreenCanvas;
+    // (undocumented)
+    createTexture(source: TextureSource): Texture;
+    // (undocumented)
+    deleteTexture(texture: Texture): void;
+    // (undocumented)
+    destroy(): void;
+    // (undocumented)
+    render(camera: Camera2D, batch: BatchResult): void;
+    // (undocumented)
+    resize(width: number, height: number): void;
 }
 
 // (No @packageDocumentation comment for this package)

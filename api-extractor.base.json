@@ -12,7 +12,7 @@
         "lib": ["ES2022", "DOM"],
         "strict": true,
         "skipLibCheck": true,
-        "types": []
+        "types": ["@webgpu/types"]
       },
       "include": ["dist/index.d.ts"]
     }

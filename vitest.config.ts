@@ -18,6 +18,14 @@ export default defineConfig({
   },
   test: {
     include: ['packages/*/test/**/*.test.{ts,tsx}'],
-    coverage: { provider: 'v8', include: ['packages/*/src/**'] },
+    coverage: {
+      provider: 'v8',
+      include: ['packages/*/src/**'],
+      exclude: [
+        'packages/render/src/webgl2.ts',
+        'packages/render/src/webgpu.ts',
+        'packages/render/src/create-renderer.ts',
+      ],
+    },
   },
 });
