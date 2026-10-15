@@ -192,7 +192,7 @@
       "name": "portojs/core",
       "path": "dist/core.js",
       "import": "*",
-      "limit": "7 KB"
+      "limit": "8 KB"
     },
     {
       "name": "portojs (everything)",

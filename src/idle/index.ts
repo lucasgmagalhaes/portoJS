@@ -1,3 +1,4 @@
+export { idleComponents } from './components.js';
 export { Economy, ECONOMY_OBJECT } from './economy.js';
 export type {
   EconomyOptions,

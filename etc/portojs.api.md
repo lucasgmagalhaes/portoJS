@@ -209,6 +209,8 @@ export abstract class Component {
     start?(): void;
     // @internal
     startCalled: boolean;
+    startCoroutine(routine: Iterator<CoroutineYield>): Coroutine;
+    stopAllCoroutines(): void;
     static typeId: string | undefined;
     // @internal
     wasActive: boolean;
@@ -218,7 +220,32 @@ export abstract class Component {
 export type ComponentConstructor<C extends Component = Component, O = never> = new (gameObject: GameObject, options: O) => C;
 
 // @public
+export class ComponentRegistry {
+    get(id: string): RegisteredType | undefined;
+    has(id: string): boolean;
+    // Warning: (ae-forgotten-export) The symbol "RegisteredType" needs to be exported by the entry point index.d.ts
+    register(...types: RegisteredType[]): this;
+}
+
+// @public
 export type ComponentType<C extends Component = Component> = abstract new (...args: never[]) => C;
+
+// @public
+export class Coroutine extends YieldInstruction {
+    // @internal
+    constructor(owner: Component, routine: Iterator<CoroutineYield>);
+    // (undocumented)
+    isDone(): boolean;
+    get isRunning(): boolean;
+    // (undocumented)
+    readonly owner: Component;
+    // @internal
+    step(deltaTime: number): void;
+    stop(): void;
+}
+
+// @public
+export type CoroutineYield = YieldInstruction | undefined;
 
 // @public
 export type CostCurve = ExponentialCost | LinearCost | CustomCost;
@@ -421,6 +448,7 @@ export class Game {
     findObjectOfType<C extends Component>(type: ComponentType<C>): C | undefined;
     findObjectsOfType<C extends Component>(type: ComponentType<C>): C[];
     importSave(encoded: string, options?: LoadOptions): OfflineReport | undefined;
+    instantiate<P>(prefab: Prefab<P>, name: string, ...options: undefined extends P ? [options?: InstantiateOptions<P>] : [options: InstantiateOptions<P>]): GameObject;
     load(input: SaveData | string, options?: LoadOptions): OfflineReport | undefined;
     now(): number;
     get objects(): readonly GameObject[];
@@ -435,8 +463,12 @@ export class Game {
     save(): SaveData;
     simulateOffline(ms: number): OfflineReport;
     start(): void;
+    // @internal
+    startCoroutine(owner: Component, routine: Iterator<CoroutineYield>): Coroutine;
     get stepMs(): number;
     stop(): void;
+    // @internal
+    stopCoroutines(owner: Component): void;
     get structureVersion(): number;
     get tickCount(): number;
     readonly time: Time;
@@ -582,7 +614,17 @@ export interface GeneratorPurchase {
 }
 
 // @public
+export const idleComponents: ReadonlyArray<ComponentConstructor<Component, never>>;
+
+// @public
 export function importSave(encoded: string): SaveData;
+
+// @public
+export type InstantiateOptions<P> = CreateObjectOptions & (undefined extends P ? {
+    readonly params?: P;
+} : {
+    readonly params: P;
+});
 
 // @public
 export const intervalScheduler: Scheduler;
@@ -620,6 +662,9 @@ export type Listener<T> = (payload: T) => void;
 export interface LoadOptions {
     readonly offline?: boolean;
 }
+
+// @public
+export function loadScene(game: Game, scene: unknown, registry: ComponentRegistry): GameObject[];
 
 // @public
 export class ManualClock implements Clock {
@@ -676,6 +721,18 @@ export type OfflineStatus = 'none' | 'applied' | 'capped' | 'backward';
 
 // @public
 export function parseSave(input: unknown): SaveData;
+
+// @public
+export class Prefab<P = undefined> {
+    constructor(build: PrefabBuilder<P>, active?: boolean);
+    // (undocumented)
+    readonly active: boolean;
+    // (undocumented)
+    readonly build: PrefabBuilder<P>;
+}
+
+// @public
+export type PrefabBuilder<P> = (object: GameObject, params: P) => void;
 
 // @public
 export class Prestige extends Component {
@@ -820,6 +877,32 @@ export class SaveVersionError extends Error {
 }
 
 // @public
+export interface Scene {
+    readonly objects: readonly SceneObject[];
+}
+
+// @public
+export interface SceneComponent {
+    readonly enabled?: boolean;
+    readonly options?: unknown;
+    readonly type: string;
+}
+
+// @public
+export class SceneError extends Error {
+    // (undocumented)
+    readonly name = "SceneError";
+}
+
+// @public
+export interface SceneObject {
+    readonly active?: boolean;
+    readonly children?: readonly SceneObject[];
+    readonly components?: readonly SceneComponent[];
+    readonly name: string;
+}
+
+// @public
 export interface Scheduler {
     start(callback: () => void, intervalMs: number): () => void;
 }
@@ -947,6 +1030,32 @@ export interface UpgradePurchase {
     readonly level: number;
     // (undocumented)
     readonly upgrade: Upgrade;
+}
+
+// @public
+export class WaitForSeconds extends YieldInstruction {
+    constructor(seconds: number);
+    // (undocumented)
+    isDone(deltaTime: number): boolean;
+}
+
+// @public
+export class WaitUntil extends YieldInstruction {
+    constructor(condition: () => boolean);
+    // (undocumented)
+    isDone(): boolean;
+}
+
+// @public
+export class WaitWhile extends YieldInstruction {
+    constructor(condition: () => boolean);
+    // (undocumented)
+    isDone(): boolean;
+}
+
+// @public
+export abstract class YieldInstruction {
+    abstract isDone(deltaTime: number): boolean;
 }
 
 // (No @packageDocumentation comment for this package)
