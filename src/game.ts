@@ -1,6 +1,6 @@
 import { createCore } from './core/core.js';
 import type { Core, CoreOfflineOptions, CoreOptions } from './core/core.js';
-import type { AnyPlugin } from './core/plugin.js';
+import type { AnyPlugin, ApiOf, EventsOf } from './core/plugin.js';
 import { achievements } from './mechanics/achievements/index.js';
 import type {
   AchievementDef,
@@ -32,12 +32,18 @@ export type GameConfig<
   U extends string,
   A extends string,
   PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined,
+  X extends readonly AnyPlugin[] = readonly [],
 > = Omit<ResourcesConfig<R, G, U>, 'offline'> &
   Omit<CoreOptions, 'plugins' | 'offline'> & {
     /** Offline cap and efficiency, plus tuning for production that has no closed form. */
     readonly offline?: CoreOfflineOptions & ResourcesOfflineOptions;
     /** Optional prestige layer. */
     readonly prestige?: PR;
+    /**
+     * Extra plugins, installed after the built-in ones so they can `kernel.require` them.
+     * Their APIs and events are merged into the returned game with full types.
+     */
+    readonly plugins?: X;
     /** Optional achievements; each condition receives the game API. */
     readonly achievements?: { readonly [K in A]: AchievementDef<GameView<R, G, U, PR>> };
     /** How often achievement conditions are checked, in ms of game time. Default `1000`. */
@@ -47,20 +53,29 @@ export type GameConfig<
 type Optional<Condition, T> = Condition extends true ? T : unknown;
 
 /** The object returned by {@link createGame}: the core plus every configured feature. */
-export type Game<R extends string, G extends string, U extends string, A extends string, PR> = Core<
+export type Game<
+  R extends string,
+  G extends string,
+  U extends string,
+  A extends string,
+  PR,
+  X extends readonly AnyPlugin[] = readonly [],
+> = Core<
   ResourcesEvents<R, G, U> &
     (PR extends undefined ? object : PrestigeEvents) &
-    ([A] extends [never] ? object : AchievementsEvents<A>)
+    ([A] extends [never] ? object : AchievementsEvents<A>) &
+    EventsOf<X>
 > &
   ResourcesApi<R, G, U> &
   Optional<PR extends undefined ? false : true, PrestigeApi> &
-  ([A] extends [never] ? unknown : AchievementsApi<A>);
+  ([A] extends [never] ? unknown : AchievementsApi<A>) &
+  ApiOf<X>;
 
 /**
  * Creates a complete idle game from one declarative object: resources, generators,
  * upgrades, and optionally prestige and achievements, on top of the game-agnostic core.
  *
- * For custom mechanics or a different feature mix, compose plugins yourself with
+ * Add your own mechanics through the `plugins` option, or compose everything yourself with
  * {@link createCore}.
  *
  * @example
@@ -81,7 +96,8 @@ export function createGame<
   U extends string = never,
   A extends string = never,
   PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined = undefined,
->(config: GameConfig<R, G, U, A, PR>): Game<R, G, U, A, PR> {
+  X extends readonly AnyPlugin[] = readonly [],
+>(config: GameConfig<R, G, U, A, PR, X>): Game<R, G, U, A, PR, X> {
   const {
     resources: resourceDefs,
     generators,
@@ -90,6 +106,7 @@ export function createGame<
     achievements: achievementDefs,
     achievementCheckIntervalMs,
     offline,
+    plugins: extraPlugins,
     ...coreOptions
   } = config;
 
@@ -130,9 +147,9 @@ export function createGame<
   const core = createCore({
     ...coreOptions,
     ...(offline === undefined ? {} : { offline }),
-    plugins,
+    plugins: [...plugins, ...(extraPlugins ?? [])],
   });
   // `plugins` is assembled dynamically, so the merged type is asserted once here; the
   // `Game` type mirrors exactly which plugins were added above.
-  return core as unknown as Game<R, G, U, A, PR>;
+  return core as unknown as Game<R, G, U, A, PR, X>;
 }

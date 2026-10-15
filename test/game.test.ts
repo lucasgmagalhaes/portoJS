@@ -1,6 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vitest';
-import { ManualClock, createGame } from '../src/index.js';
-import type { BigNum, Scheduler } from '../src/index.js';
+import { ManualClock, createGame, definePlugin } from '../src/index.js';
+import type { BigNum, ResourcesApi, Scheduler } from '../src/index.js';
 
 function fakeScheduler(): { scheduler: Scheduler; fire: () => void } {
   let callback: (() => void) | undefined;
@@ -198,5 +198,73 @@ describe('createGame: offline tuning', () => {
       resources: { gold: { initial: 0 } },
     });
     expect(() => game.simulateOffline(1000)).not.toThrow();
+  });
+});
+
+describe('createGame: extra plugins', () => {
+  interface TipApi {
+    readonly tipsGiven: number;
+    tip(amount: number): boolean;
+  }
+
+  const tips = definePlugin<TipApi, { tipped: { amount: number } }>('tips', (kernel) => {
+    const wallet = kernel.require<ResourcesApi<'gold', never, never>>('resources');
+    let given = 0;
+    kernel.registerSystem({
+      id: 'tips',
+      serialize: () => given,
+      deserialize: (data) => {
+        given = typeof data === 'number' ? data : 0;
+      },
+    });
+    return {
+      get tipsGiven() {
+        return given;
+      },
+      tip(amount) {
+        if (!wallet.spend('gold', amount)) return false;
+        given += amount;
+        kernel.emit('tipped', { amount });
+        return true;
+      },
+    };
+  });
+
+  it('merges the plugin API and events with full types', () => {
+    const game = createGame({
+      clock: new ManualClock(0),
+      resources: { gold: { initial: 10 } },
+      plugins: [tips],
+    });
+    expectTypeOf(game.tip).parameter(0).toEqualTypeOf<number>();
+    expectTypeOf(game.tipsGiven).toEqualTypeOf<number>();
+    expectTypeOf(game.amount('gold')).toEqualTypeOf<BigNum>();
+
+    const seen: number[] = [];
+    game.on('tipped', ({ amount }) => seen.push(amount));
+    expect(game.tip(4)).toBe(true);
+    expect(game.tip(100)).toBe(false);
+    expect(seen).toEqual([4]);
+    expect(game.amount('gold').toNumber()).toBe(6);
+  });
+
+  it('persists the extra plugin state with the rest of the game', () => {
+    const make = () =>
+      createGame({
+        clock: new ManualClock(0),
+        resources: { gold: { initial: 10 } },
+        plugins: [tips],
+      });
+    const a = make();
+    a.tip(3);
+    const b = make();
+    b.load(JSON.parse(JSON.stringify(a.save())), { offline: false });
+    expect(b.tipsGiven).toBe(3);
+    expect(b.amount('gold').toNumber()).toBe(7);
+  });
+
+  it('still works without extra plugins', () => {
+    const game = createGame({ clock: new ManualClock(0), resources: { gold: {} } });
+    expect(game.amount('gold').isZero()).toBe(true);
   });
 });
