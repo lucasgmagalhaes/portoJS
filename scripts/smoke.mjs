@@ -4,7 +4,19 @@ import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
 import * as esm from '../dist/index.js';
 
-const cjs = createRequire(import.meta.url)('../dist/index.cjs');
+const require = createRequire(import.meta.url);
+const cjs = require('../dist/index.cjs');
+
+// Subpath entries must share one copy of each class, otherwise instanceof breaks.
+const esmBignum = await import('../dist/bignum.js');
+const esmCore = await import('../dist/core.js');
+const esmMechanics = await import('../dist/mechanics.js');
+assert.equal(esmBignum.BigNum, esm.BigNum, 'esm: bignum entry shares BigNum');
+assert.equal(esmCore.BigNum, esm.BigNum, 'esm: core entry shares BigNum');
+assert.equal(typeof esmMechanics.resources, 'function', 'esm: mechanics entry');
+assert.equal(require('../dist/bignum.cjs').BigNum, cjs.BigNum, 'cjs: bignum entry shares BigNum');
+assert.equal(require('../dist/core.cjs').BigNum, cjs.BigNum, 'cjs: core entry shares BigNum');
+assert.equal(typeof require('../dist/mechanics.cjs').resources, 'function', 'cjs: mechanics entry');
 
 for (const [name, lib] of [
   ['esm', esm],

@@ -19,7 +19,38 @@
         "types": "./dist/index.d.cts",
         "default": "./dist/index.cjs"
       }
-    }
+    },
+    "./core": {
+      "import": {
+        "types": "./dist/core.d.ts",
+        "default": "./dist/core.js"
+      },
+      "require": {
+        "types": "./dist/core.d.cts",
+        "default": "./dist/core.cjs"
+      }
+    },
+    "./bignum": {
+      "import": {
+        "types": "./dist/bignum.d.ts",
+        "default": "./dist/bignum.js"
+      },
+      "require": {
+        "types": "./dist/bignum.d.cts",
+        "default": "./dist/bignum.cjs"
+      }
+    },
+    "./mechanics": {
+      "import": {
+        "types": "./dist/mechanics.d.ts",
+        "default": "./dist/mechanics.js"
+      },
+      "require": {
+        "types": "./dist/mechanics.d.cts",
+        "default": "./dist/mechanics.cjs"
+      }
+    },
+    "./package.json": "./package.json"
   },
   "files": [
     "dist",
@@ -38,7 +69,8 @@
     "coverage": "vitest run --coverage",
     "smoke": "node scripts/smoke.mjs",
     "check:package": "publint && attw --pack .",
-    "prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm build"
+    "prepublishOnly": "pnpm lint && pnpm typecheck && pnpm test && pnpm build",
+    "size": "size-limit"
   },
   "keywords": [
     "idle",
@@ -55,12 +87,14 @@
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
     "@eslint/js": "^10.0.1",
+    "@size-limit/preset-small-lib": "^14.2.0",
     "@types/node": "^26.6.5",
     "@vitest/coverage-v8": "^5.0.4",
     "eslint": "^10.12.0",
     "fast-check": "^4.10.2",
     "prettier": "^3.9.10",
     "publint": "^0.3.25",
+    "size-limit": "^14.2.0",
     "tinybench": "^6.2.2",
     "tsup": "^9.0.0",
     "tsx": "^4.23.15",
@@ -85,5 +119,38 @@
   "publishConfig": {
     "access": "public",
     "provenance": true
-  }
+  },
+  "typesVersions": {
+    "*": {
+      "core": [
+        "./dist/core.d.ts"
+      ],
+      "bignum": [
+        "./dist/bignum.d.ts"
+      ],
+      "mechanics": [
+        "./dist/mechanics.d.ts"
+      ]
+    }
+  },
+  "size-limit": [
+    {
+      "name": "portojs/bignum",
+      "path": "dist/bignum.js",
+      "import": "*",
+      "limit": "3 KB"
+    },
+    {
+      "name": "portojs/core",
+      "path": "dist/core.js",
+      "import": "*",
+      "limit": "7 KB"
+    },
+    {
+      "name": "portojs (everything)",
+      "path": "dist/index.js",
+      "import": "*",
+      "limit": "12 KB"
+    }
+  ]
 }
