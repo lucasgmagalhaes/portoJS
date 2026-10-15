@@ -23,9 +23,7 @@ fn vertexMain(
   @location(2) vUvVh : vec3<f32>,
   @location(3) color : vec4<f32>,
 ) -> VertexOutput {
-  var corners = array<vec2<f32>, 4>(
-    vec2<f32>(0.0, 0.0), vec2<f32>(1.0, 0.0), vec2<f32>(0.0, 1.0), vec2<f32>(1.0, 1.0));
-  let corner = corners[index];
+  let corner = vec2<f32>(f32(index & 1u), f32(index >> 1u));
   let local = (corner - rotOriginU.yz) * posSize.zw;
   let c = cos(rotOriginU.x);
   let s = sin(rotOriginU.x);
