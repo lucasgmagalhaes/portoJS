@@ -2,9 +2,9 @@ import { BigNum } from '@portojs/core';
 import type { BigNumLike } from '@portojs/core';
 import { SaveCorruptedError } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
-import type { Generator } from './generator.js';
-import type { Resource } from './resource.js';
-import type { Upgrade } from './upgrade.js';
+import type { Generator } from './generator.ts';
+import type { Resource } from './resource.ts';
+import type { Upgrade } from './upgrade.ts';
 
 /**
  * A purchase is allowed when the price exceeds the balance by less than this fraction. Absorbs

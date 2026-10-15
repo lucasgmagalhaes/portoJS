@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ManualClock, TimeGuard, systemClock } from '../src/index.js';
+import { ManualClock, TimeGuard, systemClock } from '../src/index.ts';
 
 describe('ManualClock', () => {
   it('starts at the given time and only moves on demand', () => {

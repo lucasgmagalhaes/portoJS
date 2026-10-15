@@ -3,8 +3,8 @@ import { SaveCorruptedError, isJsonObject } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import type { Generator } from './generator.js';
-import type { BulkAmount } from './shared.js';
+import type { Generator } from './generator.ts';
+import type { BulkAmount } from './shared.ts';
 
 /**
  * Options for {@link AutoBuyer}.

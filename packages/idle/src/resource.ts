@@ -4,8 +4,8 @@ import { SaveCorruptedError, isJsonObject } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { Economy } from './economy.js';
-import { affordable, readBig } from './shared.js';
+import { Economy } from './economy.ts';
+import { affordable, readBig } from './shared.ts';
 
 /**
  * Options for {@link Resource}.

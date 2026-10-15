@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ManualClock } from '../src/index.js';
-import { Engine, createIntervalScheduler } from '../src/index.js';
-import type { Scheduler } from '../src/index.js';
+import { ManualClock } from '../src/index.ts';
+import { Engine, createIntervalScheduler } from '../src/index.ts';
+import type { Scheduler } from '../src/index.ts';
 
 /**
  * Scheduler that never fires by itself; the test pumps it.

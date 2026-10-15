@@ -1,6 +1,6 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { BigNum } from '../../src/index.js';
+import { BigNum } from '../../src/index.ts';
 
 /**
  * Non-zero doubles with magnitude in [1e-50, 1e50], either sign.

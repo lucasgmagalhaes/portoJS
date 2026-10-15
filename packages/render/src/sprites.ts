@@ -1,6 +1,6 @@
 import { defineComponent } from '@portojs/ecs';
 import type { System, World } from '@portojs/ecs';
-import type { SpriteBatch, Texture } from './batch.js';
+import type { SpriteBatch, Texture } from './batch.ts';
 
 /**
  * Position, rotation (radians) and scale of an entity.

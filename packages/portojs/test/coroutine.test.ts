@@ -7,8 +7,8 @@ import {
   WaitUntil,
   WaitWhile,
   YieldInstruction,
-} from '../src/index.js';
-import type { CoroutineYield } from '../src/index.js';
+} from '../src/index.ts';
+import type { CoroutineYield } from '../src/index.ts';
 
 class Runner extends Component {
   log: string[] = [];

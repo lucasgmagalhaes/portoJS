@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Emitter } from '../src/index.js';
+import { Emitter } from '../src/index.ts';
 
 interface Events {
   hit: { damage: number };

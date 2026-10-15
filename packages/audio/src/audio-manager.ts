@@ -1,7 +1,7 @@
 import { Component } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { AudioEngine } from './engine.js';
-import type { AudioEngineOptions } from './engine.js';
+import { AudioEngine } from './engine.ts';
+import type { AudioEngineOptions } from './engine.ts';
 
 /**
  * Owns an {@link AudioEngine} for a game: audio pauses while the component is inactive and the

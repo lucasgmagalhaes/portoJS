@@ -1,8 +1,8 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { BigNum } from '@portojs/core';
-import { solveFlows } from '../src/flows.js';
-import type { FlowSource } from '../src/flows.js';
+import { solveFlows } from '../src/flows.ts';
+import type { FlowSource } from '../src/flows.ts';
 
 const n = (v: number | string): BigNum => BigNum.from(v);
 const toResource = (initial: number, coefficient: number, index = 0): FlowSource => ({

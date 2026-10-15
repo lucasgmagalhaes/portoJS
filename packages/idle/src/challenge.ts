@@ -3,8 +3,8 @@ import { SaveCorruptedError, isJsonObject } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { Game, GameObject } from '@portojs/runtime';
-import { Economy } from './economy.js';
-import type { ResetKeep, TargetedMultiplier } from './shared.js';
+import { Economy } from './economy.ts';
+import type { ResetKeep, TargetedMultiplier } from './shared.ts';
 
 /**
  * Options for {@link Challenge}.

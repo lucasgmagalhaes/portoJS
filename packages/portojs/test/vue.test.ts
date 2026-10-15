@@ -1,7 +1,7 @@
 import { effectScope, watch } from 'vue';
 import { describe, expect, it } from 'vitest';
-import { Game, Generator, ManualClock, Resource, format } from '../src/index.js';
-import { useGame } from '../src/vue.js';
+import { Game, Generator, ManualClock, Resource, format } from '../src/index.ts';
+import { useGame } from '../src/vue.ts';
 
 function make() {
   const clock = new ManualClock(0);

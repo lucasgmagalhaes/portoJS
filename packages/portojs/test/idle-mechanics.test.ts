@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { ManualClock, SaveCorruptedError, createSave, parseSave } from '../src/index.js';
-import { Game } from '../src/index.js';
+import { ManualClock, SaveCorruptedError, createSave, parseSave } from '../src/index.ts';
+import { Game } from '../src/index.ts';
 import {
   Achievement,
   AutoBuyer,
@@ -13,7 +13,7 @@ import {
   Resource,
   Unlock,
   Upgrade,
-} from '../src/index.js';
+} from '../src/index.ts';
 
 function world(
   initialGold: number | string = 0,

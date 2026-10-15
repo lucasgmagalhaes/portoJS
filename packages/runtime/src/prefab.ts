@@ -1,4 +1,4 @@
-import type { GameObject } from './game-object.js';
+import type { GameObject } from './game-object.ts';
 
 /**
  * Builds the contents of an object created from a {@link Prefab}.

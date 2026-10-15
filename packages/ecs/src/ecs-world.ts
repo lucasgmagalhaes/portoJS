@@ -1,7 +1,7 @@
 import { Component } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { World } from './world.js';
-import type { WorldOptions } from './world.js';
+import { World } from './world.ts';
+import type { WorldOptions } from './world.ts';
 
 /**
  * Hosts an ECS {@link World} inside a game: its systems run on every fixed step, in game time,

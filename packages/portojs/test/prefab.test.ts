@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { Component, Game, Generator, ManualClock, Prefab, Resource } from '../src/index.js';
+import { Component, Game, Generator, ManualClock, Prefab, Resource } from '../src/index.ts';
 
 class Tag extends Component {
   static override typeId = 'Tag';

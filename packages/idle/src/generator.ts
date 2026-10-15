@@ -4,12 +4,12 @@ import { SaveCorruptedError, isJsonObject } from '@portojs/core';
 import type { JsonObject, JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { compileCost } from './cost.js';
-import type { CostCurve, CostFunctions } from './cost.js';
-import { Economy } from './economy.js';
-import type { Resource } from './resource.js';
-import { affordable, readBig, wholeCount } from './shared.js';
-import type { BulkAmount } from './shared.js';
+import { compileCost } from './cost.ts';
+import type { CostCurve, CostFunctions } from './cost.ts';
+import { Economy } from './economy.ts';
+import type { Resource } from './resource.ts';
+import { affordable, readBig, wholeCount } from './shared.ts';
+import type { BulkAmount } from './shared.ts';
 
 /**
  * A price: a {@link CostCurve} paid in one resource.

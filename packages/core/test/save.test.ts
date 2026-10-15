@@ -12,8 +12,8 @@ import {
   parseSave,
   stableStringify,
   toBase64,
-} from '../src/index.js';
-import type { JsonObject } from '../src/index.js';
+} from '../src/index.ts';
+import type { JsonObject } from '../src/index.ts';
 
 const sample: JsonObject = { gold: '1.5e12', miners: 10, flags: [true, null], nested: { a: 1 } };
 

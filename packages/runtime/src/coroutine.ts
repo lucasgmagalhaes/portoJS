@@ -1,4 +1,4 @@
-import type { Component } from './component.js';
+import type { Component } from './component.ts';
 
 /**
  * Something a coroutine can `yield` to wait. Subclass it for custom waits.

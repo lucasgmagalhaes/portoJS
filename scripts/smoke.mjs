@@ -67,3 +67,43 @@ for (const [name, lib] of [
   assert.equal(lib.format('1.5e12', { notation: 'suffix' }), '1.5T', `${name}: format`);
   console.log(`${name}: ok (Node ${process.version})`);
 }
+
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+
+/**
+ * Every .d.ts and .d.cts under `dir`. They must only point at files that exist, with
+ * extensions consumers can import.
+ */
+function declarationFiles(dir) {
+  const found = [];
+  for (const name of readdirSync(dir)) {
+    const path = join(dir, name);
+    if (statSync(path).isDirectory()) found.push(...declarationFiles(path));
+    else if (name.endsWith('.d.ts') || name.endsWith('.d.cts')) found.push(path);
+  }
+  return found;
+}
+
+const packagesDir = resolve(import.meta.dirname, '../packages');
+let checked = 0;
+for (const pkg of readdirSync(packagesDir)) {
+  const dist = join(packagesDir, pkg, 'dist');
+  if (!existsSync(dist)) continue;
+  for (const file of declarationFiles(dist)) {
+    const text = readFileSync(file, 'utf8');
+    for (const match of text.matchAll(/from '(\.[^']*)'/g)) {
+      const specifier = match[1];
+      assert.ok(!specifier.endsWith('.ts'), `${file}: "${specifier}" must not end in .ts`);
+      const target = specifier.endsWith('.cjs')
+        ? specifier.replace(/\.cjs$/, '.d.cts')
+        : specifier.replace(/\.js$/, '.d.ts');
+      assert.ok(
+        existsSync(resolve(dirname(file), target)),
+        `${file}: "${specifier}" does not resolve`,
+      );
+      checked += 1;
+    }
+  }
+}
+console.log(`declarations: ok (${checked} relative imports resolve)`);

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { Camera2D, INSTANCE_FLOATS, SpriteBatch } from '../src/index.js';
-import type { Texture } from '../src/index.js';
+import { Camera2D, INSTANCE_FLOATS, SpriteBatch } from '../src/index.ts';
+import type { Texture } from '../src/index.ts';
 
 const a: Texture = { id: 1, width: 16, height: 16 };
 const b: Texture = { id: 2, width: 16, height: 16 };

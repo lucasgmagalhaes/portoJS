@@ -9,7 +9,7 @@ import {
   SceneError,
   idleComponents,
   loadScene,
-} from '../src/index.js';
+} from '../src/index.ts';
 
 class Tag extends Component {
   static override typeId = 'Tag';

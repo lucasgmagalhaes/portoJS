@@ -1,5 +1,5 @@
-import { BigNum } from './BigNum.js';
-import type { BigNumLike } from './BigNum.js';
+import { BigNum } from './BigNum.ts';
+import type { BigNumLike } from './BigNum.ts';
 
 /**
  * Built-in notations.

@@ -1,14 +1,14 @@
 import type { Component, ComponentConstructor } from '@portojs/runtime';
-import { Achievement } from './achievement.js';
-import { AutoBuyer } from './auto-buyer.js';
-import { Boost } from './boost.js';
-import { Challenge } from './challenge.js';
-import { DataStore } from './data-store.js';
-import { Generator } from './generator.js';
-import { Prestige } from './prestige.js';
-import { Resource } from './resource.js';
-import { Unlock } from './unlock.js';
-import { Upgrade } from './upgrade.js';
+import { Achievement } from './achievement.ts';
+import { AutoBuyer } from './auto-buyer.ts';
+import { Boost } from './boost.ts';
+import { Challenge } from './challenge.ts';
+import { DataStore } from './data-store.ts';
+import { Generator } from './generator.ts';
+import { Prestige } from './prestige.ts';
+import { Resource } from './resource.ts';
+import { Unlock } from './unlock.ts';
+import { Upgrade } from './upgrade.ts';
 
 /**
  * Every idle component a scene can name, ready for `new ComponentRegistry().register(...idleComponents)`.

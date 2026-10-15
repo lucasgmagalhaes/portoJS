@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
 import { BigNum } from '@portojs/core';
-import { compileCost } from '../src/cost.js';
+import { compileCost } from '../src/cost.ts';
 
 const n = (v: number | string): BigNum => BigNum.from(v);
 

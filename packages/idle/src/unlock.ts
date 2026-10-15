@@ -2,9 +2,9 @@ import { SaveCorruptedError } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { Game, GameObject } from '@portojs/runtime';
-import { Economy } from './economy.js';
-import type { Generator } from './generator.js';
-import type { Upgrade } from './upgrade.js';
+import { Economy } from './economy.ts';
+import type { Generator } from './generator.ts';
+import type { Upgrade } from './upgrade.ts';
 
 /**
  * Options for {@link Unlock}.

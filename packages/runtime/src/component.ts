@@ -1,7 +1,7 @@
 import type { JsonValue } from '@portojs/core';
-import type { Coroutine, CoroutineYield } from './coroutine.js';
-import type { Game } from './game.js';
-import type { GameObject } from './game-object.js';
+import type { Coroutine, CoroutineYield } from './coroutine.ts';
+import type { Game } from './game.ts';
+import type { GameObject } from './game-object.ts';
 
 /**
  * A component class: constructed with the object it is attached to and its options.

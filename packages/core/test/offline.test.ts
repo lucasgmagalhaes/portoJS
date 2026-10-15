@@ -5,7 +5,7 @@ import {
   forEachOfflineStep,
   resolveElapsed,
   resolveOffline,
-} from '../src/index.js';
+} from '../src/index.ts';
 
 const HOUR = 3_600_000;
 

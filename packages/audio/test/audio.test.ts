@@ -1,7 +1,7 @@
 import { ManualClock } from '@portojs/core';
 import { Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
-import { AudioEngine, AudioManager } from '../src/index.js';
+import { AudioEngine, AudioManager } from '../src/index.ts';
 
 class FakeParam {
   value = 1;

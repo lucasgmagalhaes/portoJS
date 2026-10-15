@@ -1,9 +1,9 @@
-import { Gamepads } from './gamepad.js';
-import type { GamepadsOptions } from './gamepad.js';
-import { Keyboard } from './keyboard.js';
-import type { KeyboardOptions } from './keyboard.js';
-import { Pointer } from './pointer.js';
-import type { PointerTarget } from './pointer.js';
+import { Gamepads } from './gamepad.ts';
+import type { GamepadsOptions } from './gamepad.ts';
+import { Keyboard } from './keyboard.ts';
+import type { KeyboardOptions } from './keyboard.ts';
+import { Pointer } from './pointer.ts';
+import type { PointerTarget } from './pointer.ts';
 
 /**
  * Options for {@link Input}.

@@ -1,8 +1,8 @@
 import { ManualClock } from '@portojs/core';
 import { Component, Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
-import { ButtonState, Gamepads, Input, InputComponent, Keyboard, Pointer } from '../src/index.js';
-import type { GamepadLike } from '../src/index.js';
+import { ButtonState, Gamepads, Input, InputComponent, Keyboard, Pointer } from '../src/index.ts';
+import type { GamepadLike } from '../src/index.ts';
 
 interface Fire {
   (type: string, props?: Record<string, unknown>): { defaultPrevented: boolean };

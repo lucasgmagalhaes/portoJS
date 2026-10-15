@@ -1,7 +1,7 @@
 import { ManualClock } from '@portojs/core';
 import { Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
-import { EcsWorld, World, defineComponent, not } from '../src/index.js';
+import { EcsWorld, World, defineComponent, not } from '../src/index.ts';
 
 const Position = defineComponent({ x: 'f32', y: 'f32' });
 const Velocity = defineComponent({ vx: 'f32', vy: 'f32' });

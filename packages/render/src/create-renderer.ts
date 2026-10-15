@@ -1,6 +1,6 @@
-import type { Renderer, RendererOptions } from './renderer.js';
-import { createWebGL2Renderer } from './webgl2.js';
-import { createWebGPURenderer } from './webgpu.js';
+import type { Renderer, RendererOptions } from './renderer.ts';
+import { createWebGL2Renderer } from './webgl2.ts';
+import { createWebGPURenderer } from './webgpu.ts';
 
 const TRANSPARENT = [0, 0, 0, 0] as const;
 

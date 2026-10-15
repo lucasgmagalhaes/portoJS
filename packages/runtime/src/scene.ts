@@ -1,7 +1,7 @@
-import type { ComponentConstructor } from './component.js';
-import type { Component } from './component.js';
-import type { Game } from './game.js';
-import type { GameObject } from './game-object.js';
+import type { ComponentConstructor } from './component.ts';
+import type { Component } from './component.ts';
+import type { Game } from './game.ts';
+import type { GameObject } from './game-object.ts';
 
 const MAX_DEPTH = 64;
 

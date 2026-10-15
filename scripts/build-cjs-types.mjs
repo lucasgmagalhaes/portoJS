@@ -2,18 +2,27 @@ import { copyFileSync, readFileSync, readdirSync, statSync, writeFileSync } from
 import { join } from 'node:path';
 
 /**
- * Copies every .d.ts in ./dist to a .d.cts whose relative imports point at .cjs files, so that
- * CommonJS consumers get types that match the CommonJS output.
+ * Finishes the declaration files in ./dist.
+ *
+ * tsc keeps the ".ts" specifiers of the sources, which consumers cannot import, so every .d.ts
+ * is rewritten to ".js" (what the ESM output is called). Then each .d.ts is copied to a .d.cts
+ * whose relative imports point at ".cjs", so CommonJS consumers get types that match the
+ * CommonJS output.
  */
+function swap(text, from, to) {
+  return text.split(`${from}'`).join(`${to}'`).split(`${from}"`).join(`${to}"`);
+}
+
 function walk(dir) {
   for (const name of readdirSync(dir)) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) walk(path);
     else if (name.endsWith('.d.ts')) {
+      const esm = swap(readFileSync(path, 'utf8'), '.ts', '.js');
+      writeFileSync(path, esm);
       const target = path.slice(0, -'.d.ts'.length) + '.d.cts';
       copyFileSync(path, target);
-      const text = readFileSync(target, 'utf8');
-      writeFileSync(target, text.split(".js'").join(".cjs'").split('.js"').join('.cjs"'));
+      writeFileSync(target, swap(esm, '.js', '.cjs'));
     }
   }
 }

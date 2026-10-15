@@ -1,7 +1,7 @@
 import { Component } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { Input } from './input.js';
-import type { InputOptions } from './input.js';
+import { Input } from './input.ts';
+import type { InputOptions } from './input.ts';
 
 /**
  * Owns an {@link Input} for a game. It runs after every other component in each fixed step, so

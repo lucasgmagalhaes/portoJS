@@ -1,4 +1,4 @@
-import { SaveCorruptedError } from './errors.js';
+import { SaveCorruptedError } from './errors.ts';
 
 /**
  * Any value representable in JSON.

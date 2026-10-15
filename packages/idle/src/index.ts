@@ -1,5 +1,5 @@
-export { idleComponents } from './components.js';
-export { Economy, ECONOMY_OBJECT } from './economy.js';
+export { idleComponents } from './components.ts';
+export { Economy, ECONOMY_OBJECT } from './economy.ts';
 export type {
   EconomyOptions,
   ModifierContext,
@@ -7,34 +7,34 @@ export type {
   OfflineGains,
   Purchase,
   PurchaseGuard,
-} from './economy.js';
-export { Generator } from './generator.js';
-export type { GeneratorOptions, GeneratorPurchase, ResourceCost } from './generator.js';
-export { Resource } from './resource.js';
-export type { ResourceOptions } from './resource.js';
-export { Upgrade } from './upgrade.js';
-export type { UpgradeOptions, UpgradePurchase } from './upgrade.js';
-export type { BulkAmount, EffectTarget, ResetKeep, TargetedMultiplier } from './shared.js';
-export { compileCost } from './cost.js';
-export type { CostCurve, CostFunctions, CustomCost, ExponentialCost, LinearCost } from './cost.js';
-export { solveFlows } from './flows.js';
-export type { FlowResult, FlowSource } from './flows.js';
-export { Achievement } from './achievement.js';
-export type { AchievementOptions } from './achievement.js';
-export { AutoBuyer } from './auto-buyer.js';
-export type { AutoBuy, AutoBuyerOptions } from './auto-buyer.js';
-export { Boost } from './boost.js';
-export type { BoostOptions } from './boost.js';
-export { Challenge } from './challenge.js';
-export type { ChallengeOptions } from './challenge.js';
-export { DataStore } from './data-store.js';
-export { Prestige } from './prestige.js';
+} from './economy.ts';
+export { Generator } from './generator.ts';
+export type { GeneratorOptions, GeneratorPurchase, ResourceCost } from './generator.ts';
+export { Resource } from './resource.ts';
+export type { ResourceOptions } from './resource.ts';
+export { Upgrade } from './upgrade.ts';
+export type { UpgradeOptions, UpgradePurchase } from './upgrade.ts';
+export type { BulkAmount, EffectTarget, ResetKeep, TargetedMultiplier } from './shared.ts';
+export { compileCost } from './cost.ts';
+export type { CostCurve, CostFunctions, CustomCost, ExponentialCost, LinearCost } from './cost.ts';
+export { solveFlows } from './flows.ts';
+export type { FlowResult, FlowSource } from './flows.ts';
+export { Achievement } from './achievement.ts';
+export type { AchievementOptions } from './achievement.ts';
+export { AutoBuyer } from './auto-buyer.ts';
+export type { AutoBuy, AutoBuyerOptions } from './auto-buyer.ts';
+export { Boost } from './boost.ts';
+export type { BoostOptions } from './boost.ts';
+export { Challenge } from './challenge.ts';
+export type { ChallengeOptions } from './challenge.ts';
+export { DataStore } from './data-store.ts';
+export { Prestige } from './prestige.ts';
 export type {
   PrestigeBonus,
   PrestigeFormula,
   PrestigeOptions,
   PrestigeResult,
   RootFormula,
-} from './prestige.js';
-export { Unlock } from './unlock.js';
-export type { UnlockOptions } from './unlock.js';
+} from './prestige.ts';
+export { Unlock } from './unlock.ts';
+export type { UnlockOptions } from './unlock.ts';

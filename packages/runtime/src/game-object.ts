@@ -1,5 +1,5 @@
-import type { Component, ComponentConstructor, ComponentType } from './component.js';
-import type { Game } from './game.js';
+import type { Component, ComponentConstructor, ComponentType } from './component.ts';
+import type { Game } from './game.ts';
 
 /**
  * A named container of components, like Unity's `GameObject`. Create one with

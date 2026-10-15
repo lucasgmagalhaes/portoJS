@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { ManualClock, SaveCorruptedError, createSave } from '../src/index.js';
-import type { JsonValue } from '../src/index.js';
-import { Component, Game, GameEvent } from '../src/index.js';
+import { ManualClock, SaveCorruptedError, createSave } from '../src/index.ts';
+import type { JsonValue } from '../src/index.ts';
+import { Component, Game, GameEvent } from '../src/index.ts';
 
 class Recorder extends Component {
   static override typeId = 'Recorder';

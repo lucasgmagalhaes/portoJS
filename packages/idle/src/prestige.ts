@@ -4,10 +4,10 @@ import { SaveCorruptedError, isJsonObject } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { Economy } from './economy.js';
-import type { Resource } from './resource.js';
-import { readBig } from './shared.js';
-import type { EffectTarget, ResetKeep } from './shared.js';
+import { Economy } from './economy.ts';
+import type { Resource } from './resource.ts';
+import { readBig } from './shared.ts';
+import type { EffectTarget, ResetKeep } from './shared.ts';
 
 /**
  * Preset formula: `scale × (earned / threshold) ^ exponent`, or `0` below the threshold. With

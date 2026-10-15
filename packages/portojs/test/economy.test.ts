@@ -1,9 +1,9 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { BigNum, ManualClock, SaveCorruptedError, createSave, parseSave } from '../src/index.js';
-import { Game } from '../src/index.js';
-import { Economy, Generator, Resource, Upgrade } from '../src/index.js';
-import type { GeneratorOptions } from '../src/index.js';
+import { BigNum, ManualClock, SaveCorruptedError, createSave, parseSave } from '../src/index.ts';
+import { Game } from '../src/index.ts';
+import { Economy, Generator, Resource, Upgrade } from '../src/index.ts';
+import type { GeneratorOptions } from '../src/index.ts';
 
 const HOUR_MS = 3_600_000;
 

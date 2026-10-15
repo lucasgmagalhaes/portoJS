@@ -3,9 +3,9 @@ import { SaveCorruptedError } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { Economy } from './economy.js';
-import type { ModifierContext } from './economy.js';
-import type { TargetedMultiplier } from './shared.js';
+import { Economy } from './economy.ts';
+import type { ModifierContext } from './economy.ts';
+import type { TargetedMultiplier } from './shared.ts';
 
 /**
  * Options for {@link Boost}.

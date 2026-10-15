@@ -1,9 +1,9 @@
 import { getCurrentScope, onScopeDispose, shallowRef } from 'vue';
 import type { ShallowRef } from 'vue';
-import { sameValue, subscribeAll } from './shared.js';
-import type { Observable } from './shared.js';
+import { sameValue, subscribeAll } from './shared.ts';
+import type { Observable } from './shared.ts';
 
-export type { Observable } from './shared.js';
+export type { Observable } from './shared.ts';
 
 /**
  * Exposes a value from a game as a Vue ref that updates when it changes.

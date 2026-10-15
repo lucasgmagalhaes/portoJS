@@ -1,1 +1,1 @@
-export * from './bignum/index.js';
+export * from './bignum/index.ts';

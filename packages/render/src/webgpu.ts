@@ -1,7 +1,7 @@
-import type { BatchResult, Texture } from './batch.js';
-import type { Camera2D } from './camera.js';
-import { INSTANCE_BYTES, MATRIX_BYTES } from './renderer.js';
-import type { ClearColor, Renderer, TextureSource } from './renderer.js';
+import type { BatchResult, Texture } from './batch.ts';
+import type { Camera2D } from './camera.ts';
+import { INSTANCE_BYTES, MATRIX_BYTES } from './renderer.ts';
+import type { ClearColor, Renderer, TextureSource } from './renderer.ts';
 
 const SHADER = `
 struct Uniforms { viewProj : mat4x4<f32> };

@@ -3,5 +3,5 @@ export {
   forEachOfflineStep,
   resolveElapsed,
   resolveOffline,
-} from './offline.js';
-export type { OfflineOptions, OfflineReport, OfflineStatus, StepPlanOptions } from './offline.js';
+} from './offline.ts';
+export type { OfflineOptions, OfflineReport, OfflineStatus, StepPlanOptions } from './offline.ts';

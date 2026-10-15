@@ -1,5 +1,5 @@
-import type { BatchResult, Texture } from './batch.js';
-import type { Camera2D } from './camera.js';
+import type { BatchResult, Texture } from './batch.ts';
+import type { Camera2D } from './camera.ts';
 
 /**
  * Anything a texture can be created from.

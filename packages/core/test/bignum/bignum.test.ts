@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { BigNum } from '../../src/index.js';
+import { BigNum } from '../../src/index.ts';
 
 const big = (v: string | number): BigNum => BigNum.from(v);
 

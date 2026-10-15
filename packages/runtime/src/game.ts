@@ -16,12 +16,12 @@ import {
   parseSave,
 } from '@portojs/core';
 import type { JsonObject, Migrations, SaveData } from '@portojs/core';
-import type { Component, ComponentType } from './component.js';
-import { Coroutine } from './coroutine.js';
-import type { CoroutineYield } from './coroutine.js';
-import { GameObject } from './game-object.js';
-import type { Prefab } from './prefab.js';
-import { Time } from './time.js';
+import type { Component, ComponentType } from './component.ts';
+import { Coroutine } from './coroutine.ts';
+import type { CoroutineYield } from './coroutine.ts';
+import { GameObject } from './game-object.ts';
+import type { Prefab } from './prefab.ts';
+import { Time } from './time.ts';
 
 /**
  * Where a credited away-time span came from.

@@ -1,5 +1,5 @@
-import { ComponentDef } from './component-def.js';
-import type { FieldArrays, FieldType, Schema, Store, Values } from './component-def.js';
+import { ComponentDef } from './component-def.ts';
+import type { FieldArrays, FieldType, Schema, Store, Values } from './component-def.ts';
 
 const ARRAY_TYPES: { readonly [K in FieldType]: new (length: number) => FieldArrays[K] } = {
   i8: Int8Array,

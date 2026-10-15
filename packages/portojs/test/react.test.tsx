@@ -1,8 +1,8 @@
 // @vitest-environment happy-dom
 import { act, renderHook } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
-import { BigNum, Game, Generator, ManualClock, Resource, format } from '../src/index.js';
-import { useGame } from '../src/react.js';
+import { BigNum, Game, Generator, ManualClock, Resource, format } from '../src/index.ts';
+import { useGame } from '../src/react.ts';
 
 function make() {
   const clock = new ManualClock(0);

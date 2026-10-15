@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { format } from '../../src/index.js';
-import type { BigNum } from '../../src/index.js';
+import { format } from '../../src/index.ts';
+import type { BigNum } from '../../src/index.ts';
 
 describe('format', () => {
   it('prints small numbers plainly', () => {

@@ -1,8 +1,8 @@
 import { useRef, useSyncExternalStore } from 'react';
-import { sameValue, subscribeAll } from './shared.js';
-import type { Observable, Off } from './shared.js';
+import { sameValue, subscribeAll } from './shared.ts';
+import type { Observable, Off } from './shared.ts';
 
-export type { Observable } from './shared.js';
+export type { Observable } from './shared.ts';
 
 const subscribers = new WeakMap<Observable, (notify: () => void) => Off>();
 

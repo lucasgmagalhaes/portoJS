@@ -3,12 +3,12 @@ import { SaveCorruptedError } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
-import { compileCost } from './cost.js';
-import type { CostFunctions } from './cost.js';
-import { Economy } from './economy.js';
-import type { ResourceCost } from './generator.js';
-import { affordable } from './shared.js';
-import type { TargetedMultiplier } from './shared.js';
+import { compileCost } from './cost.ts';
+import type { CostFunctions } from './cost.ts';
+import { Economy } from './economy.ts';
+import type { ResourceCost } from './generator.ts';
+import { affordable } from './shared.ts';
+import type { TargetedMultiplier } from './shared.ts';
 
 /**
  * Options for {@link Upgrade}.

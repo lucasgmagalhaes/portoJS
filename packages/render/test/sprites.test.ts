@@ -6,8 +6,8 @@ import {
   SpriteBatch,
   createSpriteSystem,
   spawnSprite,
-} from '../src/index.js';
-import type { Texture } from '../src/index.js';
+} from '../src/index.ts';
+import type { Texture } from '../src/index.ts';
 
 const hero: Texture = { id: 1, width: 32, height: 16 };
 const rock: Texture = { id: 2, width: 8, height: 8 };

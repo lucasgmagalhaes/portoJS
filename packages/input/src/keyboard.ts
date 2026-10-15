@@ -1,4 +1,4 @@
-import { ButtonState } from './button-state.js';
+import { ButtonState } from './button-state.ts';
 
 /**
  * Options for {@link Keyboard}.

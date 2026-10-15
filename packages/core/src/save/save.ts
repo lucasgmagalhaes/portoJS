@@ -1,6 +1,6 @@
-import { fnv1a, fromBase64, isJsonObject, stableStringify, toBase64 } from './codec.js';
-import type { JsonObject } from './codec.js';
-import { SaveCorruptedError, SaveVersionError } from './errors.js';
+import { fnv1a, fromBase64, isJsonObject, stableStringify, toBase64 } from './codec.ts';
+import type { JsonObject } from './codec.ts';
+import { SaveCorruptedError, SaveVersionError } from './errors.ts';
 
 /**
  * A serialized game state with metadata and an integrity checksum.

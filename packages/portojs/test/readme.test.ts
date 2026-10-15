@@ -8,8 +8,8 @@ import {
   Resource,
   SaveCorruptedError,
   format,
-} from '../src/index.js';
-import type { JsonValue } from '../src/index.js';
+} from '../src/index.ts';
+import type { JsonValue } from '../src/index.ts';
 
 describe('README examples', () => {
   it('runs the minimal example as written', () => {

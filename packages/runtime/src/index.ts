@@ -1,8 +1,8 @@
-export { Component } from './component.js';
-export type { ComponentConstructor, ComponentType } from './component.js';
-export { Coroutine, WaitForSeconds, WaitUntil, WaitWhile, YieldInstruction } from './coroutine.js';
-export type { CoroutineYield } from './coroutine.js';
-export { Game } from './game.js';
+export { Component } from './component.ts';
+export type { ComponentConstructor, ComponentType } from './component.ts';
+export { Coroutine, WaitForSeconds, WaitUntil, WaitWhile, YieldInstruction } from './coroutine.ts';
+export type { CoroutineYield } from './coroutine.ts';
+export { Game } from './game.ts';
 export type {
   CreateObjectOptions,
   GameEvents,
@@ -11,12 +11,12 @@ export type {
   InstantiateOptions,
   LoadOptions,
   OfflineSource,
-} from './game.js';
-export { GameEvent } from './game-event.js';
-export type { GameEventListener } from './game-event.js';
-export { GameObject } from './game-object.js';
-export { Prefab } from './prefab.js';
-export type { PrefabBuilder } from './prefab.js';
-export { ComponentRegistry, SceneError, loadScene } from './scene.js';
-export type { Scene, SceneComponent, SceneObject } from './scene.js';
-export { Time } from './time.js';
+} from './game.ts';
+export { GameEvent } from './game-event.ts';
+export type { GameEventListener } from './game-event.ts';
+export { GameObject } from './game-object.ts';
+export { Prefab } from './prefab.ts';
+export type { PrefabBuilder } from './prefab.ts';
+export { ComponentRegistry, SceneError, loadScene } from './scene.ts';
+export type { Scene, SceneComponent, SceneObject } from './scene.ts';
+export { Time } from './time.ts';

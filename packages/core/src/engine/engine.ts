@@ -1,5 +1,5 @@
-import { TimeGuard, systemClock } from '../clock/index.js';
-import type { Clock } from '../clock/index.js';
+import { TimeGuard, systemClock } from '../clock/index.ts';
+import type { Clock } from '../clock/index.ts';
 
 /**
  * Drives a repeating callback. Injectable so tests (and non-browser hosts) control

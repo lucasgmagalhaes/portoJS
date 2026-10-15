@@ -3,15 +3,15 @@ import type { BigNumLike } from '@portojs/core';
 import { forEachOfflineStep } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
 import type { Game, GameObject } from '@portojs/runtime';
-import { solveFlows } from './flows.js';
-import type { FlowSource } from './flows.js';
-import { Generator } from './generator.js';
-import type { GeneratorPurchase } from './generator.js';
-import { Resource } from './resource.js';
-import { filled } from './shared.js';
-import type { EffectTarget, ResetKeep } from './shared.js';
-import { Upgrade } from './upgrade.js';
-import type { UpgradePurchase } from './upgrade.js';
+import { solveFlows } from './flows.ts';
+import type { FlowSource } from './flows.ts';
+import { Generator } from './generator.ts';
+import type { GeneratorPurchase } from './generator.ts';
+import { Resource } from './resource.ts';
+import { filled } from './shared.ts';
+import type { EffectTarget, ResetKeep } from './shared.ts';
+import { Upgrade } from './upgrade.ts';
+import type { UpgradePurchase } from './upgrade.ts';
 
 /**
  * Name of the object the economy lives on when it is created automatically.

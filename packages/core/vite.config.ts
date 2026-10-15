@@ -1,3 +1,3 @@
-import { libraryConfig } from '../../vite.library.js';
+import { libraryConfig } from '../../vite.library.ts';
 
 export default libraryConfig(['index', 'bignum']);

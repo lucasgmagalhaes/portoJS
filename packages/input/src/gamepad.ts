@@ -1,4 +1,4 @@
-import { ButtonState } from './button-state.js';
+import { ButtonState } from './button-state.ts';
 
 /**
  * The parts of a browser `Gamepad` this package reads.
