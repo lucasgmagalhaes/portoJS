@@ -64,11 +64,8 @@ jobs:
         with:
           node-version: 22
           cache: pnpm
-          cache-dependency-path: examples/clicker/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
-        working-directory: examples/clicker
-      - run: pnpm build
-        working-directory: examples/clicker
+      - run: pnpm --filter portojs-clicker-example build
 
   # Real browser: the example game with a faked clock (timers, Date.now, background throttling).
   e2e:
@@ -81,8 +78,6 @@ jobs:
           node-version: 24
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm install --frozen-lockfile
-        working-directory: examples/clicker
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm e2e
       - uses: actions/upload-artifact@v7
