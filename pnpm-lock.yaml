@@ -110,6 +110,16 @@ importers:
 
   packages/core: {}
 
+  packages/ecs:
+    dependencies:
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+
   packages/idle:
     dependencies:
       '@portojs/core':

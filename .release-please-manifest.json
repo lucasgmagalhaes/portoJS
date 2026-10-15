@@ -4,5 +4,6 @@
   "packages/idle": "0.6.0",
   "packages/react": "0.6.0",
   "packages/vue": "0.6.0",
-  "packages/portojs": "0.6.0"
+  "packages/portojs": "0.6.0",
+  "packages/ecs": "0.6.0"
 }
