@@ -316,6 +316,14 @@ export class Game {
   }
 
   /**
+   * Counter that changes whenever an object or component is added or removed. Components that
+   * cache lookups can compare it to know when to refresh.
+   */
+  get structureVersion(): number {
+    return this.structure;
+  }
+
+  /**
    * Every live game object, in creation order.
    */
   get objects(): readonly GameObject[] {
