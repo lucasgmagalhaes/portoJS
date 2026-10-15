@@ -1,0 +1,42 @@
+name: Bug report
+description: Something behaves incorrectly
+labels: [bug]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What did you expect, and what did you get instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: Minimal reproduction
+      description: Ideally a short script or failing test using `ManualClock`, so time is deterministic.
+      render: ts
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: leveling version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: runtime
+    attributes:
+      label: Runtime
+      options: [Browser, Node, Electron, Other]
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Runtime version / browser
+      placeholder: Node 22.4, Chrome 126
+  - type: textarea
+    id: extra
+    attributes:
+      label: Anything else?
