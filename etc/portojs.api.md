@@ -198,7 +198,7 @@ export interface CostFunctions {
 export function createCore<P extends readonly AnyPlugin[] = readonly []>(options?: CoreOptions<P>): Core<EventsOf<P>> & ApiOf<P>;
 
 // @public
-export function createGame<R extends string, G extends string = never, U extends string = never, A extends string = never, PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined = undefined>(config: GameConfig<R, G, U, A, PR>): Game<R, G, U, A, PR>;
+export function createGame<R extends string, G extends string = never, U extends string = never, A extends string = never, PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined = undefined, X extends readonly AnyPlugin[] = readonly []>(config: GameConfig<R, G, U, A, PR, X>): Game<R, G, U, A, PR, X>;
 
 // @public
 export function createIntervalScheduler(options?: IntervalSchedulerOptions): Scheduler;
@@ -246,6 +246,7 @@ export class Emitter<E extends object> {
 export class Engine {
     constructor(options: EngineOptions);
     advance(ms: number): number;
+    discardPending(): void;
     readonly maxCatchUpTicks: number;
     get pending(): number;
     get running(): boolean;
@@ -323,12 +324,13 @@ export function fromBase64(encoded: string): string;
 // Warning: (ae-forgotten-export) The symbol "Optional" needs to be exported by the entry point index.d.ts
 //
 // @public
-export type Game<R extends string, G extends string, U extends string, A extends string, PR> = Core<ResourcesEvents<R, G, U> & (PR extends undefined ? object : PrestigeEvents) & ([A] extends [never] ? object : AchievementsEvents<A>)> & ResourcesApi<R, G, U> & Optional<PR extends undefined ? false : true, PrestigeApi> & ([A] extends [never] ? unknown : AchievementsApi<A>);
+export type Game<R extends string, G extends string, U extends string, A extends string, PR, X extends readonly AnyPlugin[] = readonly []> = Core<ResourcesEvents<R, G, U> & (PR extends undefined ? object : PrestigeEvents) & ([A] extends [never] ? object : AchievementsEvents<A>) & EventsOf<X>> & ResourcesApi<R, G, U> & Optional<PR extends undefined ? false : true, PrestigeApi> & ([A] extends [never] ? unknown : AchievementsApi<A>) & ApiOf<X>;
 
 // @public
-export type GameConfig<R extends string, G extends string, U extends string, A extends string, PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined> = Omit<ResourcesConfig<R, G, U>, 'offline'> & Omit<CoreOptions, 'plugins' | 'offline'> & {
+export type GameConfig<R extends string, G extends string, U extends string, A extends string, PR extends PrestigeConfig<NoInfer<R>, NoInfer<G>, NoInfer<U>> | undefined, X extends readonly AnyPlugin[] = readonly []> = Omit<ResourcesConfig<R, G, U>, 'offline'> & Omit<CoreOptions, 'plugins' | 'offline'> & {
     readonly offline?: CoreOfflineOptions & ResourcesOfflineOptions;
     readonly prestige?: PR;
+    readonly plugins?: X;
     readonly achievements?: {
         readonly [K in A]: AchievementDef<GameView<R, G, U, PR>>;
     };

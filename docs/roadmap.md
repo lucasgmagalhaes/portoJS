@@ -41,7 +41,7 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 | R3  | No way to tear a game down (UI unmount, tests)                                                                    | **done** (`Core.dispose()`)                                                         |
 | R4  | `BigNum` mantissa is a double: ~15 significant digits, and two doubles within 1 ulp can map to the same BigNum    | accepted, documented; revisit only if a game needs more precision                   |
 | R5  | Chained generators use explicit Euler per tick; offline uses the exact polynomial, so they differ slightly        | accepted, documented in `docs/offline-progress.md`; option: sub-stepping for chains |
-| R6  | `Core.load` does not clear the engine's time accumulator; up to one step of pending time carries across a load    | open, minor                                                                         |
+| R6  | `Core.load` does not clear the engine's time accumulator; up to one step of pending time carries across a load    | **done** (`Engine.discardPending()` after load)                                     |
 | R7  | Save import has no size limit: a huge Base64 string is fully decoded and parsed                                   | **done** (`maxSaveChars`, default 10M characters)                                   |
 | R8  | `createGame` cannot install extra plugins with merged types                                                       | **done** (`createGame({ plugins })` with merged types)                              |
 | R9  | Achievement `effect` re-runs on load, so non-idempotent effects double-apply                                      | documented; consider a stricter API (effects declared as modifiers)                 |
