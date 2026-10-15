@@ -50,6 +50,10 @@ export type {
   PrestigeResult,
   RootFormula,
 } from './prestige.ts';
+export { PrestigeTree } from './prestige-tree.ts';
+export type { NodeBought, NodeStatus, PrestigeNode, PrestigeTreeOptions } from './prestige-tree.ts';
+export { Quest } from './quest.ts';
+export type { QuestClaim, QuestOptions, QuestStep } from './quest.ts';
 export { Unlock } from './unlock.ts';
 export type { UnlockOptions } from './unlock.ts';
 export { costChartSvg, costTable } from './cost-chart.ts';

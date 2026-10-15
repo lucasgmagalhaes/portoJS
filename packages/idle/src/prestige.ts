@@ -248,6 +248,18 @@ export class Prestige extends Component {
   }
 
   /**
+   * Gives points back to the balance without counting them as earned, for example when a
+   * prestige tree is respecced.
+   *
+   * @throws {RangeError} if `amount` is negative.
+   */
+  refund(amount: BigNumLike): void {
+    const value = BigNum.from(amount);
+    if (value.isNegative()) throw new RangeError('Prestige.refund needs an amount >= 0');
+    this.balance = this.balance.add(value);
+  }
+
+  /**
    * Clears the points and the since-reset counter, as a higher layer does.
    *
    * @internal

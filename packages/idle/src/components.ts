@@ -7,6 +7,8 @@ import { DataStore } from './data-store.ts';
 import { Generator } from './generator.ts';
 import { LiveEvent } from './live-event.ts';
 import { Prestige } from './prestige.ts';
+import { PrestigeTree } from './prestige-tree.ts';
+import { Quest } from './quest.ts';
 import { Resource } from './resource.ts';
 import { Unlock } from './unlock.ts';
 import { Upgrade } from './upgrade.ts';
@@ -27,4 +29,6 @@ export const idleComponents: ReadonlyArray<ComponentConstructor<Component, never
   Boost,
   DataStore,
   LiveEvent,
+  Quest,
+  PrestigeTree,
 ];
