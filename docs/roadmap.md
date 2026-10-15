@@ -21,7 +21,7 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 
 | #   | Finding                                                                                                                                                                  | Status                                                                                             |
 | --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
-| P1  | No changelog, no versioning flow, no publish pipeline                                                                                                                    | **done** (release-please + npm publish with provenance)                                            |
+| P1  | No changelog and no versioning flow                                                                                                                                      | **done** (release-please; npm publishing deliberately not automated yet)                           |
 | P2  | `package.json` lacked `repository`, `bugs`, `homepage`, `author`, `publishConfig`                                                                                        | **done**                                                                                           |
 | P3  | CI matrix used Node 18 and 20, but the dev tooling needs newer Node (vitest 5 needs 22.12+, tsup 9 needs 22.18+, ESLint 10 needs 20.19+), so those jobs could never pass | **done** (checks on 22/24; built output smoke-tested on 18/20/22/24)                               |
 | P4  | No automated check that the published artifact works for ESM and CJS consumers                                                                                           | **done** (`pnpm smoke`, `pnpm check:package`)                                                      |
@@ -99,10 +99,11 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 
 1. Merge PRs with Conventional Commit titles (`feat:`, `fix:`, `perf:`, `docs:` ...).
 2. `release-please` keeps a release PR open that bumps the version and writes `CHANGELOG.md` from those commits. Before 1.0, `feat` bumps the minor and `fix` bumps the patch; a `!` or `BREAKING CHANGE:` also bumps the minor.
-3. Merging the release PR tags the release, creates the GitHub release, and the `publish` job runs lint, typecheck, tests, build and package checks, then `pnpm publish --provenance`.
+3. Merging the release PR tags the release and creates the GitHub release. **Nothing is published to npm**: publishing is deliberately not automated yet.
 
 One-time setup on GitHub:
 
-- Add an `NPM_TOKEN` repository secret (an npm automation token with publish rights to `portojs`).
 - Settings → Actions → General → allow GitHub Actions to create pull requests.
 - Optionally set the PR merge method to "squash" so each PR title becomes one changelog line.
+
+When it is time to publish, add a job to `.github/workflows/release.yml` that runs after a release is created (`release_created` output), with an `NPM_TOKEN` secret and `pnpm publish --provenance`. The package already passes `publint` and `attw` (`pnpm check:package`).
