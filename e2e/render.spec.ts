@@ -55,10 +55,18 @@ test.describe('WebGPU renderer', () => {
   test('draws a tinted sprite when WebGPU is available', async ({ page }) => {
     await page.goto(`${BASE}?paused=1&count=0`);
     const available = await page.evaluate(async () => {
-      const gpu = (navigator as { gpu?: { requestAdapter(): Promise<unknown> } }).gpu;
-      return gpu !== undefined && (await gpu.requestAdapter()) !== null;
+      const gpu = (navigator as { gpu?: { requestAdapter(): Promise<GPUAdapter | null> } }).gpu;
+      const adapter = await gpu?.requestAdapter();
+      if (adapter === undefined || adapter === null) return false;
+      try {
+        (await adapter.requestDevice()).destroy();
+        return true;
+      } catch {
+        return false;
+      }
     });
-    test.skip(!available, 'WebGPU is not available in this browser');
+    if (process.env['CI'] !== undefined) expect(available, 'WebGPU adapter in CI').toBe(true);
+    else test.skip(!available, 'WebGPU is not available in this browser');
     await open(page, 'webgpu', 0);
     expect(await page.evaluate(() => window.__demo?.backend)).toBe('webgpu');
     await page.evaluate(() => {

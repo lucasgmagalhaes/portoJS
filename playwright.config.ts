@@ -1,5 +1,13 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const gpuArgs = [
+  '--enable-unsafe-webgpu',
+  '--enable-features=Vulkan',
+  '--use-webgpu-adapter=swiftshader',
+  '--enable-unsafe-swiftshader',
+  '--ignore-gpu-blocklist',
+];
+
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,
@@ -7,7 +15,9 @@ export default defineConfig({
   retries: process.env['CI'] ? 1 : 0,
   reporter: process.env['CI'] ? [['github'], ['list']] : 'list',
   use: { baseURL: 'http://localhost:4173', trace: 'retain-on-failure' },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'], launchOptions: { args: gpuArgs } } },
+  ],
   webServer: [
     {
       command: 'npx vite --port 4173 --strictPort',
