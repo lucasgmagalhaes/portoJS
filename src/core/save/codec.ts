@@ -19,8 +19,16 @@ export function isJsonObject(value: unknown): value is JsonObject {
 export function stableStringify(value: JsonValue): string {
   if (value === null || typeof value !== 'object') return JSON.stringify(value);
   if (Array.isArray(value)) return `[${value.map(stableStringify).join(',')}]`;
-  const entries = Object.entries(value).sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0));
-  return `{${entries.map(([k, v]) => `${JSON.stringify(k)}:${stableStringify(v)}`).join(',')}}`;
+  // Default sort compares UTF-16 code units, which is exactly the order we want and is much
+  // faster than a comparator for objects with thousands of keys.
+  const keys = Object.keys(value).sort();
+  let out = '{';
+  for (let i = 0; i < keys.length; i++) {
+    const key = keys[i] as string;
+    if (i > 0) out += ',';
+    out += `${JSON.stringify(key)}:${stableStringify(value[key] as JsonValue)}`;
+  }
+  return `${out}}`;
 }
 
 /** 32-bit FNV-1a hash of `text` as 8 hex digits. Detects accidents, not tampering. */
