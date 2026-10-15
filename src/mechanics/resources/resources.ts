@@ -44,6 +44,9 @@ interface GenState {
   readonly initialBought: BigNum;
   bought: BigNum;
   free: BigNum;
+  /** Last serialized form, reused while `bought` and `free` are the same objects (immutable). */
+  snapshot:
+    { readonly bought: BigNum; readonly free: BigNum; readonly json: JsonObject } | undefined;
 }
 
 interface UpState {
@@ -155,6 +158,7 @@ export function resources<R extends string, G extends string = never, U extends 
           initialBought,
           bought: initialBought,
           free: BigNum.ZERO,
+          snapshot: undefined,
         };
       });
 
@@ -206,6 +210,11 @@ export function resources<R extends string, G extends string = never, U extends 
         }
       };
 
+      /** `rate × multipliers × dt` per generator, valid while nothing that feeds it changes. */
+      let effDt: BigNum[] = [];
+      let effDtFor = Number.NaN;
+      let dtCache: { readonly seconds: number; readonly value: BigNum } | undefined;
+
       const rebuildUpgradeCaches = (): void => {
         genUpgradeMult.fill(BigNum.ONE);
         resUpgradeMult.fill(BigNum.ONE);
@@ -217,6 +226,7 @@ export function resources<R extends string, G extends string = never, U extends 
           }
         }
         baseEff = gens.map((g, i) => g.rate.mul(genUpgradeMult[i] as BigNum).mul(allUpgradeMult));
+        effDtFor = Number.NaN;
       };
 
       const refreshModifiers = (): void => {
@@ -245,13 +255,21 @@ export function resources<R extends string, G extends string = never, U extends 
       const pendingGen: BigNum[] = gens.map(() => BigNum.ZERO);
 
       /** Computes what every generator emits over `dt` seconds, into the scratch arrays. */
-      const produce = (dt: BigNum): void => {
+      const produce = (dt: BigNum, cacheKey?: number): void => {
         pendingRes.fill(BigNum.ZERO);
         if (hasChains) pendingGen.fill(BigNum.ZERO);
+        // Dynamic modifiers are re-read every tick, so the cache only applies without them.
+        const cached = cacheKey !== undefined && modifiers.size === 0;
+        if (cached && effDtFor !== cacheKey) {
+          effDt = gens.map((_, i) => effOf(i).mul(dt));
+          effDtFor = cacheKey;
+        }
         for (let i = 0; i < gens.length; i++) {
           const g = gens[i] as GenState;
-          if (g.bought.isZero() && g.free.isZero()) continue;
-          const out = g.bought.add(g.free).mul(effOf(i)).mul(dt);
+          const hasFree = !g.free.isZero();
+          if (g.bought.isZero() && !hasFree) continue;
+          const held = hasFree ? g.bought.add(g.free) : g.bought;
+          const out = held.mul(cached ? (effDt[i] as BigNum) : effOf(i).mul(dt));
           const t = g.target.index;
           if (g.target.kind === 'resource') pendingRes[t] = (pendingRes[t] as BigNum).add(out);
           else pendingGen[t] = (pendingGen[t] as BigNum).add(out);
@@ -266,7 +284,10 @@ export function resources<R extends string, G extends string = never, U extends 
 
       const step = (dtSeconds: number): void => {
         refreshModifiers();
-        produce(BigNum.from(dtSeconds));
+        if (dtCache?.seconds !== dtSeconds) {
+          dtCache = { seconds: dtSeconds, value: BigNum.from(dtSeconds) };
+        }
+        produce(dtCache.value, dtSeconds);
         for (let r = 0; r < res.length; r++) {
           const pending = pendingRes[r] as BigNum;
           if (!pending.isZero()) credit(r, pending.mul(resMultOf(r)));
@@ -344,7 +365,14 @@ export function resources<R extends string, G extends string = never, U extends 
           });
           generatorIds.forEach((id, i) => {
             const g = gens[i] as GenState;
-            generatorsOut[id] = { bought: g.bought.toJSON(), free: g.free.toJSON() };
+            const snap = g.snapshot;
+            if (snap !== undefined && snap.bought === g.bought && snap.free === g.free) {
+              generatorsOut[id] = snap.json;
+              return;
+            }
+            const json: JsonObject = { bought: g.bought.toJSON(), free: g.free.toJSON() };
+            g.snapshot = { bought: g.bought, free: g.free, json };
+            generatorsOut[id] = json;
           });
           upgradeIds.forEach((id, i) => {
             upgradesOut[id] = (ups[i] as UpState).level;

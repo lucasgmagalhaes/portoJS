@@ -527,3 +527,36 @@ describe('resources: ticking and offline agree (property)', () => {
     );
   }, 30_000);
 });
+
+describe('resources: cached production stays correct', () => {
+  it('picks up upgrades, modifiers and their removal between ticks', () => {
+    const { game } = build(1000);
+    game.buy('miner', 2);
+    const earnedOver = (ms: number): number => {
+      const before = game.amount('gold');
+      game.advance(ms);
+      return game.amount('gold').sub(before).toNumber();
+    };
+    expect(earnedOver(1000)).toBeCloseTo(2, 9);
+    game.buyUpgrade('pick'); // miners x2
+    const afterUpgrade = earnedOver(1000);
+    expect(afterUpgrade).toBeCloseTo(4, 9);
+    game.setModifier('boost', { all: true }, 10);
+    expect(earnedOver(1000)).toBeCloseTo(40, 9);
+    game.removeModifier('boost');
+    expect(earnedOver(1000)).toBeCloseTo(4, 9);
+    game.buy('miner');
+    expect(earnedOver(1000)).toBeCloseTo(6, 9);
+  });
+
+  it('serializes unchanged generators from cache and notices changes', () => {
+    const { game } = build(1000);
+    game.buy('miner', 2);
+    const first = JSON.stringify(game.save().data);
+    expect(JSON.stringify(game.save().data)).toBe(first);
+    game.buy('miner');
+    expect(JSON.stringify(game.save().data)).not.toBe(first);
+    game.reset();
+    expect(JSON.stringify(game.save().data)).toContain('"bought":"0"');
+  });
+});
