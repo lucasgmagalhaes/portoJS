@@ -1,3 +1,9 @@
+/**
+ * React bindings for PortoJS games.
+ *
+ * @module @portojs/react
+ */
+
 import { useRef, useSyncExternalStore } from 'react';
 import { sameValue, subscribeAll } from './shared.ts';
 import type { Observable, Off } from './shared.ts';

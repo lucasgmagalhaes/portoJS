@@ -1,3 +1,9 @@
+/**
+ * Vue bindings for PortoJS games.
+ *
+ * @module @portojs/vue
+ */
+
 import { getCurrentScope, onScopeDispose, shallowRef } from 'vue';
 import type { ShallowRef } from 'vue';
 import { sameValue, subscribeAll } from './shared.ts';

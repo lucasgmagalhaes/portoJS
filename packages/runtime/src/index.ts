@@ -1,3 +1,9 @@
+/**
+ * The Unity-style Game, GameObject and Component runtime of PortoJS, with coroutines, prefabs and JSON scenes.
+ *
+ * @module @portojs/runtime
+ */
+
 export { Component } from './component.ts';
 export type { ComponentConstructor, ComponentType } from './component.ts';
 export { Coroutine, WaitForSeconds, WaitUntil, WaitWhile, YieldInstruction } from './coroutine.ts';

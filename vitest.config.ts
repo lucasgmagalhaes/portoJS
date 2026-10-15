@@ -6,6 +6,7 @@ const at = (path: string): string => fileURLToPath(new URL(path, import.meta.url
 export default defineConfig({
   resolve: {
     alias: {
+      portojs: at('./packages/portojs/src/index.ts'),
       '@portojs/core/bignum': at('./packages/core/src/bignum.ts'),
       '@portojs/core': at('./packages/core/src/index.ts'),
       '@portojs/runtime': at('./packages/runtime/src/index.ts'),

@@ -1,3 +1,9 @@
+/**
+ * Web Audio for PortoJS: buses, sound loading, playback control and autoplay unlocking.
+ *
+ * @module @portojs/audio
+ */
+
 export { AudioManager } from './audio-manager.ts';
 export { AudioEngine, Playback } from './engine.ts';
 export type { AudioEngineOptions, Fetcher, PlayOptions, Sound } from './engine.ts';

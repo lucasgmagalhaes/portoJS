@@ -1,3 +1,9 @@
+/**
+ * 2D rendering for PortoJS: an orthographic camera, an auto-batching sprite renderer with WebGPU and WebGL2 backends and ECS integration.
+ *
+ * @module @portojs/render
+ */
+
 export { INSTANCE_FLOATS, SpriteBatch } from './batch.ts';
 export type { BatchResult, DrawGroup, SpriteDraw, Texture } from './batch.ts';
 export { Camera2D } from './camera.ts';

@@ -1,6 +1,23 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["packages/portojs/src/index.ts"],
+  "entryPoints": [
+    "packages/core/src/index.ts",
+    "packages/runtime/src/index.ts",
+    "packages/idle/src/index.ts",
+    "packages/react/src/index.ts",
+    "packages/vue/src/index.ts",
+    "packages/svelte/src/index.ts",
+    "packages/solid/src/index.ts",
+    "packages/ecs/src/index.ts",
+    "packages/render/src/index.ts",
+    "packages/input/src/index.ts",
+    "packages/audio/src/index.ts",
+    "packages/physics/src/index.ts",
+    "packages/tools/src/index.ts",
+    "packages/devtools/src/index.ts",
+    "packages/worker/src/index.ts",
+    "packages/platform/src/index.ts"
+  ],
   "tsconfig": "tsconfig.json",
   "out": "docs/api",
   "plugin": ["typedoc-plugin-markdown"],
@@ -14,5 +31,6 @@
   "skipErrorChecking": true,
   "githubPages": false,
   "cleanOutputDir": true,
-  "name": "API reference"
+  "name": "API reference",
+  "entryPointStrategy": "resolve"
 }

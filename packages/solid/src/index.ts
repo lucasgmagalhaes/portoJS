@@ -1,3 +1,9 @@
+/**
+ * Solid bindings for PortoJS games.
+ *
+ * @module @portojs/solid
+ */
+
 import { createSignal, getOwner, onCleanup } from 'solid-js';
 import type { Accessor } from 'solid-js';
 import { sameValue, subscribeAll } from './shared.ts';

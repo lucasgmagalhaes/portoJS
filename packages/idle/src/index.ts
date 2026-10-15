@@ -1,3 +1,9 @@
+/**
+ * Optional idle and incremental game components for PortoJS: resources, generators, upgrades, prestige and more.
+ *
+ * @module @portojs/idle
+ */
+
 export { idleComponents } from './components.ts';
 export { Economy, ECONOMY_OBJECT } from './economy.ts';
 export type {

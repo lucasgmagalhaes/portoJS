@@ -1,3 +1,9 @@
+/**
+ * Svelte store bindings for PortoJS games.
+ *
+ * @module @portojs/svelte
+ */
+
 import { sameValue, subscribeAll } from './shared.ts';
 import type { Observable, Off } from './shared.ts';
 

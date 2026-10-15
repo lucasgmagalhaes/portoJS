@@ -1,3 +1,9 @@
+/**
+ * Platform adapters for PortoJS: Telegram Mini Apps, TikTok mini games and the plain web, with cloud storage, haptics, lifecycle and a session helper.
+ *
+ * @module @portojs/platform
+ */
+
 export { webPlatform } from './platform.ts';
 export type {
   Haptic,

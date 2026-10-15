@@ -1,3 +1,9 @@
+/**
+ * Keyboard, pointer (mouse, touch, pen) and gamepad input for PortoJS, with per-step pressed and released edges and named actions.
+ *
+ * @module @portojs/input
+ */
+
 export { ButtonState } from './button-state.ts';
 export { Gamepads } from './gamepad.ts';
 export type { GamepadLike, GamepadProvider, GamepadsOptions } from './gamepad.ts';

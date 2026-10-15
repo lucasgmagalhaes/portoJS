@@ -9,7 +9,13 @@ hero:
       text: Get started
       link: /getting-started
     - theme: alt
-      text: Try the playground
+      text: Tutorials
+      link: /tutorials/
+    - theme: alt
+      text: Catalogue
+      link: /catalogue
+    - theme: alt
+      text: Playground
       link: /playground
     - theme: alt
       text: API reference
@@ -24,7 +30,11 @@ features:
   - title: Numbers that never overflow
     details: An immutable BigNum with exponents up to ~9e15, JSON-safe, formatted as 1.5e12 or 1.5T.
   - title: Idle mechanics when you want them
-    details: Resource, Generator, Upgrade, Prestige, Achievement, Unlock, AutoBuyer, Challenge, Boost. Add only what your game needs.
+    details: Resource, Generator, Upgrade, Prestige, Achievement, Unlock, AutoBuyer, Challenge, Boost, LiveEvent. Add only what your game needs.
+  - title: Sprites, physics, input, audio
+    details: A typed-array ECS, a WebGPU renderer with a WebGL2 fallback, Rapier physics, keyboard, pointer and gamepad input, and a Web Audio mixer, each an optional package.
+  - title: Made for mini-games
+    details: Telegram and TikTok adapters, a Web Worker host, compressed saves and a balancing simulator with devtools.
   - title: Deterministic and tested
     details: Inject a fake clock and replay time exactly. Unit, property-based and browser tests. About 6 KB for the runtime.
 ---

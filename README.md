@@ -141,7 +141,7 @@ Numbers vary by machine; run the benchmark yourself.
 
 ## Documentation
 
-Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`. The same content as plain files:
+Full site (guides, four tutorials, a searchable catalogue, API reference for every package and an in-browser playground): `pnpm docs:dev`. The same content as plain files:
 
 - [Getting started](docs/getting-started.md)
 - [Components and the game model](docs/components.md): lifecycle, saves, writing your own
@@ -180,7 +180,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] Localisable number suffix sets
 - [x] Off-main-thread simulation (Web Worker helper)
 - [ ] Decide on Rust/WebAssembly for hot spots such as physics (planned for the end)
-- [ ] Documentation site with its own theme, a component catalogue and tutorials (planned for the end)
+- [x] Documentation site with its own theme, a component catalogue and tutorials
 - [x] Devtools: inspect objects and components, fast-forward time, edit values
 
 ## License

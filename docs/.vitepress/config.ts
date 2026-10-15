@@ -1,17 +1,23 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitepress';
 
+const base = process.env['DOCS_BASE'] ?? '/';
+
 export default defineConfig({
   title: 'PortoJS',
+  head: [['link', { rel: 'icon', href: `${base}logo.svg` }]],
   description:
     'A headless TypeScript game engine with a Unity-style Game, GameObject and Component model.',
-  base: process.env['DOCS_BASE'] ?? '/',
+  base,
   cleanUrls: true,
   lastUpdated: true,
   srcExclude: ['**/README.md'],
   themeConfig: {
+    logo: '/logo.svg',
     nav: [
       { text: 'Guide', link: '/getting-started' },
+      { text: 'Tutorials', link: '/tutorials/' },
+      { text: 'Catalogue', link: '/catalogue' },
       { text: 'Playground', link: '/playground' },
       { text: 'API', link: '/api/' },
       { text: 'Roadmap', link: '/roadmap' },
@@ -36,8 +42,21 @@ export default defineConfig({
         ],
       },
       {
+        text: 'Tutorials',
+        items: [
+          { text: 'Overview', link: '/tutorials/' },
+          { text: 'Hello, game', link: '/tutorials/hello-game' },
+          { text: 'Your first idle game', link: '/tutorials/idle-game' },
+          { text: 'A sprite game', link: '/tutorials/sprite-game' },
+          { text: 'A bouncing ball', link: '/tutorials/bouncing-ball' },
+        ],
+      },
+      {
         text: 'Try it',
-        items: [{ text: 'Playground', link: '/playground' }],
+        items: [
+          { text: 'Catalogue', link: '/catalogue' },
+          { text: 'Playground', link: '/playground' },
+        ],
       },
       {
         text: 'Reference',

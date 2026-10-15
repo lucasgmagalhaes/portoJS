@@ -1,3 +1,9 @@
+/**
+ * Developer tools for PortoJS: a headless balancing simulator and a game inspector.
+ *
+ * @module @portojs/tools
+ */
+
 export { simulate } from './simulate.ts';
 export type { SimulationOptions, SimulationResult, SimulationSample } from './simulate.ts';
 export { buyCheapest, buyInOrder } from './strategies.ts';
