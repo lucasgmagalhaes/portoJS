@@ -216,6 +216,7 @@ Imported from `portojs` or `portojs/idle`. They are ordinary components built on
 | `AutoBuyer`   | Buys a generator on a timer; switch with `enabled`             | Does not act while the player is away                   |
 | `Challenge`   | Restart with a handicap, earn a permanent reward               | One challenge runs at a time                            |
 | `Boost`       | Time-limited multipliers ("2x for 30 s")                       | Timers pause while away; no boost on offline gains      |
+| `LiveEvent`   | Calendar windows with multipliers ("double gold on weekends")  | Follows the clock, saves nothing; no effect on offline  |
 | `DataStore`   | Free-form saved data (`set` / `get`)                           | Values must be JSON                                     |
 
 ```ts
@@ -254,6 +255,25 @@ economy.purchased.addListener((purchase) => console.log(purchase.kind));
 ```
 
 A dynamic modifier receives `{ offline }`, so a time-limited bonus can step aside while away-time is credited.
+
+### Calendar events
+
+`LiveEvent` is open during windows of the game clock, so it runs whether or not the player is online, unlike `Boost`, which counts down only while playing:
+
+```ts
+const weekend = game.createObject('Weekend').addComponent(LiveEvent, {
+  startsAt: Date.UTC(2026, 0, 3),
+  durationMs: 2 * 86_400_000,
+  repeatEveryMs: 7 * 86_400_000,
+  effects: [{ resource: gold, multiplier: 2 }],
+});
+weekend.started.addListener(() => showBanner('Double gold!'));
+weekend.isOpen(); // now
+weekend.nextWindow(); // { start, end }
+weekend.windowsBetween(from, to); // the data for a calendar view
+```
+
+Its multipliers apply to production while playing and not to offline gains, which keeps those a closed form. Edges are as precise as the update rate.
 
 ## Tips
 

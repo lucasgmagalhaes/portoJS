@@ -5,6 +5,7 @@ import { Boost } from './boost.ts';
 import { Challenge } from './challenge.ts';
 import { DataStore } from './data-store.ts';
 import { Generator } from './generator.ts';
+import { LiveEvent } from './live-event.ts';
 import { Prestige } from './prestige.ts';
 import { Resource } from './resource.ts';
 import { Unlock } from './unlock.ts';
@@ -25,4 +26,5 @@ export const idleComponents: ReadonlyArray<ComponentConstructor<Component, never
   Challenge,
   Boost,
   DataStore,
+  LiveEvent,
 ];

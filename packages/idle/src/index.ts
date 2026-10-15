@@ -48,3 +48,5 @@ export { Unlock } from './unlock.ts';
 export type { UnlockOptions } from './unlock.ts';
 export { costChartSvg, costTable } from './cost-chart.ts';
 export type { ChartSeries, CostChartOptions, CostRow, CostTableOptions } from './cost-chart.ts';
+export { LiveEvent } from './live-event.ts';
+export type { EventWindow, LiveEventOptions } from './live-event.ts';

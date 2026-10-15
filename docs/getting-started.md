@@ -56,7 +56,7 @@ You can also pass your own `suffixes` array, starting at 10^3.
 
 ## Idle mechanics are optional
 
-The `Game` knows nothing about resources or prestige. They are components from `portojs/idle` that you add when you want them: `Resource`, `Generator`, `Upgrade`, `Prestige`, `Achievement`, `Unlock`, `AutoBuyer`, `Challenge`, `Boost`, `DataStore`. A game that is not idle simply does not import them.
+The `Game` knows nothing about resources or prestige. They are components from `portojs/idle` that you add when you want them: `Resource`, `Generator`, `Upgrade`, `Prestige`, `Achievement`, `Unlock`, `AutoBuyer`, `Challenge`, `Boost`, `LiveEvent`, `DataStore`. A game that is not idle simply does not import them.
 
 ## Your own behavior
 

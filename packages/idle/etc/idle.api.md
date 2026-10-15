@@ -263,6 +263,12 @@ export type EffectTarget = {
 };
 
 // @public
+export interface EventWindow {
+    readonly end: number;
+    readonly start: number;
+}
+
+// @public
 export interface ExponentialCost {
     readonly base: BigNumLike;
     readonly growth: BigNumLike;
@@ -341,6 +347,35 @@ export interface LinearCost {
     readonly increment: BigNumLike;
     // (undocumented)
     readonly type: 'linear';
+}
+
+// @public
+export class LiveEvent extends Component {
+    constructor(gameObject: GameObject, options: LiveEventOptions);
+    // (undocumented)
+    awake(): void;
+    readonly ended: GameEvent<LiveEvent>;
+    // (undocumented)
+    fixedUpdate(): void;
+    isOpen(at?: number): boolean;
+    nextWindow(at?: number): EventWindow | undefined;
+    // (undocumented)
+    onDestroy(): void;
+    remainingMs(at?: number): number;
+    readonly started: GameEvent<LiveEvent>;
+    // (undocumented)
+    static typeId: string;
+    windowAt(at?: number): EventWindow | undefined;
+    windowsBetween(from: number, to: number): EventWindow[];
+}
+
+// @public
+export interface LiveEventOptions {
+    readonly durationMs: number;
+    readonly effects?: readonly TargetedMultiplier[];
+    readonly occurrences?: number;
+    readonly repeatEveryMs?: number;
+    readonly startsAt: number;
 }
 
 // @public

@@ -79,7 +79,7 @@ An earlier version used a functional plugin kernel (`createCore`, `definePlugin`
 
 **Idle mechanics**
 
-- Time-limited events and a calendar.
+- Done: time-limited events (`LiveEvent`) with a calendar.
 - Done: polynomial and stepped cost curves and a cost chart.
 
 **Developer experience**
