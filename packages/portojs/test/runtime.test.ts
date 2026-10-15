@@ -461,3 +461,17 @@ describe('Offline progress', () => {
     expect(counter.value).toBe(0);
   });
 });
+
+describe('Game compressed saves', () => {
+  it('exports a compressed save that loads back and respects maxSaveChars', () => {
+    const clock = new ManualClock(0);
+    const game = new Game({ clock });
+    const recorder = game.createObject('R').addComponent(Recorder);
+    const packed = game.exportSave({ compress: true });
+    expect(packed.startsWith('~')).toBe(true);
+    expect(() => game.importSave(packed)).not.toThrow();
+    expect(recorder.log).toContain('awake');
+    const strict = new Game({ clock, maxSaveChars: 10_000 });
+    expect(() => strict.importSave(packed.padEnd(20_000, 'A'))).toThrow(SaveCorruptedError);
+  });
+});

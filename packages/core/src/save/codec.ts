@@ -51,10 +51,9 @@ export function fnv1a(text: string): string {
 const CHUNK = 0x8000;
 
 /**
- * Encodes text as UTF-8 then Base64.
+ * Encodes bytes as Base64.
  */
-export function toBase64(text: string): string {
-  const bytes = new TextEncoder().encode(text);
+export function bytesToBase64(bytes: Uint8Array): string {
   let binary = '';
   for (let i = 0; i < bytes.length; i += CHUNK) {
     binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
@@ -63,15 +62,36 @@ export function toBase64(text: string): string {
 }
 
 /**
+ * Decodes Base64 to bytes.
+ *
+ * @throws {SaveCorruptedError} if the input is not valid Base64.
+ */
+export function base64ToBytes(encoded: string): Uint8Array {
+  try {
+    const binary = atob(encoded);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    return bytes;
+  } catch {
+    throw new SaveCorruptedError('Save string is not valid Base64');
+  }
+}
+
+/**
+ * Encodes text as UTF-8 then Base64.
+ */
+export function toBase64(text: string): string {
+  return bytesToBase64(new TextEncoder().encode(text));
+}
+
+/**
  * Decodes Base64 produced by {@link toBase64}.
  *
  * @throws {SaveCorruptedError} if the input is not valid Base64 / UTF-8.
  */
 export function fromBase64(encoded: string): string {
+  const bytes = base64ToBytes(encoded);
   try {
-    const binary = atob(encoded);
-    const bytes = new Uint8Array(binary.length);
-    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes);
   } catch {
     throw new SaveCorruptedError('Save string is not valid Base64');

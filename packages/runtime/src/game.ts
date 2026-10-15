@@ -15,7 +15,7 @@ import {
   migrateSave,
   parseSave,
 } from '@portojs/core';
-import type { JsonObject, Migrations, SaveData } from '@portojs/core';
+import type { ExportOptions, JsonObject, Migrations, SaveData } from '@portojs/core';
 import type { Component, ComponentType } from './component.ts';
 import { Coroutine } from './coroutine.ts';
 import type { CoroutineYield } from './coroutine.ts';
@@ -209,7 +209,7 @@ function decodeText(text: string, maxChars: number): SaveData {
     );
   }
   const trimmed = text.trim();
-  return trimmed.startsWith('{') ? parseSave(trimmed) : importSave(trimmed);
+  return trimmed.startsWith('{') ? parseSave(trimmed) : importSave(trimmed, maxChars);
 }
 
 /**
@@ -561,10 +561,11 @@ export class Game {
   }
 
   /**
-   * Captures the state as a Base64 string, ready to copy or store.
+   * Captures the state as a Base64 string, ready to copy or store. Pass `{ compress: true }` for
+   * a much smaller string; loading reads both formats.
    */
-  exportSave(): string {
-    return exportSave(this.save());
+  exportSave(options?: ExportOptions): string {
+    return exportSave(this.save(), options);
   }
 
   /**

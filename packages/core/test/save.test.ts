@@ -160,3 +160,77 @@ describe('migrations', () => {
     expect(() => migrateSave(createSave(1, 1, {}), 2, junk)).toThrow(SaveVersionError);
   });
 });
+
+describe('compressed export', () => {
+  const big: JsonObject = {
+    items: Array.from({ length: 4000 }, (_, i) => ({
+      id: i,
+      name: `generator-${i % 17}`,
+      owned: '1.5e12',
+    })),
+  };
+
+  it('round-trips and is much smaller for repetitive saves', () => {
+    const save = createSave(3, 1000, big);
+    const plain = exportSave(save);
+    const packed = exportSave(save, { compress: true });
+    expect(packed.startsWith('~')).toBe(true);
+    expect(packed.length).toBeLessThan(plain.length / 3);
+    expect(importSave(packed)).toEqual(save);
+    expect(importSave(plain)).toEqual(save);
+  });
+
+  it('round-trips arbitrary data, including text beyond ASCII and table resets', () => {
+    fc.assert(
+      fc.property(
+        fc.string({ unit: 'binary', maxLength: 300 }),
+        fc.integer({ min: 0, max: 5 }),
+        (text, extra) => {
+          const save = createSave(1, 5, {
+            text,
+            list: Array.from({ length: extra * 2000 }, (_, i) => i % 9),
+          });
+          expect(importSave(exportSave(save, { compress: true }))).toEqual(save);
+        },
+      ),
+      { numRuns: 40 },
+    );
+  });
+
+  it('rejects damaged or hostile compressed input', () => {
+    const packed = exportSave(createSave(1, 1, sample), { compress: true });
+    expect(() => importSave('~!!!')).toThrow(SaveCorruptedError);
+    expect(() => importSave(`${packed.slice(0, -6)}AAAA`)).toThrow(SaveCorruptedError);
+    expect(() => importSave(packed.slice(0, 8))).toThrow(SaveCorruptedError);
+    expect(() => importSave('~')).toThrow(SaveCorruptedError);
+    expect(() => importSave(packed, 10)).toThrow(SaveCorruptedError);
+    expect(() => importSave(`~${toBase64('plain text, not lzw')}`)).toThrow(SaveCorruptedError);
+  });
+
+  it('never crashes on random compressed payloads', () => {
+    fc.assert(
+      fc.property(fc.uint8Array({ maxLength: 200 }), (bytes) => {
+        const encoded = `~${btoa(String.fromCharCode(...bytes))}`;
+        try {
+          importSave(encoded);
+        } catch (error) {
+          expect(error).toBeInstanceOf(SaveCorruptedError);
+        }
+      }),
+      { numRuns: 300 },
+    );
+  });
+});
+
+describe('compressed export with a full code table', () => {
+  it('clears the table and keeps round-tripping on large, noisy data', () => {
+    let seed = 12345;
+    const noise = Array.from({ length: 250_000 }, () => {
+      seed = (Math.imul(seed, 1664525) + 1013904223) >>> 0;
+      return seed % 1000;
+    });
+    const save = createSave(1, 1, { noise });
+    const packed = exportSave(save, { compress: true });
+    expect(importSave(packed)).toEqual(save);
+  });
+});

@@ -167,10 +167,10 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] Prefab-style templates to create many similar objects
 - [x] A scene description format (JSON) that builds objects and components
 - [x] Coroutines for sequenced timed behavior
-- [ ] Optional compressed save format
+- [x] Optional compressed save format
 - [x] Svelte and Solid bindings
 - [ ] More cost curves and a cost-curve visualiser for balancing
-- [ ] Localisable number suffix sets
+- [x] Localisable number suffix sets
 - [ ] Off-main-thread simulation (Web Worker helper)
 - [ ] Decide on Rust/WebAssembly for hot spots such as physics (planned for the end)
 - [ ] Documentation site with its own theme, a component catalogue and tutorials (planned for the end)

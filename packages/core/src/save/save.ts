@@ -1,6 +1,15 @@
-import { fnv1a, fromBase64, isJsonObject, stableStringify, toBase64 } from './codec.ts';
+import {
+  base64ToBytes,
+  bytesToBase64,
+  fnv1a,
+  fromBase64,
+  isJsonObject,
+  stableStringify,
+  toBase64,
+} from './codec.ts';
 import type { JsonObject } from './codec.ts';
 import { SaveCorruptedError, SaveVersionError } from './errors.ts';
+import { lzwCompress, lzwDecompress } from './lzw.ts';
 
 /**
  * A serialized game state with metadata and an integrity checksum.
@@ -77,19 +86,47 @@ export function parseSave(input: unknown): SaveData {
 }
 
 /**
- * Serializes a save to a Base64 string that is safe to copy, paste or store.
+ * Prefix of a compressed export. It is not a Base64 character, so the two formats never clash.
  */
-export function exportSave(save: SaveData): string {
-  return toBase64(JSON.stringify(save));
+const COMPRESSED_PREFIX = '~';
+
+/**
+ * Options of {@link exportSave}.
+ */
+export interface ExportOptions {
+  /**
+   * Compress the save (LZW, then Base64, prefixed with `~`). Typically several times smaller for
+   * big saves. {@link importSave} reads both formats. Default `false`.
+   */
+  compress?: boolean;
 }
 
 /**
- * Reads a string produced by {@link exportSave}.
+ * Serializes a save to a Base64 string that is safe to copy, paste or store.
+ */
+export function exportSave(save: SaveData, options: ExportOptions = {}): string {
+  const json = JSON.stringify(save);
+  if (options.compress !== true) return toBase64(json);
+  return COMPRESSED_PREFIX + bytesToBase64(lzwCompress(new TextEncoder().encode(json)));
+}
+
+/**
+ * Reads a string produced by {@link exportSave}, compressed or not.
  *
+ * @param encoded the exported string.
+ * @param maxChars largest decompressed save accepted, in bytes. Default 10,000,000.
  * @throws {SaveCorruptedError} if the string is damaged or fails validation.
  */
-export function importSave(encoded: string): SaveData {
-  return parseSave(fromBase64(encoded.trim()));
+export function importSave(encoded: string, maxChars = 10_000_000): SaveData {
+  const text = encoded.trim();
+  if (!text.startsWith(COMPRESSED_PREFIX)) return parseSave(fromBase64(text));
+  const bytes = lzwDecompress(base64ToBytes(text.slice(COMPRESSED_PREFIX.length)), maxChars);
+  try {
+    return parseSave(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
+  } catch (error) {
+    if (error instanceof SaveCorruptedError) throw error;
+    throw new SaveCorruptedError('Compressed save is not valid text');
+  }
 }
 
 /**

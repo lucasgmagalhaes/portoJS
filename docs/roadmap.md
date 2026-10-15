@@ -10,7 +10,7 @@ A code-level review of what `portojs` needs to become a dependable, widely used 
 | Coverage                  | about 98% of statements and lines, about 94% of branches          |
 | Package lint (`publint`)  | clean                                                             |
 | Types (`attw`)            | clean for node10, node16 (CJS and ESM) and bundler resolution     |
-| Bundle (brotli, minified) | `portojs/bignum` ~2 KB, `portojs/core` ~6.4 KB, everything ~12 KB |
+| Bundle (brotli, minified) | `portojs/bignum` ~2 KB, `portojs/core` ~8.6 KB, everything ~14 KB |
 | Tick, 10,000 generators   | ~0.5 ms per 100 ms step; ~0.7 ms with chained tiers               |
 | Offline 24 h, 10k gens    | ~4 ms flat, ~24 ms chained (closed form)                          |
 | `save()` / `exportSave()` | ~13 ms / ~34 ms with 10,000 generators                            |
@@ -105,8 +105,7 @@ The guides are static Markdown today. Once the packages settle, replace them wit
 **Platform**
 
 - Web Worker helper to run the simulation off the main thread.
-- Optional compressed save format.
-- Localisable number suffix sets.
+- Done: optional compressed save format (`exportSave({ compress: true })`) and localisable number formatting (`SUFFIX_SETS`, `decimal`).
 
 ## 5. How releases work
 

@@ -23,6 +23,17 @@ game.load(JSON.parse(raw)); // also accepts an object or a JSON string
 
 `BigNum` values are stored as strings such as `"1.5e12"`, so no precision is lost in transit.
 
+## Compressed saves
+
+Big games make big saves. Ask for a compressed export and loading accepts both forms:
+
+```ts
+const small = game.exportSave({ compress: true }); // "~" + Base64 of LZW-compressed JSON
+game.importSave(small); // same call as before
+```
+
+Compression is pure JavaScript and synchronous, with no dependencies. Repetitive saves, such as thousands of similar generators, shrink several times over. The checksum still guards the content, and `maxSaveChars` also limits how far a compressed string may expand, so a hostile string cannot exhaust memory.
+
 ## Integrity
 
 Every save carries a checksum computed over a key-order-independent form of its content, so it survives databases that reorder keys. Loading verifies it:

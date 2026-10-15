@@ -5,6 +5,7 @@
 ```ts
 
 import type { Clock } from '@portojs/core';
+import type { ExportOptions } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import type { Listener } from '@portojs/core';
 import type { Migrations } from '@portojs/core';
@@ -90,7 +91,7 @@ export class Game {
     readonly clock: Clock;
     createObject(name: string, options?: CreateObjectOptions): GameObject;
     dispose(): void;
-    exportSave(): string;
+    exportSave(options?: ExportOptions): string;
     find(name: string): GameObject | undefined;
     findObjectOfType<C extends Component>(type: ComponentType<C>): C | undefined;
     findObjectsOfType<C extends Component>(type: ComponentType<C>): C[];

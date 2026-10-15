@@ -103,7 +103,12 @@ export interface EngineOptions {
 }
 
 // @public
-export function exportSave(save: SaveData): string;
+export interface ExportOptions {
+    compress?: boolean;
+}
+
+// @public
+export function exportSave(save: SaveData, options?: ExportOptions): string;
 
 // @public
 export function fnv1a(text: string): string;
@@ -116,6 +121,7 @@ export function format(value: BigNumLike, options?: FormatOptions): string;
 
 // @public
 export interface FormatOptions {
+    readonly decimal?: string;
     readonly notation?: Notation | Formatter;
     readonly plainBelow?: number;
     readonly precision?: number;
@@ -129,7 +135,7 @@ export type Formatter = (value: BigNum, precision: number) => string;
 export function fromBase64(encoded: string): string;
 
 // @public
-export function importSave(encoded: string): SaveData;
+export function importSave(encoded: string, maxChars?: number): SaveData;
 
 // @public
 export const intervalScheduler: Scheduler;
@@ -233,6 +239,9 @@ export interface StepPlanOptions {
     readonly maxSteps?: number;
     readonly minStepMs?: number;
 }
+
+// @public
+export const SUFFIX_SETS: Readonly<Record<'short' | 'si' | 'pt', readonly string[]>>;
 
 // @public
 export const systemClock: Clock;
