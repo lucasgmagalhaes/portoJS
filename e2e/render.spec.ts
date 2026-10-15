@@ -67,6 +67,8 @@ test.describe('WebGPU renderer', () => {
     });
     if (process.env['CI'] !== undefined) expect(available, 'WebGPU adapter in CI').toBe(true);
     else test.skip(!available, 'WebGPU is not available in this browser');
+    page.on('console', (message) => console.log(`[page ${message.type()}] ${message.text()}`));
+    page.on('pageerror', (error) => console.log(`[page error] ${error.message}`));
     await open(page, 'webgpu', 0);
     expect(await page.evaluate(() => window.__demo?.backend)).toBe('webgpu');
     await page.evaluate(() => {
