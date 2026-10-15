@@ -5,3 +5,5 @@ coverage
 .token-optimizer
 graphify-out
 temp
+test-results
+playwright-report

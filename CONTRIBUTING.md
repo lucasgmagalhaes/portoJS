@@ -19,7 +19,11 @@ pnpm format:check
 pnpm typecheck
 pnpm test
 pnpm build
+pnpm size && pnpm api:check
+pnpm e2e   # browser tests; first run: pnpm exec playwright install chromium
 ```
+
+If you change the public API on purpose, refresh the report with `pnpm api:update` and commit `etc/portojs.api.md`.
 
 CI runs the same checks on every pull request.
 
