@@ -12,6 +12,8 @@ import type { FlowSource } from './flows.js';
 import type {
   BulkAmount,
   EffectTarget,
+  PurchaseGuard,
+  PurchaseTarget,
   ResetKeep,
   ResourcesApi,
   ResourcesConfig,
@@ -446,6 +448,11 @@ export function resources<R extends string, G extends string = never, U extends 
         }
         return BigNum.from(amount);
       };
+      const guards = new Map<string, PurchaseGuard<G, U>>();
+      const allowed = (target: PurchaseTarget<G, U>): boolean => {
+        for (const guard of guards.values()) if (!guard(target)) return false;
+        return true;
+      };
       const maxFor = (g: GenState): BigNum =>
         g.costFns.max(g.bought, (res[g.costResource] as ResState).amount);
       const totalFor = (g: GenState, amount: BulkAmount): BigNum => {
@@ -493,15 +500,18 @@ export function resources<R extends string, G extends string = never, U extends 
         cost: (id, amount = 1) => totalFor(gens[genAt(id)] as GenState, amount),
         canBuy: (id, amount = 1) => {
           const g = gens[genAt(id)] as GenState;
+          if (!allowed({ kind: 'generator', id })) return false;
           if (amount === 'max') return maxFor(g).gt(0);
           return affordable(totalFor(g, amount), (res[g.costResource] as ResState).amount);
         },
-        maxAffordable: (id) => maxFor(gens[genAt(id)] as GenState),
+        maxAffordable: (id) =>
+          allowed({ kind: 'generator', id }) ? maxFor(gens[genAt(id)] as GenState) : BigNum.ZERO,
         buy: (id, amount = 1) => {
           const index = genAt(id);
           const g = gens[index] as GenState;
           const wallet = res[g.costResource] as ResState;
           const count = amount === 'max' ? maxFor(g) : validateCount(amount);
+          if (!allowed({ kind: 'generator', id })) return BigNum.ZERO;
           if (count.isZero()) return BigNum.ZERO;
           const price = g.costFns.total(g.bought, count);
           if (!affordable(price, wallet.amount)) return BigNum.ZERO;
@@ -524,13 +534,13 @@ export function resources<R extends string, G extends string = never, U extends 
         },
         canBuyUpgrade: (id) => {
           const u = ups[upAt(id)] as UpState;
-          if (u.level >= u.maxLevel) return false;
+          if (u.level >= u.maxLevel || !allowed({ kind: 'upgrade', id })) return false;
           const price = u.costFns.unit(BigNum.from(u.level));
           return affordable(price, (res[u.costResource] as ResState).amount);
         },
         buyUpgrade: (id) => {
           const u = ups[upAt(id)] as UpState;
-          if (u.level >= u.maxLevel) return false;
+          if (u.level >= u.maxLevel || !allowed({ kind: 'upgrade', id })) return false;
           const wallet = res[u.costResource] as ResState;
           const price = u.costFns.unit(BigNum.from(u.level));
           if (!affordable(price, wallet.amount)) return false;
@@ -572,6 +582,11 @@ export function resources<R extends string, G extends string = never, U extends 
           }
           return removed;
         },
+
+        setPurchaseGuard: (name, guard) => {
+          guards.set(name, guard);
+        },
+        removePurchaseGuard: (name) => guards.delete(name),
 
         resetRun: (keep: ResetKeep<R, G, U> = {}) => {
           const keptRes = res.map((r) => r.amount);

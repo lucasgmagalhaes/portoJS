@@ -109,6 +109,15 @@ export interface ResourcesEvents<R extends string, G extends string, U extends s
   offlineGains: { readonly elapsedMs: number; readonly gains: Readonly<Record<R, BigNum>> };
 }
 
+/** What a purchase guard is asked about. */
+export type PurchaseTarget<G extends string, U extends string> =
+  { readonly kind: 'generator'; readonly id: G } | { readonly kind: 'upgrade'; readonly id: U };
+
+/** Return `false` to forbid buying the target right now. */
+export type PurchaseGuard<G extends string, U extends string> = (
+  target: PurchaseTarget<G, U>,
+) => boolean;
+
 /** Methods the {@link resources} plugin adds to the game. */
 export interface ResourcesApi<R extends string, G extends string, U extends string> {
   /** Ids of all resources. */
@@ -170,6 +179,15 @@ export interface ResourcesApi<R extends string, G extends string, U extends stri
   ): void;
   /** Removes a modifier. Returns whether it existed. */
   removeModifier(id: string): boolean;
+
+  /**
+   * Registers (or replaces) a named guard that can forbid purchases, e.g. until something is
+   * unlocked. A purchase happens only if every guard allows it; guarded targets report
+   * `canBuy` false and `maxAffordable` zero.
+   */
+  setPurchaseGuard(name: string, guard: PurchaseGuard<G, U>): void;
+  /** Removes a guard. Returns whether it existed. */
+  removePurchaseGuard(name: string): boolean;
 
   /**
    * Returns the run to its starting state, keeping what `keep` lists. Run totals

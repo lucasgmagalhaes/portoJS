@@ -9,6 +9,8 @@ export type {
   EffectTarget,
   GeneratorDef,
   GeneratorPurchase,
+  PurchaseGuard,
+  PurchaseTarget,
   ResetKeep,
   ResourceDef,
   ResourcesApi,
