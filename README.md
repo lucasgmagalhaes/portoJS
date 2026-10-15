@@ -85,7 +85,7 @@ game.createObject('Player').addComponent(Health);
 | **Big numbers**      | Immutable `BigNum` (`mantissa × 10^exponent`), exponents up to ~9e15, JSON-safe, property-tested against doubles                                                                              |
 | **Formatting**       | Scientific, engineering, suffix (`1.5T`) and custom formatters, with correct rounding carry                                                                                                   |
 | **Idle mechanics**   | Opt-in components: `Resource`, `Generator` (bulk buy, closed-form offline), `Upgrade`, `Prestige` (stackable layers), `Achievement`, `Unlock`, `AutoBuyer`, `Challenge`, `Boost`, `DataStore` |
-| **UI bindings**      | `useGame` hooks for React and Vue                                                                                                                                                             |
+| **UI bindings**      | `useGame` for React, Vue, Svelte and Solid                                                                                                                                                    |
 | **Quality**          | Strict TypeScript, no `any`, ESM + CJS + `.d.ts`, unit, property-based and browser tests                                                                                                      |
 
 ## Entry points
@@ -112,13 +112,15 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/idle`    | Opt-in idle mechanics as components                                    |
 | `@portojs/react`   | `useGame` for React                                                    |
 | `@portojs/vue`     | `useGame` for Vue                                                      |
+| `@portojs/svelte`  | `useGame` as a Svelte store                                            |
+| `@portojs/solid`   | `useGame` as a Solid signal                                            |
 | `@portojs/ecs`     | Typed-array ECS: integer entities, cached queries, systems             |
 | `@portojs/render`  | Camera, auto-batching sprites, WebGPU with WebGL2 fallback             |
 | `@portojs/input`   | Keyboard, pointer and gamepad input with named actions                 |
 | `@portojs/audio`   | Web Audio mixer with buses and playback control                        |
 | `@portojs/physics` | 2D rigid bodies and collision events on Rapier                         |
 
-`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio` and `@portojs/physics` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -142,7 +144,7 @@ Full site (guides, API reference and an in-browser playground): `pnpm docs:dev`.
 - [Offline progress](docs/offline-progress.md): how away-time is computed, capped and credited
 - [Saves and migrations](docs/saves-and-migrations.md): versioning, export/import, corruption handling
 - [Prestige](docs/prestige.md): resets, formulas, layers and permanent bonuses
-- [UI bindings](docs/bindings.md): `useGame` for React and Vue
+- [UI bindings](docs/bindings.md): `useGame` for React, Vue, Svelte and Solid
 - [Input and audio](docs/input-and-audio.md): `@portojs/input`, `@portojs/audio`
 - [Physics](docs/physics.md): `@portojs/physics`, rigid bodies and collisions
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
@@ -166,7 +168,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 - [x] A scene description format (JSON) that builds objects and components
 - [x] Coroutines for sequenced timed behavior
 - [ ] Optional compressed save format
-- [ ] Svelte and Solid bindings
+- [x] Svelte and Solid bindings
 - [ ] More cost curves and a cost-curve visualiser for balancing
 - [ ] Localisable number suffix sets
 - [ ] Off-main-thread simulation (Web Worker helper)

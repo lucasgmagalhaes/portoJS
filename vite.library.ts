@@ -42,6 +42,7 @@ function isExternal(id: string): boolean {
     id.startsWith('@dimforge/') ||
     id === 'react' ||
     id === 'vue' ||
+    id === 'solid-js' ||
     id.startsWith('node:')
   );
 }

@@ -86,7 +86,7 @@ An earlier version used a functional plugin kernel (`createCore`, `definePlugin`
 
 - Balancing tools: a headless simulator that fast-forwards a game and reports time-to-milestone.
 - Devtools: inspect objects and components, edit values, fast-forward time.
-- Svelte and Solid bindings.
+- Done: Svelte and Solid bindings, and 2D physics on Rapier (`@portojs/physics`).
 
 **Documentation site (planned for the end)**
 

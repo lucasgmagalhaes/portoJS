@@ -66,6 +66,12 @@ export default defineConfig({
         '@portojs/react': fileURLToPath(
           new URL('../../packages/react/src/index.ts', import.meta.url),
         ),
+        '@portojs/svelte': fileURLToPath(
+          new URL('../../packages/svelte/src/index.ts', import.meta.url),
+        ),
+        '@portojs/solid': fileURLToPath(
+          new URL('../../packages/solid/src/index.ts', import.meta.url),
+        ),
         '@portojs/vue': fileURLToPath(new URL('../../packages/vue/src/index.ts', import.meta.url)),
         '@portojs/physics': fileURLToPath(
           new URL('../../packages/physics/src/index.ts', import.meta.url),

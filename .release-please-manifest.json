@@ -9,5 +9,7 @@
   "packages/render": "0.8.0",
   "packages/input": "0.8.0",
   "packages/audio": "0.8.0",
-  "packages/physics": "0.8.0"
+  "packages/physics": "0.8.0",
+  "packages/svelte": "0.8.0",
+  "packages/solid": "0.8.0"
 }
