@@ -69,6 +69,19 @@ test.describe('WebGPU renderer', () => {
     else test.skip(!available, 'WebGPU is not available in this browser');
     page.on('console', (message) => console.log(`[page ${message.type()}] ${message.text()}`));
     page.on('pageerror', (error) => console.log(`[page error] ${error.message}`));
+    await page.addInitScript(() => {
+      const original = GPUAdapter.prototype.requestDevice;
+      GPUAdapter.prototype.requestDevice = async function (this: GPUAdapter, descriptor) {
+        const device = await original.call(this, descriptor);
+        device.addEventListener('uncapturederror', (event) => {
+          console.error(`uncaptured: ${(event as GPUUncapturedErrorEvent).error.message}`);
+        });
+        console.log(
+          `adapter: ${this.info.vendor} ${this.info.architecture} ${this.info.description}`,
+        );
+        return device;
+      };
+    });
     await open(page, 'webgpu', 0);
     expect(await page.evaluate(() => window.__demo?.backend)).toBe('webgpu');
     await page.evaluate(() => {
@@ -79,6 +92,9 @@ test.describe('WebGPU renderer', () => {
     });
     await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(resolve)));
     const shot = (await page.locator('#stage').screenshot()).toString('base64');
+    await test
+      .info()
+      .attach('webgpu.png', { body: Buffer.from(shot, 'base64'), contentType: 'image/png' });
     const centre = await page.evaluate(async (data) => {
       const bytes = Uint8Array.from(atob(data), (c) => c.charCodeAt(0));
       const bitmap = await createImageBitmap(new Blob([bytes], { type: 'image/png' }));
