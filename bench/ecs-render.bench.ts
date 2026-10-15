@@ -47,8 +47,9 @@ for (const count of COUNTS) {
 
 await bench.run();
 console.table(
-  bench.tasks.map((task) => ({
-    task: task.name,
-    'mean (ms)': task.result ? Number(task.result.latency.mean.toFixed(3)) : 0,
-  })),
+  bench.tasks.map((task) => {
+    const stats = task.result;
+    if (!('latency' in stats)) return { task: task.name, 'mean (ms)': 'n/a' };
+    return { task: task.name, 'mean (ms)': Number(stats.latency.mean.toFixed(3)) };
+  }),
 );
