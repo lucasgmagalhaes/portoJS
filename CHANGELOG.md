@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.4.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.3.0...v0.4.0) (2026-10-15)
+
+
+### Features
+
+* **registry:** add plugin for free-form saved game data ([9807f5e](https://github.com/lucasgmagalhaes/portoJS/commit/9807f5e591925b04b5c7ff75fe97f40af96ab8a3))
+
+
+### Documentation
+
+* add a Phaser migration guide and update the roadmap ([9c873f7](https://github.com/lucasgmagalhaes/portoJS/commit/9c873f70796c393c3591323a2bee798f72bfe967))
+
 ## [0.3.0](https://github.com/lucasgmagalhaes/portoJS/compare/v0.2.0...v0.3.0) (2026-10-15)
 
 ### Features
