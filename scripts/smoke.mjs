@@ -11,6 +11,8 @@ const cjs = require('../dist/index.cjs');
 const esmBignum = await import('../dist/bignum.js');
 const esmCore = await import('../dist/core.js');
 const esmMechanics = await import('../dist/mechanics.js');
+assert.equal(typeof (await import('../dist/react.js')).useGame, 'function', 'esm: react entry');
+assert.equal(typeof (await import('../dist/vue.js')).useGame, 'function', 'esm: vue entry');
 assert.equal(esmBignum.BigNum, esm.BigNum, 'esm: bignum entry shares BigNum');
 assert.equal(esmCore.BigNum, esm.BigNum, 'esm: core entry shares BigNum');
 assert.equal(typeof esmMechanics.resources, 'function', 'esm: mechanics entry');

@@ -6,6 +6,8 @@ export default defineConfig({
     core: 'src/core/index.ts',
     bignum: 'src/core/bignum/index.ts',
     mechanics: 'src/mechanics/index.ts',
+    react: 'src/bindings/react.ts',
+    vue: 'src/bindings/vue.ts',
   },
   format: ['esm', 'cjs'],
   // Shared chunks keep one copy of classes such as BigNum across entries, so `instanceof`

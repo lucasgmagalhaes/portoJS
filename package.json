@@ -50,6 +50,26 @@
         "default": "./dist/mechanics.cjs"
       }
     },
+    "./react": {
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.js"
+      },
+      "require": {
+        "types": "./dist/react.d.cts",
+        "default": "./dist/react.cjs"
+      }
+    },
+    "./vue": {
+      "import": {
+        "types": "./dist/vue.d.ts",
+        "default": "./dist/vue.js"
+      },
+      "require": {
+        "types": "./dist/vue.d.cts",
+        "default": "./dist/vue.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -97,12 +117,18 @@
     "@microsoft/api-extractor": "^7.59.4",
     "@playwright/test": "^1.64.1",
     "@size-limit/preset-small-lib": "^14.2.0",
+    "@testing-library/react": "^16.3.3",
     "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitest/coverage-v8": "^5.0.4",
     "eslint": "^10.12.0",
     "fast-check": "^4.10.2",
+    "happy-dom": "^21.0.1",
     "prettier": "^3.9.10",
     "publint": "^0.3.25",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "size-limit": "^14.2.0",
     "tinybench": "^6.2.2",
     "tsup": "^9.0.0",
@@ -143,6 +169,12 @@
       ],
       "mechanics": [
         "./dist/mechanics.d.ts"
+      ],
+      "react": [
+        "./dist/react.d.ts"
+      ],
+      "vue": [
+        "./dist/vue.d.ts"
       ]
     }
   },
@@ -164,6 +196,36 @@
       "path": "dist/index.js",
       "import": "*",
       "limit": "14 KB"
+    },
+    {
+      "name": "portojs/react",
+      "path": "dist/react.js",
+      "import": "*",
+      "limit": "3 KB",
+      "ignore": [
+        "react"
+      ]
+    },
+    {
+      "name": "portojs/vue",
+      "path": "dist/vue.js",
+      "import": "*",
+      "limit": "3 KB",
+      "ignore": [
+        "vue"
+      ]
     }
-  ]
+  ],
+  "peerDependencies": {
+    "react": ">=18",
+    "vue": ">=3.3"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
+  }
 }
