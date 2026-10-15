@@ -6,11 +6,12 @@ on:
   pull_request:
 
 jobs:
+  # Dev tooling (vitest, tsup, eslint) needs a recent Node, so quality checks run there.
   check:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node: [18, 20, 22]
+        node: [22, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -22,8 +23,32 @@ jobs:
       - run: pnpm lint
       - run: pnpm format:check
       - run: pnpm typecheck
-      - run: pnpm test
+      - run: pnpm coverage
       - run: pnpm build
+      - run: pnpm check:package
+      - uses: actions/upload-artifact@v4
+        if: matrix.node == 24
+        with:
+          name: dist
+          path: dist
+
+  # The library itself supports Node 18+: load the built output on every supported runtime.
+  runtime:
+    needs: check
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: [18, 20, 22, 24]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+      - run: node scripts/smoke.mjs
 
   example:
     runs-on: ubuntu-latest
