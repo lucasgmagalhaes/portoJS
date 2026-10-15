@@ -1,3 +1,4 @@
+import fc from 'fast-check';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   BigNum,
@@ -7,6 +8,7 @@ import {
   createSave,
 } from '../src/core/index.js';
 import { resources } from '../src/mechanics/resources/index.js';
+import type { GeneratorDef } from '../src/mechanics/resources/index.js';
 
 const HOUR_MS = 3_600_000;
 
@@ -477,4 +479,51 @@ describe('resources: BigNum interop', () => {
     const { game } = build();
     expect(game.amount('gold')).toBeInstanceOf(BigNum);
   });
+});
+
+describe('resources: ticking and offline agree (property)', () => {
+  it('offline equals the same time played tick by tick for resource-only production', () => {
+    const generator = fc.record({
+      rate: fc.double({ min: 0.01, max: 50, noNaN: true }),
+      initial: fc.integer({ min: 0, max: 200 }),
+      target: fc.constantFrom('a', 'b'),
+    });
+    fc.assert(
+      fc.property(
+        fc.array(generator, { minLength: 1, maxLength: 6 }),
+        fc.integer({ min: 1, max: 600 }),
+        fc.double({ min: 0.5, max: 5, noNaN: true }),
+        (defs, seconds, boost) => {
+          const generators: Record<string, GeneratorDef<'a' | 'b', string>> = {};
+          defs.forEach((d, i) => {
+            generators[`g${i}`] = {
+              cost: { resource: 'a', base: 1, growth: 1 },
+              produces: d.target,
+              rate: d.rate,
+              initial: d.initial,
+            };
+          });
+          const make = () => {
+            const game = createCore({
+              clock: new ManualClock(0),
+              plugins: [resources({ resources: { a: {}, b: {} }, generators })],
+            });
+            game.setModifier('boost', { all: true }, boost);
+            return game;
+          };
+          const ticked = make();
+          const away = make();
+          ticked.advance(seconds * 1000);
+          away.simulateOffline(seconds * 1000);
+          for (const id of ['a', 'b'] as const) {
+            const x = ticked.amount(id);
+            const y = away.amount(id);
+            if (x.isZero() && y.isZero()) continue;
+            expect(x.sub(y).abs().div(BigNum.max(x, y)).lt(1e-9)).toBe(true);
+          }
+        },
+      ),
+      { numRuns: 60 },
+    );
+  }, 30_000);
 });

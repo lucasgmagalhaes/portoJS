@@ -1,3 +1,4 @@
+import fc from 'fast-check';
 import { describe, expect, expectTypeOf, it } from 'vitest';
 import {
   ManualClock,
@@ -319,5 +320,63 @@ describe('createCore: dispose', () => {
     expect(game.running).toBe(false);
     game.add(1);
     expect(log).toEqual(['stop']);
+  });
+});
+
+describe('createCore: untrusted input limits', () => {
+  it('rejects oversized save strings before decoding them', () => {
+    const { game } = make({ maxSaveChars: 50 });
+    const big = game.exportSave();
+    expect(big.length).toBeGreaterThan(50);
+    expect(() => game.importSave(big)).toThrow(/too large/);
+    expect(() => game.load(big)).toThrow(SaveCorruptedError);
+    // The default limit (10M chars) is far above any real save.
+    expect(() => make().game.load('x'.repeat(5_000_000))).toThrow(/not valid Base64/);
+  });
+
+  it('validates the limit', () => {
+    expect(() => createCore({ maxSaveChars: 0 })).toThrow(RangeError);
+    expect(() => createCore({ maxSaveChars: NaN })).toThrow(RangeError);
+  });
+
+  it('only ever throws SaveCorruptedError for arbitrary strings (fuzz)', () => {
+    const { game } = make();
+    game.add(5);
+    fc.assert(
+      fc.property(
+        fc.oneof(fc.string(), fc.string({ unit: 'binary' }), fc.base64String(), fc.json()),
+        (text) => {
+          try {
+            game.importSave(text, { offline: false });
+          } catch (error) {
+            expect(error).toBeInstanceOf(SaveCorruptedError);
+          }
+          expect(game.count).toBe(5); // a rejected import never touches state
+        },
+      ),
+      { numRuns: 500 },
+    );
+  });
+
+  it('survives mutated real saves (fuzz)', () => {
+    const { game } = make();
+    game.add(5);
+    const real = game.exportSave();
+    fc.assert(
+      fc.property(
+        fc.nat(real.length - 1),
+        fc.string({ minLength: 1, maxLength: 3 }),
+        (at, junk) => {
+          const mutated = real.slice(0, at) + junk + real.slice(at + 1);
+          try {
+            game.importSave(mutated, { offline: false });
+          } catch (error) {
+            expect(error).toBeInstanceOf(SaveCorruptedError);
+          }
+          expect(game.count).toBe(5);
+        },
+      ),
+      { numRuns: 500 },
+    );
   });
 });
