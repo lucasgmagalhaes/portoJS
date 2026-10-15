@@ -66,7 +66,7 @@ describe('createGame: minimal usage from the README', () => {
     });
     game.buy('miner');
     const save = game.exportSave();
-    clock.advance(10 * 3_600_000); // away for 10 h, but capped to 1 h at 50%
+    clock.advance(10 * 3_600_000);
     const report = game.importSave(save);
     expect(report?.status).toBe('capped');
     expect(game.amount('gold').toNumber()).toBeCloseTo(2 * 1800, 3);
@@ -145,13 +145,13 @@ describe('createGame: full feature set', () => {
     expect(game.canPrestige()).toBe(true);
     game.buyUpgrade('pick');
     const gained = game.prestige();
-    expect(gained?.toNumber()).toBe(2); // earned ~500.2 -> floor(sqrt(500.2 / 100)) = 2
+    expect(gained?.toNumber()).toBe(2);
     clock.advance(200);
     game.update();
     expect(unlocked).toEqual(['richer', 'firstPrestige']);
-    expect(game.upgradeLevel('pick')).toBe(1); // kept
-    expect(game.bought('miner').isZero()).toBe(true); // reset
-    expect(game.multiplier({ all: true }).gt(2)).toBe(true); // pick x2 plus prestige bonus
+    expect(game.upgradeLevel('pick')).toBe(1);
+    expect(game.bought('miner').isZero()).toBe(true);
+    expect(game.multiplier({ all: true }).gt(2)).toBe(true);
   });
 
   it('round-trips everything through an exported string', () => {
@@ -192,7 +192,6 @@ describe('createGame: offline tuning', () => {
         },
       },
     });
-    // maxChain 1 forbids the two-tier closed form, so the bounded simulation runs instead.
     game.simulateOffline(10_000);
     expect(game.amount('gold').gt(0)).toBe(true);
     expect(game.count('t1').gt(1)).toBe(true);

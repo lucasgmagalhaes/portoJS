@@ -1,6 +1,5 @@
 import { defineConfig, devices } from '@playwright/test';
 
-// Browser tests drive the example game, which imports the library straight from src/.
 export default defineConfig({
   testDir: 'e2e',
   fullyParallel: true,

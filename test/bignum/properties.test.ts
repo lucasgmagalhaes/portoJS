@@ -82,7 +82,6 @@ describe('BigNum properties', () => {
   it('cmp agrees with number ordering and is antisymmetric', () => {
     fc.assert(
       fc.property(num, num, (a, b) => {
-        // Distinct doubles within ~1 ulp may normalize to the same mantissa; skip those.
         fc.pre(!relClose(a, b, 1e-15) || a === b);
         const expected = a < b ? -1 : a > b ? 1 : 0;
         expect(BigNum.from(a).cmp(b)).toBe(expected);

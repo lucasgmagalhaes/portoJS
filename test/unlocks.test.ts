@@ -41,7 +41,7 @@ describe('unlocks', () => {
     expect(game.maxAffordable('drill').isZero()).toBe(true);
     expect(game.canBuyUpgrade('pick')).toBe(false);
     expect(game.buyUpgrade('pick')).toBe(false);
-    expect(game.amount('gold').toNumber()).toBe(1000); // nothing was spent
+    expect(game.amount('gold').toNumber()).toBe(1000);
   });
 
   it('opens a gate as soon as the condition becomes true, without waiting for a tick', () => {
@@ -49,7 +49,7 @@ describe('unlocks', () => {
     const seen: string[] = [];
     game.on('unlocked', (e) => seen.push(e.id));
     game.buy('miner', 3);
-    expect(game.canBuy('drill')).toBe(true); // lazily evaluated by the guard
+    expect(game.canBuy('drill')).toBe(true);
     expect(game.buy('drill').toNumber()).toBe(1);
     expect(seen).toEqual(['deep']);
     expect(game.unlockedIds()).toEqual(['deep']);

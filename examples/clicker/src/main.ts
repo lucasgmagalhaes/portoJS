@@ -5,9 +5,6 @@ import './style.css';
 const SAVE_KEY = 'portojs-clicker-save';
 const HOUR = 3_600_000;
 
-// ---------------------------------------------------------------------------
-// The game: one declarative object.
-// ---------------------------------------------------------------------------
 const game = createGame({
   resources: { gold: { initial: 0 } },
   generators: {
@@ -86,9 +83,6 @@ const achievementLabels = {
   ascended: 'Ascend for the first time',
 } as const;
 
-// ---------------------------------------------------------------------------
-// Tiny DOM helpers (textContent only, no innerHTML).
-// ---------------------------------------------------------------------------
 type Props = { className?: string; text?: string; id?: string; type?: string };
 
 function h<K extends keyof HTMLElementTagNameMap>(
@@ -116,9 +110,6 @@ function toast(message: string): void {
   toastTimer = window.setTimeout(() => toastEl.classList.remove('show'), 3500);
 }
 
-// ---------------------------------------------------------------------------
-// Build the UI once; render() only updates text and disabled flags.
-// ---------------------------------------------------------------------------
 const goldEl = h('div', { className: 'gold' });
 const rateEl = h('div', { className: 'rate' });
 const clickBtn = h('button', { id: 'click', text: 'Mine gold' });
@@ -269,9 +260,6 @@ function render(): void {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Events, input, persistence.
-// ---------------------------------------------------------------------------
 game.on('tick', render);
 game.on('achievementUnlocked', ({ id }) => toast(`Achievement: ${achievementLabels[id]}`));
 game.on('prestige', ({ gained }) => toast(`Ascended! +${fmt(gained)} prestige points`));
@@ -327,7 +315,7 @@ document.addEventListener('visibilitychange', () => {
 const stored = localStorage.getItem(SAVE_KEY);
 if (stored !== null) {
   try {
-    game.importSave(stored); // migrates, validates and credits offline progress
+    game.importSave(stored);
   } catch (error) {
     toast(`${describe(error)} Starting fresh.`);
   }

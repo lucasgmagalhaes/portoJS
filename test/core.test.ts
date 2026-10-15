@@ -199,7 +199,6 @@ describe('createCore: saves', () => {
   it('is atomic: a failing deserializer rolls everything back', () => {
     const { game } = make();
     game.add(7);
-    // A structurally valid save (correct checksum) whose payload makes the counter throw.
     const poisoned = createSave(game.version, game.now(), { counter: 'explode' });
     expect(() => game.load(poisoned)).toThrow('bad data');
     expect(game.count).toBe(7);
@@ -294,7 +293,7 @@ describe('createCore: offline', () => {
     const { clock, game } = make({ maxCatchUpTicks: 10, offline: { efficiency: 0.5 } });
     const overflow: number[] = [];
     game.on('overflow', (o) => overflow.push(o.droppedMs));
-    clock.advance(100_000); // 1000 steps due, 10 allowed, 990 dropped
+    clock.advance(100_000);
     game.update();
     expect(overflow).toEqual([99_000]);
     expect(game.count).toBe(10 * 100 + 99_000 * 0.5);
@@ -330,7 +329,6 @@ describe('createCore: untrusted input limits', () => {
     expect(big.length).toBeGreaterThan(50);
     expect(() => game.importSave(big)).toThrow(/too large/);
     expect(() => game.load(big)).toThrow(SaveCorruptedError);
-    // The default limit (10M chars) is far above any real save.
     expect(() => make().game.load('x'.repeat(5_000_000))).toThrow(/not valid Base64/);
   });
 
@@ -351,7 +349,7 @@ describe('createCore: untrusted input limits', () => {
           } catch (error) {
             expect(error).toBeInstanceOf(SaveCorruptedError);
           }
-          expect(game.count).toBe(5); // a rejected import never touches state
+          expect(game.count).toBe(5);
         },
       ),
       { numRuns: 500 },
@@ -385,7 +383,7 @@ describe('createCore: loading discards pending loop time', () => {
   it('does not tick the loaded state for time that passed before the load', () => {
     const { clock, game } = make();
     const save = game.save();
-    clock.advance(1000); // pending, not yet pumped
+    clock.advance(1000);
     game.load(save, { offline: false });
     expect(game.update()).toBe(0);
     expect(game.count).toBe(0);

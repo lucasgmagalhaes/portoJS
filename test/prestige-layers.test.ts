@@ -37,7 +37,7 @@ describe('prestigeLayers', () => {
     const { game } = build();
     expect(game.layerIds).toEqual(['ascension', 'transcendence']);
     expect(game.canAscend('ascension')).toBe(false);
-    game.add('gold', 400); // sqrt(400 / 100) = 2
+    game.add('gold', 400);
     expect(game.pendingLayer('ascension').toNumber()).toBe(2);
     expect(game.canAscend('ascension')).toBe(true);
     expect(game.canAscend('transcendence')).toBe(false);
@@ -55,16 +55,15 @@ describe('prestigeLayers', () => {
     expect(game.amount('gold').isZero()).toBe(true);
     expect(game.bought('miner').isZero()).toBe(true);
     expect(events).toEqual([['ascension', '2e0', 1]]);
-    expect(game.ascend('ascension')).toBeUndefined(); // nothing earned in the new run
+    expect(game.ascend('ascension')).toBeUndefined();
   });
 
   it('a higher layer is based on what the lower one produced', () => {
     const { game } = build();
     for (let i = 0; i < 2; i++) {
       game.add('gold', 400);
-      game.ascend('ascension'); // 2 + 2 points gained
+      game.ascend('ascension');
     }
-    // transcendence basis = 4 points gained, threshold 4 => sqrt(4 / 4) = 1
     expect(game.pendingLayer('transcendence').toNumber()).toBe(1);
     expect(game.ascend('transcendence')?.toNumber()).toBe(1);
     expect(game.layerPoints('transcendence').toNumber()).toBe(1);
@@ -81,13 +80,13 @@ describe('prestigeLayers', () => {
     expect(game.layerPoints('ascension').isZero()).toBe(true);
     expect(game.layerLifetime('ascension').toNumber()).toBe(4);
     expect(game.layerCount('ascension')).toBe(2);
-    expect(game.pendingLayer('transcendence').isZero()).toBe(true); // basis was reset too
+    expect(game.pendingLayer('transcendence').isZero()).toBe(true);
   });
 
   it('applies the bonuses of every layer to production', () => {
     const { game } = build();
     game.add('gold', 400);
-    game.ascend('ascension'); // 2 points => x(1 + 2)
+    game.ascend('ascension');
     game.add('gold', 1);
     game.buy('miner');
     expect(game.rate('gold').toNumber()).toBeCloseTo(3, 9);

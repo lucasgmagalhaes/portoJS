@@ -48,23 +48,23 @@ describe('prestige', () => {
     expect(game.canPrestige()).toBe(false);
     game.add('gold', 99);
     expect(game.canPrestige()).toBe(false);
-    game.add('gold', 301); // earned 400 -> sqrt(4) = 2
+    game.add('gold', 301);
     expect(game.pendingPrestige().toNumber()).toBe(2);
     expect(game.canPrestige()).toBe(true);
   });
 
   it('floors the reward and honours the minimum', () => {
     const { game } = build({ minimum: 3 });
-    game.add('gold', 400); // 2 < minimum
+    game.add('gold', 400);
     expect(game.pendingPrestige().isZero()).toBe(true);
-    game.add('gold', 500); // 900 -> 3
+    game.add('gold', 500);
     expect(game.pendingPrestige().toNumber()).toBe(3);
   });
 
   it('supports exponent, scale and custom formulas', () => {
     const preset = build({ gain: { threshold: 10, exponent: 1, scale: 2 } }).game;
     preset.add('gold', 55);
-    expect(preset.pendingPrestige().toNumber()).toBe(11); // 2 * 5.5
+    expect(preset.pendingPrestige().toNumber()).toBe(11);
     const custom = build({ gain: (earned) => earned.log10() }).game;
     custom.add('gold', 1000);
     expect(custom.pendingPrestige().toNumber()).toBe(3);
@@ -80,7 +80,7 @@ describe('prestige', () => {
     const events: Array<[string, string, number]> = [];
     game.on('prestige', (e) => events.push([e.gained.toString(), e.points.toString(), e.count]));
     const gained = game.prestige();
-    expect(gained?.toNumber()).toBe(3); // sqrt(1000/100) = 3.16 -> 3
+    expect(gained?.toNumber()).toBe(3);
     expect(game.prestigePoints().toNumber()).toBe(3);
     expect(game.prestigeLifetime().toNumber()).toBe(3);
     expect(game.prestigeCount()).toBe(1);
@@ -108,11 +108,11 @@ describe('prestige', () => {
 
   it('applies permanent bonuses that grow with points', () => {
     const { game } = build({}, 10);
-    game.buy('miner'); // 1 miner
+    game.buy('miner');
     const before = game.rate('gold').toNumber();
     expect(before).toBeCloseTo(1, 12);
     game.add('gold', 10_000);
-    game.prestige(); // sqrt(10010/100) = 10 points -> +5.0 => x6
+    game.prestige();
     game.add('gold', 100);
     game.buy('miner');
     expect(game.prestigePoints().toNumber()).toBe(10);
@@ -124,7 +124,7 @@ describe('prestige', () => {
       bonuses: [{ target: { resource: 'gold' }, multiplier: (points) => points.add(1).pow(2) }],
     });
     game.add('gold', 400);
-    game.prestige(); // 2 points -> x9
+    game.prestige();
     game.add('gold', 20);
     game.buy('miner');
     expect(game.rate('gold').toNumber()).toBeCloseTo(9, 9);

@@ -46,10 +46,9 @@ describe('challenges', () => {
     expect(game.startChallenge('slow')).toBe(true);
     expect(events).toEqual(['slow']);
     expect(game.activeChallenge()).toBe('slow');
-    expect(game.upgradeLevel('pick')).toBe(1); // kept
-    expect(game.amount('gems').isZero()).toBe(true); // reset
+    expect(game.upgradeLevel('pick')).toBe(1);
+    expect(game.amount('gems').isZero()).toBe(true);
     game.buy('miner');
-    // 10/s × pick x2 × handicap 0.1
     expect(game.rate('gold').toNumber()).toBeCloseTo(2, 9);
   });
 
@@ -67,7 +66,7 @@ describe('challenges', () => {
     game.on('challengeCompleted', (e) => done.push([e.id, e.firstTime]));
     game.startChallenge('slow');
     game.buy('miner');
-    expect(game.rate('gold').toNumber()).toBeCloseTo(1, 9); // 10 × 0.1
+    expect(game.rate('gold').toNumber()).toBeCloseTo(1, 9);
     game.add('gold', 600);
     clock.advance(200);
     game.update();
@@ -75,7 +74,7 @@ describe('challenges', () => {
     expect(game.activeChallenge()).toBeUndefined();
     expect(game.isChallengeCompleted('slow')).toBe(true);
     expect(game.completedChallenges()).toEqual(['slow']);
-    expect(game.rate('gold').toNumber()).toBeCloseTo(20, 9); // 10 × reward 2, no handicap
+    expect(game.rate('gold').toNumber()).toBeCloseTo(20, 9);
   });
 
   it('replaying a completed challenge does not stack the reward', () => {
@@ -114,7 +113,7 @@ describe('challenges', () => {
     game.buy('miner');
     const before = game.amount('gold');
     game.simulateOffline(10_000);
-    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(10, 6); // 1/s × 10 s
+    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(10, 6);
   });
 
   it('round-trips through a save, handicap included', () => {

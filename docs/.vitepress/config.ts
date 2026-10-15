@@ -1,13 +1,11 @@
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vitepress';
 
-// The site and its playground import the library straight from the repository sources.
 const source = fileURLToPath(new URL('../../src/index.ts', import.meta.url));
 
 export default defineConfig({
   title: 'PortoJS',
   description: 'A headless TypeScript engine for idle and incremental games.',
-  // Set DOCS_BASE=/portoJS/ when serving from GitHub Pages.
   base: process.env['DOCS_BASE'] ?? '/',
   cleanUrls: true,
   lastUpdated: true,

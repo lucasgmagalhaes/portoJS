@@ -76,7 +76,6 @@ describe('exponential cost', () => {
           const c = compileCost({ base, growth });
           const budget = n(budgetValue);
           const k = c.max(n(owned), budget).toNumber();
-          // Brute force upper-bound the search; max can't exceed what 1-by-1 buying allows.
           let affordable = 0;
           let spent: BigNum = BigNum.ZERO;
           while (affordable < 5000) {
@@ -102,7 +101,6 @@ describe('linear cost', () => {
   });
 
   it('sums arithmetic series', () => {
-    // 10 + 15 + 20 + 25 = 70
     expect(cost.total(n(0), n(4)).toNumber()).toBeCloseTo(70, 12);
     expect(close(cost.total(n(7), n(50)), brute(cost.unit, 7, 50))).toBe(true);
   });
@@ -153,7 +151,6 @@ describe('linear cost', () => {
 describe('custom cost', () => {
   it('iterates when no closed form is given', () => {
     const cost = compileCost({ type: 'custom', cost: (owned) => owned.add(1).pow(2) });
-    // 1 + 4 + 9 = 14
     expect(cost.total(n(0), n(3)).toNumber()).toBe(14);
     expect(cost.max(n(0), n(14)).toNumber()).toBe(3);
     expect(cost.max(n(0), n(13)).toNumber()).toBe(2);
@@ -165,7 +162,7 @@ describe('custom cost', () => {
       type: 'custom',
       cost: () => 3,
       sum: (_owned, count) => count.mul(3),
-      max: (_owned, budget) => budget.div(3).add(2), // deliberately a bit off
+      max: (_owned, budget) => budget.div(3).add(2),
     });
     expect(cost.max(n(0), n(10)).toNumber()).toBe(3);
     expect(cost.total(n(0), n(4)).toNumber()).toBe(12);

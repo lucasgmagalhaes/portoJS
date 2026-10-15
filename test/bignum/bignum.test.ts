@@ -212,7 +212,6 @@ describe('BigNum implicit conversion guard', () => {
   it('refuses silent numeric use', () => {
     const a = big(1);
     const b = big(2);
-    // TypeScript allows this, but at runtime it must not silently compare strings
     expect(() => a < b).toThrow(TypeError);
     // @ts-expect-error arithmetic on objects is intentionally rejected at runtime
     expect(() => a + 1).toThrow(TypeError);

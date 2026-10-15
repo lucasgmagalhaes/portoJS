@@ -67,7 +67,7 @@ describe('autoBuyers', () => {
     game.setAutoBuyer('drillBot', true);
     clock.advance(2000);
     game.update();
-    expect(game.bought('drill').isZero()).toBe(true); // locked by "tier2"
+    expect(game.bought('drill').isZero()).toBe(true);
     expect(game.bought('miner').toNumber()).toBe(4);
   });
 

@@ -49,7 +49,6 @@ describe('Engine fixed timestep', () => {
   it('is independent of update frequency', () => {
     const a = setup({ stepMs: 100 });
     const b = setup({ stepMs: 100 });
-    // A: one update every 7 ms. B: one update every 333 ms. Same total time.
     for (let i = 0; i < 1000; i++) {
       a.clock.advance(7);
       a.engine.update();
@@ -58,7 +57,7 @@ describe('Engine fixed timestep', () => {
       b.clock.advance(333);
       b.engine.update();
     }
-    b.clock.advance(7); // 21 * 333 + 7 = 7000 ms in total
+    b.clock.advance(7);
     b.engine.update();
     expect(a.engine.stepCount).toBe(70);
     expect(b.engine.stepCount).toBe(70);
@@ -93,7 +92,7 @@ describe('Engine fixed timestep', () => {
 describe('Engine catch-up limit', () => {
   it('caps steps per update and reports the dropped time', () => {
     const { clock, engine, steps, dropped } = setup({ stepMs: 100, maxCatchUpTicks: 5 });
-    clock.advance(10_000); // a backgrounded tab: 100 steps worth of time
+    clock.advance(10_000);
     expect(engine.update()).toBe(5);
     expect(steps).toHaveLength(5);
     expect(dropped).toEqual([9_500]);
@@ -174,7 +173,6 @@ describe('Engine lifecycle', () => {
     });
     clock.advance(300);
     expect(() => engine.update()).toThrow('boom');
-    // Two steps were consumed (one ok, one failed); one is still pending.
     expect(engine.pending).toBe(100);
     expect(engine.update()).toBe(1);
   });

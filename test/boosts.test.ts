@@ -39,7 +39,7 @@ describe('boosts', () => {
     expect(game.rate('gold').toNumber()).toBeCloseTo(30, 9);
     expect(game.activeBoosts()).toEqual(['frenzy']);
     const before = game.amount('gold');
-    game.advance(1000); // 10 steps of 100 ms, all boosted
+    game.advance(1000);
     expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(30, 6);
     expect(game.isBoostActive('frenzy')).toBe(false);
     expect(game.boostRemainingMs('frenzy')).toBe(0);
@@ -87,9 +87,9 @@ describe('boosts', () => {
     game.activateBoost('frenzy');
     const before = game.amount('gold');
     game.simulateOffline(60_000);
-    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(600, 6); // 10/s, no boost
-    expect(game.boostRemainingMs('frenzy')).toBe(1000); // untouched
-    expect(game.rate('gold').toNumber()).toBeCloseTo(30, 9); // boost still there live
+    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(600, 6);
+    expect(game.boostRemainingMs('frenzy')).toBe(1000);
+    expect(game.rate('gold').toNumber()).toBeCloseTo(30, 9);
   });
 
   it('persists remaining time', () => {

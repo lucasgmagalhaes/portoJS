@@ -98,7 +98,6 @@ describe('resources: buying', () => {
 
   it('x10 is all-or-nothing', () => {
     const { game } = build(100);
-    // 10 miners cost 10 * (1.15^10 - 1) / 0.15 ≈ 203 > 100
     expect(game.canBuy('miner', 10)).toBe(false);
     expect(game.buy('miner', 10).toNumber()).toBe(0);
     expect(game.amount('gold').toNumber()).toBe(100);
@@ -127,19 +126,18 @@ describe('resources: buying', () => {
     expect(game.cost('miner', 'max').lte(1000)).toBe(true);
     expect(game.cost('miner', 'max').eq(game.cost('miner', max.toNumber()))).toBe(true);
     const poor = build(1).game;
-    expect(poor.cost('miner', 'max').toNumber()).toBeCloseTo(10, 9); // price of one
+    expect(poor.cost('miner', 'max').toNumber()).toBeCloseTo(10, 9);
   });
 
   it('works with linear costs', () => {
     const { game } = build(1000);
-    // drill prices: 100, 150, 200 ...
     expect(game.buy('drill', 3).toNumber()).toBe(3);
     expect(game.amount('gold').toNumber()).toBeCloseTo(1000 - 450, 9);
   });
 
   it('allows an exact-balance purchase despite float drift', () => {
     const { game } = build(0);
-    for (let i = 0; i < 10; i++) game.add('gold', 1); // exactly 10
+    for (let i = 0; i < 10; i++) game.add('gold', 1);
     expect(game.canBuy('miner')).toBe(true);
     expect(game.buy('miner').toNumber()).toBe(1);
     expect(game.amount('gold').isZero()).toBe(true);
@@ -163,7 +161,7 @@ describe('resources: buying', () => {
 describe('resources: production', () => {
   it('produces rate × count × time', () => {
     const { clock, game } = build(10);
-    game.buy('miner'); // 1 miner, 0 gold left
+    game.buy('miner');
     clock.advance(10_000);
     game.update();
     expect(game.amount('gold').toNumber()).toBeCloseTo(10, 9);
@@ -185,11 +183,11 @@ describe('resources: production', () => {
     const { game } = build(1000);
     game.buy('miner', 2);
     expect(game.rate('gold').toNumber()).toBeCloseTo(2, 12);
-    expect(game.buyUpgrade('pick')).toBe(true); // miners ×2
+    expect(game.buyUpgrade('pick')).toBe(true);
     expect(game.rate('gold').toNumber()).toBeCloseTo(4, 12);
-    expect(game.buyUpgrade('lever')).toBe(true); // gold ×1.5
+    expect(game.buyUpgrade('lever')).toBe(true);
     expect(game.rate('gold').toNumber()).toBeCloseTo(6, 12);
-    expect(game.buyUpgrade('lever')).toBe(true); // ×1.5²
+    expect(game.buyUpgrade('lever')).toBe(true);
     expect(game.rate('gold').toNumber()).toBeCloseTo(9, 12);
     expect(game.multiplier({ generator: 'miner' }).toNumber()).toBeCloseTo(2, 12);
     expect(game.multiplier({ resource: 'gold' }).toNumber()).toBeCloseTo(2.25, 12);
@@ -264,7 +262,6 @@ describe('resources: production', () => {
     });
     clock.advance(10_000);
     game.update();
-    // t1(t) = 1 + t ; gold = ∫ t1 = t + t²/2 = 60 (Euler with 100 ms steps ≈ 59.5)
     expect(game.count('t1').toNumber()).toBeCloseTo(11, 6);
     expect(game.amount('gold').toNumber()).toBeGreaterThan(59);
     expect(game.amount('gold').toNumber()).toBeLessThan(60.5);
@@ -276,7 +273,7 @@ describe('resources: offline', () => {
     const online = build(1000);
     online.game.buy('miner', 5);
     online.game.buyUpgrade('pick');
-    online.game.advance(3600_000); // 1 h in 100 ms steps
+    online.game.advance(3600_000);
 
     const offline = build(1000);
     offline.game.buy('miner', 5);
@@ -315,8 +312,7 @@ describe('resources: offline', () => {
       });
     };
     const game = make();
-    game.simulateOffline(100_000); // 100 s
-    // exact: gold = t + t²/2 = 5100, t1 = 101
+    game.simulateOffline(100_000);
     expect(game.amount('gold').toNumber()).toBeCloseTo(5100, 6);
     expect(game.count('t1').toNumber()).toBeCloseTo(101, 6);
     const ticked = make();
@@ -344,7 +340,6 @@ describe('resources: offline', () => {
       ],
     });
     game.simulateOffline(1_000_000);
-    // credited span = min(1000 s, 10 s) × 0.5 = 5 s ; 2 gold/s
     expect(game.amount('gold').toNumber()).toBeCloseTo(10, 9);
   });
 
@@ -442,7 +437,7 @@ describe('resources: saves and reset', () => {
     expect(() => game.load(negative, { offline: false })).toThrow(SaveCorruptedError);
     const badLevel = createSave(1, 0, { resources: { upgrades: { pick: 99 } } });
     expect(() => game.load(badLevel, { offline: false })).toThrow(SaveCorruptedError);
-    expect(game.amount('gold').toNumber()).toBe(7); // failed loads left state intact
+    expect(game.amount('gold').toNumber()).toBe(7);
   });
 
   it('resetRun returns to the start, optionally keeping things', () => {
@@ -538,7 +533,7 @@ describe('resources: cached production stays correct', () => {
       return game.amount('gold').sub(before).toNumber();
     };
     expect(earnedOver(1000)).toBeCloseTo(2, 9);
-    game.buyUpgrade('pick'); // miners x2
+    game.buyUpgrade('pick');
     const afterUpgrade = earnedOver(1000);
     expect(afterUpgrade).toBeCloseTo(4, 9);
     game.setModifier('boost', { all: true }, 10);
@@ -570,12 +565,12 @@ describe('resources: modifier context', () => {
       seen.push(offline);
       return offline ? 1 : 3;
     });
-    expect(game.rate('gold').toNumber()).toBeCloseTo(6, 9); // live: x3
+    expect(game.rate('gold').toNumber()).toBeCloseTo(6, 9);
     const before = game.amount('gold');
     game.simulateOffline(10_000);
-    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(20, 6); // offline: x1
+    expect(game.amount('gold').sub(before).toNumber()).toBeCloseTo(20, 6);
     expect(seen).toContain(true);
     expect(seen).toContain(false);
-    expect(game.rate('gold').toNumber()).toBeCloseTo(6, 9); // flag reset afterwards
+    expect(game.rate('gold').toNumber()).toBeCloseTo(6, 9);
   });
 });

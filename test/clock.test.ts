@@ -41,7 +41,6 @@ describe('TimeGuard', () => {
     const guard = new TimeGuard(clock);
     clock.set(5_000);
     expect(guard.sample()).toEqual({ delta: 0, status: 'backward' });
-    // After a rewind the guard measures from the new position.
     clock.advance(100);
     expect(guard.sample()).toEqual({ delta: 100, status: 'ok' });
   });

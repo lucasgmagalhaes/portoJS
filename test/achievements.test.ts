@@ -46,7 +46,7 @@ describe('achievements', () => {
     game.add('gold', 150);
     clock.advance(500);
     game.update();
-    expect(game.hasAchievement('rich')).toBe(false); // interval not reached yet
+    expect(game.hasAchievement('rich')).toBe(false);
     clock.advance(600);
     game.update();
     expect(game.hasAchievement('rich')).toBe(true);

@@ -27,7 +27,7 @@ describe('Vue binding: useGame', () => {
     stop();
     clock.advance(1000);
     game.update();
-    expect(value.value).toBe('4'); // stopped: no more updates
+    expect(value.value).toBe('4');
   });
 
   it('only triggers watchers when the value really changes', () => {
@@ -36,7 +36,7 @@ describe('Vue binding: useGame', () => {
     const scope = effectScope();
     let runs = 0;
     scope.run(() => {
-      const { value } = useGame(game, (g) => g.rate('gold')); // fresh BigNum each call
+      const { value } = useGame(game, (g) => g.rate('gold'));
       watch(value, () => runs++, { flush: 'sync' });
     });
     clock.advance(1000);

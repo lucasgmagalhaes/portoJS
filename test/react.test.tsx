@@ -34,7 +34,7 @@ describe('React binding: useGame', () => {
     let renders = 0;
     renderHook(() => {
       renders++;
-      return useGame(game, (g) => g.upgradeIds.length); // never changes
+      return useGame(game, (g) => g.upgradeIds.length);
     });
     const base = renders;
     act(() => {
@@ -50,13 +50,13 @@ describe('React binding: useGame', () => {
     let renders = 0;
     const { result } = renderHook(() => {
       renders++;
-      return useGame(game, (g) => g.rate('gold')); // a fresh BigNum on every call
+      return useGame(game, (g) => g.rate('gold'));
     });
     expect(result.current).toBeInstanceOf(BigNum);
     const base = renders;
     act(() => {
       clock.advance(1000);
-      game.update(); // ten ticks, rate unchanged
+      game.update();
     });
     expect(renders).toBe(base);
   });

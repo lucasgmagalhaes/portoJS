@@ -19,14 +19,12 @@ const toGenerator = (initial: number, coefficient: number, index: number): FlowS
 describe('solveFlows', () => {
   it('is linear for a generator feeding a resource', () => {
     const result = solveFlows([toResource(10, 2)], 1, 5);
-    expect(result?.gains[0]?.toNumber()).toBeCloseTo(100, 9); // 10 units × 2/s × 5 s
+    expect(result?.gains[0]?.toNumber()).toBeCloseTo(100, 9);
     expect(result?.counts[0]?.toNumber()).toBe(10);
   });
 
   it('is quadratic for a two-tier chain', () => {
-    // g0 (1 unit, 3/s) feeds g1 (2 units, 4/s) which feeds the resource.
     const result = solveFlows([toGenerator(1, 3, 1), toResource(2, 4)], 1, 10);
-    // g1(t) = 2 + 3t ; gain = 4 ∫ (2 + 3t) dt = 4 (2t + 1.5 t²)
     expect(result?.counts[1]?.toNumber()).toBeCloseTo(32, 9);
     expect(result?.gains[0]?.toNumber()).toBeCloseTo(4 * (20 + 150), 9);
   });
@@ -88,14 +86,12 @@ describe('solveFlows', () => {
           );
           const exact = solveFlows(sources, 1, seconds);
           expect(exact).toBeDefined();
-          // Reference: midpoint integration with 20k steps.
           const steps = 20_000;
           const dt = seconds / steps;
           const c = tiers.map(([initial]) => initial);
           let gain = 0;
           for (let s = 0; s < steps; s++) {
             const rates = tiers.map(([, rate], i) => rate * (c[i] as number));
-            // Euler with half-step correction on the chain (explicit midpoint).
             const mid = c.map((v, i) => (i > 0 ? v + (rates[i - 1] as number) * dt * 0.5 : v));
             const midRates = tiers.map(([, rate], i) => rate * (mid[i] as number));
             for (let i = 1; i < c.length; i++) {

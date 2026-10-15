@@ -10,8 +10,6 @@ export default defineConfig({
     vue: 'src/bindings/vue.ts',
   },
   format: ['esm', 'cjs'],
-  // Shared chunks keep one copy of classes such as BigNum across entries, so `instanceof`
-  // works even when a consumer imports from several subpaths (including in CJS).
   splitting: true,
   dts: true,
   clean: true,

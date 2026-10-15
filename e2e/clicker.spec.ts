@@ -22,29 +22,27 @@ test('clicking mines gold and unlocks an achievement', async ({ page }) => {
   await expect(gold(page)).toHaveText('0');
   for (let i = 0; i < 20; i++) await page.locator('#click').click();
   await expect(gold(page)).toHaveText('20');
-  await page.clock.runFor(1000); // the achievement check runs every 500 ms of game time
+  await page.clock.runFor(1000);
   await expect(page.locator('.achievement.unlocked')).toContainText('First gold');
 });
 
 test('generators produce on a fixed timestep driven by the browser clock', async ({ page }) => {
   await open(page);
   for (let i = 0; i < 15; i++) await page.locator('#click').click();
-  await page.locator('.row button', { hasText: 'Buy 1' }).first().click(); // a cursor, 0.2/s
+  await page.locator('.row button', { hasText: 'Buy 1' }).first().click();
   await expect(page.locator('.rate')).toHaveText('0.2 per second');
   await page.clock.runFor(10_000);
-  await expect(gold(page)).toHaveText('2'); // 2 gold in 10 s
+  await expect(gold(page)).toHaveText('2');
 });
 
 test('a long pause in the page catches up without freezing', async ({ page }) => {
   await open(page);
   for (let i = 0; i < 15; i++) await page.locator('#click').click();
   await page.locator('.row button', { hasText: 'Buy 1' }).first().click();
-  // A throttled background tab: one timer firing after a whole hour. The loop simulates a
-  // bounded number of steps and credits the dropped time as offline time (cap 8 h at 50%).
   await page.clock.fastForward(HOUR);
   const text = (await gold(page).textContent()) ?? '';
   const value = Number.parseFloat(text.replace(/[^\d.]/g, ''));
-  expect(value).toBeGreaterThan(300); // ~360 gold: 0.2/s × 3600 s × 50%
+  expect(value).toBeGreaterThan(300);
   expect(value).toBeLessThan(400);
 });
 
@@ -54,19 +52,17 @@ test('progress is saved and offline time is credited on the next visit', async (
   await open(first);
   for (let i = 0; i < 15; i++) await first.locator('#click').click();
   await first.locator('.row button', { hasText: 'Buy 1' }).first().click();
-  await first.clock.runFor(6000); // autosave runs every 5 s
+  await first.clock.runFor(6000);
   await first.close();
 
-  // Return 20 hours later: capped at 8 h and credited at 50% => 4 h × 0.2/s = 2880 gold.
   const second = await context.newPage();
   await open(second, new Date(START.getTime() + 20 * HOUR));
-  // (The "Welcome back" toast is replaced by the achievement toast almost immediately.)
   const value = Number.parseFloat(
     ((await gold(second).textContent()) ?? '').replace(/[^\d.]/g, ''),
   );
   expect(value).toBeGreaterThan(2.8);
   expect(value).toBeLessThan(3.0);
-  await expect(gold(second)).toContainText('K'); // displayed as "2.88K"
+  await expect(gold(second)).toContainText('K');
   await context.close();
 });
 
