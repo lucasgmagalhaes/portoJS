@@ -77,6 +77,97 @@ door.opened.invoke({ by: 'player' });
 
 `addListener` returns an unsubscribe function. A `GameEvent` without a payload is invoked with no argument.
 
+## Coroutines
+
+A coroutine is a generator that pauses with `yield` and resumes later, like Unity's. It runs in game time (fixed steps), so it is deterministic with a fake clock.
+
+```ts
+import { Component, WaitForSeconds, WaitUntil } from 'portojs';
+import type { CoroutineYield } from 'portojs';
+
+class Wave extends Component {
+  static override typeId = 'Wave';
+
+  override start(): void {
+    this.startCoroutine(this.run());
+  }
+
+  *run(): Generator<CoroutineYield> {
+    while (true) {
+      yield new WaitForSeconds(30); // game seconds
+      yield new WaitUntil(() => this.ready);
+      this.spawn();
+      yield; // continue on the next step
+    }
+  }
+}
+```
+
+- Waits: `WaitForSeconds(s)`, `WaitUntil(fn)`, `WaitWhile(fn)`, a bare `yield` (next step), or another coroutine (waits for it to finish). Subclass `YieldInstruction` for your own.
+- `startCoroutine` returns a `Coroutine` with `stop()` and `isRunning`; `stopAllCoroutines()` stops every one of the component.
+- A coroutine pauses while its component is inactive and ends when the component is destroyed.
+- Coroutines are **not saved** and **do not advance during offline progress**. Keep state that must survive in the component and implement `onOffline` for away-time.
+
+## Prefabs
+
+A `Prefab` is a template for objects. Its builder receives the new object and optional parameters:
+
+```ts
+import { Generator, Prefab } from 'portojs';
+
+const minerPrefab = new Prefab<{ base: number }>((object, { base }) => {
+  object.addComponent(Generator, {
+    cost: { resource: gold, base, growth: 1.15 },
+    produces: gold,
+    rate: 1,
+  });
+});
+
+game.instantiate(minerPrefab, 'Miner1', { params: { base: 10 } });
+game.instantiate(minerPrefab, 'Miner2', { params: { base: 100 }, parent: factory });
+```
+
+Names must still be unique. If the builder throws, the half-built object is destroyed.
+
+## Scenes
+
+A scene is plain JSON that builds objects and components, so levels and balance data can live in files. Register the component classes it may name, then load it:
+
+```ts
+import { ComponentRegistry, loadScene } from 'portojs';
+import { idleComponents } from 'portojs/idle';
+
+const registry = new ComponentRegistry().register(...idleComponents, Wave);
+
+loadScene(
+  game,
+  {
+    objects: [
+      { name: 'Gold', components: [{ type: 'Resource', options: { initial: 10 } }] },
+      {
+        name: 'Miner',
+        components: [
+          {
+            type: 'Generator',
+            options: {
+              cost: { resource: { $ref: 'Gold/Resource' }, base: 10, growth: 1.15 },
+              produces: { $ref: 'Gold/Resource' },
+              rate: 1,
+            },
+          },
+        ],
+      },
+    ],
+  },
+  registry,
+);
+```
+
+- `type` is the component's `typeId`. `options` is passed to its constructor; `enabled` and `active` set the initial state; `children` nests objects.
+- `{ "$ref": "Gold" }` is the object named `Gold`, and `{ "$ref": "Gold/Resource" }` is its `Resource` component (`Gold/Resource#2` for the second). Objects are created in order, so a reference can only point at something created before it. Object names containing `/` cannot be referenced.
+- Loading is all-or-nothing and throws `SceneError` with the path of the problem, so it is safe to feed it files you did not write. Keys named `__proto__` are rejected.
+- A scene creates structure; saves still store component state by object name, so load the scene first and then `game.load(save)`.
+
 ## Time
 
 `game.time` mirrors Unity's `Time`: `fixedDeltaTime` and `deltaTime` (seconds per step), `time` and `fixedTime` (seconds simulated), `tickCount`. Away-time is not added to `time`.

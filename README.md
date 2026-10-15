@@ -75,6 +75,7 @@ game.createObject('Player').addComponent(Health);
 | Area                 | What you get                                                                                                                                                                                  |
 | -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Game model**       | `Game`, `GameObject`, `Component` with `awake`, `start`, `fixedUpdate`, `onEnable`, `onDisable`, `onDestroy`; `GameEvent`                                                                     |
+| **Authoring**        | Coroutines (`WaitForSeconds`, `WaitUntil`), `Prefab` templates with `game.instantiate`, JSON scenes with `loadScene`                                                                          |
 | **Tick loop**        | Fixed timestep with accumulator, independent of FPS, bounded catch-up for throttled tabs, deterministic with a fake clock                                                                     |
 | **Clock**            | Injectable time source, `ManualClock` for tests, protection against the system clock going back or jumping                                                                                    |
 | **Saves**            | Each component saves itself. Versioned, chained migrations, Base64 export/import, checksum, atomic load with rollback                                                                         |
@@ -136,8 +137,9 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Roadmap
 
-- [ ] Prefab-style templates to create many similar objects
-- [ ] A scene description format (JSON) that builds objects and components
+- [x] Prefab-style templates to create many similar objects
+- [x] A scene description format (JSON) that builds objects and components
+- [x] Coroutines for sequenced timed behavior
 - [ ] Optional compressed save format
 - [ ] Svelte and Solid bindings
 - [ ] More cost curves and a cost-curve visualiser for balancing

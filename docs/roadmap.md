@@ -73,9 +73,9 @@ An earlier version used a functional plugin kernel (`createCore`, `definePlugin`
 
 **Engine**
 
-- Prefabs: templates to create many similar objects.
-- A JSON scene description that builds objects and components.
-- Coroutines for sequenced timed behavior.
+- Done: prefabs (`Prefab`, `Game.instantiate`), JSON scenes (`loadScene`) and coroutines.
+- Exporting a live game back to a scene description.
+- Saving coroutine progress (they are runtime-only today).
 
 **Idle mechanics**
 
