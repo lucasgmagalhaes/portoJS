@@ -8,10 +8,13 @@ export type {
   GameEvents,
   GameOfflineOptions,
   GameOptions,
+  InstantiateOptions,
   LoadOptions,
   OfflineSource,
 } from './game.js';
 export { GameEvent } from './game-event.js';
 export type { GameEventListener } from './game-event.js';
 export { GameObject } from './game-object.js';
+export { Prefab } from './prefab.js';
+export type { PrefabBuilder } from './prefab.js';
 export { Time } from './time.js';

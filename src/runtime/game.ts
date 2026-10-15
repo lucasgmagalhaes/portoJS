@@ -20,6 +20,7 @@ import type { Component, ComponentType } from './component.js';
 import { Coroutine } from './coroutine.js';
 import type { CoroutineYield } from './coroutine.js';
 import { GameObject } from './game-object.js';
+import type { Prefab } from './prefab.js';
 import { Time } from './time.js';
 
 /**
@@ -97,6 +98,12 @@ export interface CreateObjectOptions {
    */
   readonly active?: boolean;
 }
+
+/**
+ * Options for {@link Game.instantiate}. `params` is required when the prefab declares parameters.
+ */
+export type InstantiateOptions<P> = CreateObjectOptions &
+  (undefined extends P ? { readonly params?: P } : { readonly params: P });
 
 /**
  * Options for {@link Game.load}.
@@ -422,6 +429,33 @@ export class Game {
     this.byName.set(name, object);
     this.structure += 1;
     this.bus.emit('objectCreated', { object });
+    return object;
+  }
+
+  /**
+   * Creates an object from a {@link Prefab}, like Unity's `Instantiate`. If the prefab's builder
+   * throws, the half-built object is destroyed and the error is rethrown.
+   *
+   * @throws {Error} if `name` is empty or already used by another live object.
+   */
+  instantiate<P>(
+    prefab: Prefab<P>,
+    name: string,
+    ...options: undefined extends P
+      ? [options?: InstantiateOptions<P>]
+      : [options: InstantiateOptions<P>]
+  ): GameObject {
+    const given = options[0];
+    const object = this.createObject(name, {
+      active: given?.active ?? prefab.active,
+      ...(given?.parent === undefined ? {} : { parent: given.parent }),
+    });
+    try {
+      prefab.build(object, given?.params as P);
+    } catch (error) {
+      object.destroy();
+      throw error;
+    }
     return object;
   }
 
