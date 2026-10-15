@@ -92,7 +92,7 @@ export interface PrestigeApi {
   spendPrestige(amount: BigNumLike): boolean;
 }
 
-function compileFormula(formula: PrestigeFormula): (runEarned: BigNum) => BigNum {
+export function compileFormula(formula: PrestigeFormula): (runEarned: BigNum) => BigNum {
   if (typeof formula === 'function') return (earned) => BigNum.from(formula(earned));
   const threshold = BigNum.from(formula.threshold);
   const exponent = formula.exponent ?? 0.5;
