@@ -26,7 +26,7 @@ jobs:
       - run: pnpm coverage
       - run: pnpm build
       - run: pnpm check:package
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.node == 24
         with:
           name: dist
