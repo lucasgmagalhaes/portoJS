@@ -1,2 +1,2 @@
-export { Devtools } from './devtools.ts';
-export type { DevtoolsProps } from './devtools.ts';
+export { Devtools } from './devtools.tsx';
+export type { DevtoolsProps } from './devtools.tsx';

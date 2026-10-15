@@ -41,6 +41,7 @@ function isExternal(id: string): boolean {
     id.startsWith('@portojs/') ||
     id.startsWith('@dimforge/') ||
     id === 'react' ||
+    id === 'react/jsx-runtime' ||
     id === 'vue' ||
     id === 'solid-js' ||
     id.startsWith('node:')

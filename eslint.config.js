@@ -39,7 +39,7 @@ const noPlainComments = {
 };
 
 const TYPED_FILES = [
-  'packages/*/src/**/*.ts',
+  'packages/*/src/**/*.{ts,tsx}',
   'packages/*/test/**/*.{ts,tsx}',
   'bench/**/*.ts',
   'e2e/**/*.ts',
@@ -96,7 +96,7 @@ export default tseslint.config(
     rules: { 'local/no-plain-comments': 'error' },
   },
   {
-    files: ['packages/*/src/**/*.ts'],
+    files: ['packages/*/src/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-syntax': [
         'error',

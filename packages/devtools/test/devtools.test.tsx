@@ -3,7 +3,6 @@ import { ManualClock } from '@portojs/core';
 import type { JsonValue } from '@portojs/core';
 import { Component, Game } from '@portojs/runtime';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { createElement as h } from 'react';
 import { afterEach, describe, expect, it } from 'vitest';
 import { Devtools } from '../src/index.ts';
 
@@ -42,7 +41,7 @@ afterEach(cleanup);
 describe('Devtools', () => {
   it('shows the tree with states and follows the game', () => {
     const { game } = make();
-    const { container } = render(h(Devtools, { game, refreshEveryTicks: 2 }));
+    const { container } = render(<Devtools game={game} refreshEveryTicks={2} />);
     expect(container.textContent).toContain('Counter');
     expect(container.textContent).toContain('Child (inactive)');
     expect(container.querySelector('.pj-status')?.textContent).toContain('tick 0');
@@ -55,7 +54,7 @@ describe('Devtools', () => {
 
   it('applies edits through onLoad and reports invalid JSON', () => {
     const { game, counter } = make();
-    const { container } = render(h(Devtools, { game }));
+    const { container } = render(<Devtools game={game} />);
     const area = container.querySelector('textarea') as HTMLTextAreaElement;
     fireEvent.change(area, { target: { value: '{"value": 9}' } });
     fireEvent.click(screen.getByText('Apply'));
@@ -72,7 +71,7 @@ describe('Devtools', () => {
 
   it('keeps a draft while the game ticks', () => {
     const { game } = make();
-    const { container } = render(h(Devtools, { game, refreshEveryTicks: 1 }));
+    const { container } = render(<Devtools game={game} refreshEveryTicks={1} />);
     fireEvent.change(container.querySelector('textarea') as HTMLTextAreaElement, {
       target: { value: 'draft' },
     });
@@ -84,7 +83,7 @@ describe('Devtools', () => {
 
   it('fast-forwards by steps or as away time and accepts a class name', () => {
     const { game, counter } = make();
-    const { container } = render(h(Devtools, { game, className: 'custom' }));
+    const { container } = render(<Devtools game={game} className="custom" />);
     expect(container.querySelector('.custom')).not.toBeNull();
     fireEvent.click(screen.getByText('+1 min'));
     expect(counter.value).toBe(600);
@@ -101,7 +100,7 @@ describe('Devtools', () => {
       }
     }
     game.createObject('Static').addComponent(Fixed);
-    const { container } = render(h(Devtools, { game }));
+    const { container } = render(<Devtools game={game} />);
     expect((container.querySelector('textarea') as HTMLTextAreaElement).readOnly).toBe(true);
     expect(screen.queryByText('Apply')).toBeNull();
   });

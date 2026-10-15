@@ -8,7 +8,7 @@ import { inspectGame } from '@portojs/tools';
 import type { ReactElement } from 'react';
 
 // @public
-export function Devtools(props: DevtoolsProps): ReactElement;
+export function Devtools(input: DevtoolsProps): ReactElement;
 
 // @public
 export interface DevtoolsProps {

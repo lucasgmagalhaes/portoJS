@@ -1,6 +1,6 @@
 import { fastForward, findComponent, inspectGame, setComponentState } from '@portojs/tools';
 import type { ComponentInfo, GameInfo, ObjectInfo } from '@portojs/tools';
-import { createElement as h, useRef, useState, useSyncExternalStore } from 'react';
+import { useRef, useState, useSyncExternalStore } from 'react';
 import type { ChangeEvent, ReactElement } from 'react';
 
 /**
@@ -73,8 +73,7 @@ interface EditorProps {
   readonly onApplied: () => void;
 }
 
-function ComponentEditor(props: EditorProps): ReactElement {
-  const { game, objectName, info, onApplied } = props;
+function ComponentEditor({ game, objectName, info, onApplied }: EditorProps): ReactElement {
   const [draft, setDraft] = useState<string | undefined>(undefined);
   const [problem, setProblem] = useState('');
   const shown = draft ?? (info.state === undefined ? '' : JSON.stringify(info.state, null, 2));
@@ -95,24 +94,28 @@ function ComponentEditor(props: EditorProps): ReactElement {
     }
   };
 
-  const parts: ReactElement[] = [h('strong', { key: 'type' }, info.type)];
-  if (!info.active) parts.push(h('em', { key: 'inactive' }, ' (inactive)'));
-  if (info.state !== undefined) {
-    parts.push(
-      h('textarea', {
-        key: 'state',
-        value: shown,
-        readOnly: !info.editable,
-        rows: Math.min(8, shown.split('\n').length),
-        onChange,
-      }),
-    );
-    if (info.editable) {
-      parts.push(h('button', { key: 'apply', type: 'button', onClick: apply }, 'Apply'));
-    }
-    if (problem !== '') parts.push(h('div', { key: 'error', role: 'alert' }, problem));
-  }
-  return h('div', { className: 'pj-component' }, ...parts);
+  return (
+    <div className="pj-component">
+      <strong>{info.type}</strong>
+      {info.active ? null : <em> (inactive)</em>}
+      {info.state === undefined ? null : (
+        <>
+          <textarea
+            value={shown}
+            readOnly={!info.editable}
+            rows={Math.min(8, shown.split('\n').length)}
+            onChange={onChange}
+          />
+          {info.editable ? (
+            <button type="button" onClick={apply}>
+              Apply
+            </button>
+          ) : null}
+          {problem === '' ? null : <div role="alert">{problem}</div>}
+        </>
+      )}
+    </div>
+  );
 }
 
 interface TreeProps {
@@ -121,26 +124,32 @@ interface TreeProps {
   readonly onApplied: () => void;
 }
 
-function ObjectNode(props: TreeProps): ReactElement {
-  const { game, info, onApplied } = props;
-  const children: ReactElement[] = [
-    h('summary', { key: 'name' }, info.active ? info.name : `${info.name} (inactive)`),
-  ];
+function ObjectNode({ game, info, onApplied }: TreeProps): ReactElement {
+  const components: ReactElement[] = [];
   for (const [index, component] of info.components.entries()) {
-    children.push(
-      h(ComponentEditor, {
-        key: `c${index}:${component.type}`,
-        game,
-        objectName: info.name,
-        info: component,
-        onApplied,
-      }),
+    components.push(
+      <ComponentEditor
+        key={`c${index}:${component.type}`}
+        game={game}
+        objectName={info.name}
+        info={component}
+        onApplied={onApplied}
+      />,
     );
   }
+  const children: ReactElement[] = [];
   for (const [index, child] of info.children.entries()) {
-    children.push(h(ObjectNode, { key: `o${index}:${child.name}`, game, info: child, onApplied }));
+    children.push(
+      <ObjectNode key={`o${index}:${child.name}`} game={game} info={child} onApplied={onApplied} />,
+    );
   }
-  return h('details', { className: 'pj-object', open: true }, ...children);
+  return (
+    <details className="pj-object" open>
+      <summary>{info.active ? info.name : `${info.name} (inactive)`}</summary>
+      {components}
+      {children}
+    </details>
+  );
 }
 
 /**
@@ -152,10 +161,8 @@ function ObjectNode(props: TreeProps): ReactElement {
  * @example
  * {import.meta.env.DEV && <Devtools game={game} />}
  */
-export function Devtools(props: DevtoolsProps): ReactElement {
-  const { game } = props;
-  const every = props.refreshEveryTicks ?? 10;
-  const [info, refresh] = useInspection(game, every);
+export function Devtools({ game, refreshEveryTicks = 10, className }: DevtoolsProps): ReactElement {
+  const [info, refresh] = useInspection(game, refreshEveryTicks);
 
   const buttons: ReactElement[] = [];
   for (const [label, ms, mode] of FAST_FORWARDS) {
@@ -163,20 +170,24 @@ export function Devtools(props: DevtoolsProps): ReactElement {
       fastForward(game, ms, mode);
       refresh();
     };
-    buttons.push(h('button', { key: label, type: 'button', onClick: jump }, label));
+    buttons.push(
+      <button key={label} type="button" onClick={jump}>
+        {label}
+      </button>,
+    );
   }
   const nodes: ReactElement[] = [];
   for (const [index, object] of info.objects.entries()) {
     nodes.push(
-      h(ObjectNode, { key: `${index}:${object.name}`, game, info: object, onApplied: refresh }),
+      <ObjectNode key={`${index}:${object.name}`} game={game} info={object} onApplied={refresh} />,
     );
   }
   const status = `tick ${info.tickCount} - ${(info.now / 1000).toFixed(1)} s${info.running ? '' : ' - stopped'}`;
-  return h(
-    'div',
-    { className: props.className ?? 'pj-devtools' },
-    h('div', { className: 'pj-status' }, status),
-    h('div', { className: 'pj-toolbar' }, ...buttons),
-    h('div', { className: 'pj-tree' }, ...nodes),
+  return (
+    <div className={className ?? 'pj-devtools'}>
+      <div className="pj-status">{status}</div>
+      <div className="pj-toolbar">{buttons}</div>
+      <div className="pj-tree">{nodes}</div>
+    </div>
   );
 }

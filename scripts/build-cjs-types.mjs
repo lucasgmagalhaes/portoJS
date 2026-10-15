@@ -18,7 +18,7 @@ function walk(dir) {
     const path = join(dir, name);
     if (statSync(path).isDirectory()) walk(path);
     else if (name.endsWith('.d.ts')) {
-      const esm = swap(readFileSync(path, 'utf8'), '.ts', '.js');
+      const esm = swap(swap(readFileSync(path, 'utf8'), '.tsx', '.js'), '.ts', '.js');
       writeFileSync(path, esm);
       const target = path.slice(0, -'.d.ts'.length) + '.d.cts';
       copyFileSync(path, target);

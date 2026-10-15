@@ -95,7 +95,10 @@ for (const pkg of readdirSync(packagesDir)) {
     const text = readFileSync(file, 'utf8');
     for (const match of text.matchAll(/from '(\.[^']*)'/g)) {
       const specifier = match[1];
-      assert.ok(!specifier.endsWith('.ts'), `${file}: "${specifier}" must not end in .ts`);
+      assert.ok(
+        !specifier.endsWith('.ts') && !specifier.endsWith('.tsx'),
+        `${file}: "${specifier}" must not end in .ts or .tsx`,
+      );
       const target = specifier.endsWith('.cjs')
         ? specifier.replace(/\.cjs$/, '.d.cts')
         : specifier.replace(/\.js$/, '.d.ts');
