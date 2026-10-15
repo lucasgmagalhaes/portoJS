@@ -1,23 +1,23 @@
-# leveling
+# PortoJS
 
 A headless TypeScript engine for idle and incremental games. It runs in browsers, Node and Electron, has zero runtime dependencies, and solves the parts every idle game ends up rebuilding: **huge numbers, a stable tick loop, trustworthy offline progress, and versioned saves**.
 
 ```
-pnpm add leveling
+pnpm add portojs
 ```
 
 ## Why
 
 Idle games look simple until they are not. Numbers outgrow `Number`. `setInterval` drifts, and background tabs get throttled. Players close the game for a week and expect fair progress, and nobody wants to explain why the system clock moving back gave free gold. Saves change shape between versions and must not silently corrupt.
 
-`leveling` handles those problems once, with tests, so you can focus on the game.
+`portojs` handles those problems once, with tests, so you can focus on the game.
 
 It is also **deliberately game-agnostic**: the core knows about time, ticks, saves and offline progress, and nothing else. Resources, generators, prestige and achievements are plugins on top of it. Use the batteries-included `createGame`, or compose your own mechanics.
 
 ## Minimal example
 
 ```ts
-import { createGame, format } from 'leveling';
+import { createGame, format } from 'portojs';
 
 const game = createGame({
   resources: { gold: { initial: 10 } },

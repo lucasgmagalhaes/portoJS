@@ -12,7 +12,7 @@ Everything else is a plugin. `createGame` is just `createCore` with the built-in
 ## Anatomy
 
 ```ts
-import { createCore, definePlugin } from 'leveling';
+import { createCore, definePlugin } from 'portojs';
 
 interface CounterApi {
   readonly count: number;

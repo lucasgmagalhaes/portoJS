@@ -1,5 +1,5 @@
 /**
- * leveling: a headless engine for idle and incremental games.
+ * PortoJS: a headless engine for idle and incremental games.
  *
  * - {@link createGame} builds a complete game from one declarative object.
  * - {@link createCore} + plugins gives you the game-agnostic kernel to compose your own.

@@ -1,6 +1,6 @@
 # Prestige
 
-Prestige lets players reset a run in exchange for permanent points that boost later runs. In `leveling` it is **a plugin, not part of the core**, and it only uses the public `resources` API.
+Prestige lets players reset a run in exchange for permanent points that boost later runs. In `portojs` it is **a plugin, not part of the core**, and it only uses the public `resources` API.
 
 ## Configuration
 

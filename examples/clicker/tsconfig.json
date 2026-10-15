@@ -13,7 +13,7 @@
     "skipLibCheck": true,
     "noEmit": true,
     "types": ["node", "vite/client"],
-    "paths": { "leveling": ["../../src/index.ts"] }
+    "paths": { "portojs": ["../../src/index.ts"] }
   },
   "include": ["src", "vite.config.ts"]
 }

@@ -1,8 +1,8 @@
-import { SaveCorruptedError, SaveVersionError, createGame, format } from 'leveling';
-import type { BigNum, BulkAmount } from 'leveling';
+import { SaveCorruptedError, SaveVersionError, createGame, format } from 'portojs';
+import type { BigNum, BulkAmount } from 'portojs';
 import './style.css';
 
-const SAVE_KEY = 'leveling-clicker-save';
+const SAVE_KEY = 'portojs-clicker-save';
 const HOUR = 3_600_000;
 
 // ---------------------------------------------------------------------------
@@ -207,7 +207,7 @@ const app = document.querySelector<HTMLElement>('#app');
 if (app === null) throw new Error('#app not found');
 app.append(
   h('section', { className: 'hero' }, [
-    h('h1', { text: 'leveling clicker' }),
+    h('h1', { text: 'PortoJS clicker' }),
     goldEl,
     rateEl,
     clickBtn,

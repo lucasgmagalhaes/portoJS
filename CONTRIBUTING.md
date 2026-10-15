@@ -1,4 +1,4 @@
-# Contributing to leveling
+# Contributing to PortoJS
 
 Thanks for helping! This project is a small, well-tested library; the bar is "boring and correct".
 

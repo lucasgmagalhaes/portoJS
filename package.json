@@ -1,5 +1,5 @@
 {
-  "name": "leveling",
+  "name": "portojs",
   "version": "0.0.0",
   "description": "Headless TypeScript engine for idle and incremental games: big numbers, stable ticks, offline progress, prestige and versioned saves.",
   "license": "MIT",
@@ -76,12 +76,12 @@
   "author": "Lucas Gomes",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/lucasgmagalhaes/leveling.git"
+    "url": "git+https://github.com/lucasgmagalhaes/portojs.git"
   },
   "bugs": {
-    "url": "https://github.com/lucasgmagalhaes/leveling/issues"
+    "url": "https://github.com/lucasgmagalhaes/portojs/issues"
   },
-  "homepage": "https://github.com/lucasgmagalhaes/leveling#readme",
+  "homepage": "https://github.com/lucasgmagalhaes/portojs#readme",
   "publishConfig": {
     "access": "public",
     "provenance": true

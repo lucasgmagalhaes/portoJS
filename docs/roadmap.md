@@ -1,6 +1,6 @@
 # Engineering audit and roadmap
 
-A code-level review of what `leveling` needs to become a dependable, widely used engine. Findings come from measurements on this repository (coverage, `publint`, `are-the-types-wrong`, runtime probes, benchmarks), not from guesses. Items marked **done** were fixed while writing this document.
+A code-level review of what `portojs` needs to become a dependable, widely used engine. Findings come from measurements on this repository (coverage, `publint`, `are-the-types-wrong`, runtime probes, benchmarks), not from guesses. Items marked **done** were fixed while writing this document.
 
 ## 1. Measured state
 
@@ -19,18 +19,18 @@ A code-level review of what `leveling` needs to become a dependable, widely used
 
 ### Release and packaging
 
-| #   | Finding                                                                                                                                                                  | Status                                                                                               |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| P1  | No changelog, no versioning flow, no publish pipeline                                                                                                                    | **done** (release-please + npm publish with provenance)                                              |
-| P2  | `package.json` lacked `repository`, `bugs`, `homepage`, `author`, `publishConfig`                                                                                        | **done**                                                                                             |
-| P3  | CI matrix used Node 18 and 20, but the dev tooling needs newer Node (vitest 5 needs 22.12+, tsup 9 needs 22.18+, ESLint 10 needs 20.19+), so those jobs could never pass | **done** (checks on 22/24; built output smoke-tested on 18/20/22/24)                                 |
-| P4  | No automated check that the published artifact works for ESM and CJS consumers                                                                                           | **done** (`pnpm smoke`, `pnpm check:package`)                                                        |
-| P5  | No dependency update automation, no `SECURITY.md`                                                                                                                        | **done**                                                                                             |
-| P6  | PR titles are not validated, but squash merges turn them into changelog entries                                                                                          | **done** (`pr-title.yml`)                                                                            |
-| P7  | Release PRs opened with the default `GITHUB_TOKEN` do not trigger CI                                                                                                     | open: use a PAT or GitHub App token for release-please                                               |
-| P8  | No bundle-size budget                                                                                                                                                    | open: add `size-limit` (budget: bignum-only entry, core-only entry)                                  |
-| P9  | No API-surface guard against accidental breaking changes                                                                                                                 | open: add `@microsoft/api-extractor` report checked in CI before 1.0                                 |
-| P10 | Single entry point; consumers who only need `BigNum` still import through the whole barrel                                                                               | open: add `leveling/bignum` and `leveling/core` subpath exports (the code is already layered for it) |
+| #   | Finding                                                                                                                                                                  | Status                                                                                             |
+| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------- |
+| P1  | No changelog, no versioning flow, no publish pipeline                                                                                                                    | **done** (release-please + npm publish with provenance)                                            |
+| P2  | `package.json` lacked `repository`, `bugs`, `homepage`, `author`, `publishConfig`                                                                                        | **done**                                                                                           |
+| P3  | CI matrix used Node 18 and 20, but the dev tooling needs newer Node (vitest 5 needs 22.12+, tsup 9 needs 22.18+, ESLint 10 needs 20.19+), so those jobs could never pass | **done** (checks on 22/24; built output smoke-tested on 18/20/22/24)                               |
+| P4  | No automated check that the published artifact works for ESM and CJS consumers                                                                                           | **done** (`pnpm smoke`, `pnpm check:package`)                                                      |
+| P5  | No dependency update automation, no `SECURITY.md`                                                                                                                        | **done**                                                                                           |
+| P6  | PR titles are not validated, but squash merges turn them into changelog entries                                                                                          | **done** (`pr-title.yml`)                                                                          |
+| P7  | Release PRs opened with the default `GITHUB_TOKEN` do not trigger CI                                                                                                     | open: use a PAT or GitHub App token for release-please                                             |
+| P8  | No bundle-size budget                                                                                                                                                    | open: add `size-limit` (budget: bignum-only entry, core-only entry)                                |
+| P9  | No API-surface guard against accidental breaking changes                                                                                                                 | open: add `@microsoft/api-extractor` report checked in CI before 1.0                               |
+| P10 | Single entry point; consumers who only need `BigNum` still import through the whole barrel                                                                               | open: add `portojs/bignum` and `portojs/core` subpath exports (the code is already layered for it) |
 
 ### Runtime and correctness
 
@@ -87,7 +87,7 @@ A code-level review of what `leveling` needs to become a dependable, widely used
 - Documentation site (VitePress) with generated API reference and a live playground.
 - Balancing tools: a headless simulator that fast-forwards a config and reports time-to-milestone and cost curves.
 - Devtools: inspect state, edit values, fast-forward time.
-- Framework bindings as separate packages: `@leveling/react`, `@leveling/vue`, `@leveling/svelte`.
+- Framework bindings as separate packages: `@portojs/react`, `@portojs/vue`, `@portojs/svelte`.
 
 **Platform**
 
@@ -103,6 +103,6 @@ A code-level review of what `leveling` needs to become a dependable, widely used
 
 One-time setup on GitHub:
 
-- Add an `NPM_TOKEN` repository secret (an npm automation token with publish rights to `leveling`).
+- Add an `NPM_TOKEN` repository secret (an npm automation token with publish rights to `portojs`).
 - Settings → Actions → General → allow GitHub Actions to create pull requests.
 - Optionally set the PR merge method to "squash" so each PR title becomes one changelog line.

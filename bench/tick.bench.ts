@@ -56,7 +56,7 @@ bench
 
 await bench.run();
 
-console.log(`\nleveling benchmarks, ${COUNT} generators (Node ${process.version})\n`);
+console.log(`\nportojs benchmarks, ${COUNT} generators (Node ${process.version})\n`);
 console.table(
   bench.tasks.map((task) => {
     const stats = task.result;

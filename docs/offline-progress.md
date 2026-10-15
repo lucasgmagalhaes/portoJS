@@ -1,6 +1,6 @@
 # Offline progress
 
-Idle games must reward players for time spent away, without being exploitable and without freezing the page on load. `leveling` does this in three steps.
+Idle games must reward players for time spent away, without being exploitable and without freezing the page on load. `portojs` does this in three steps.
 
 1. **Resolve** how much real time to credit.
 2. **Credit** it by asking every system to fast-forward.
@@ -11,7 +11,7 @@ Idle games must reward players for time spent away, without being exploitable an
 The span between a save and "now" is resolved by `resolveOffline` (used internally on `load`):
 
 ```ts
-import { resolveOffline } from 'leveling';
+import { resolveOffline } from 'portojs';
 
 resolveOffline(savedAt, clock.now(), { maxMs: 8 * 3_600_000, efficiency: 0.5 });
 // => { elapsedMs, appliedMs, status }

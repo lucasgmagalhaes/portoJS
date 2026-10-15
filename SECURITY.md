@@ -17,5 +17,5 @@ report is confirmed.
 - Save checksums (FNV-1a) detect accidental corruption and casual edits. They are **not** a
   security boundary. Players can always recompute them. If cheating matters to your game,
   validate progress on a server.
-- `leveling` does no I/O of its own. Anything read from storage or the network (saves,
+- `portojs` does no I/O of its own. Anything read from storage or the network (saves,
   imported strings) is validated, but treat it as untrusted input in your application.
