@@ -387,3 +387,53 @@ class Mover extends Component {
 - Every `update` runs (in `executionOrder`) before any `lateUpdate`.
 - Frames are driven by `game.update()` (the loop calls it every `pollMs`) and by `game.advance(ms)`, which counts as one frame of `ms`. For a display-rate loop, set `pollMs` to about 16, or call `game.update()` from `requestAnimationFrame`.
 - Action games can use a short step, for example `new Game({ stepMs: 16 })`. The simulation stays deterministic because it always advances in whole steps, whatever the frame rate.
+
+## Daily streaks and quests
+
+Two components bring players back every day. Both follow the game clock and a UTC offset, so pass the player's own to reset at their midnight: `-new Date().getTimezoneOffset()`. In tests use a `ManualClock` and move it a day at a time.
+
+### Login streak
+
+```ts
+import { DailyStreak } from 'portojs/idle';
+
+const streak = game.createObject('Streak').addComponent(DailyStreak, {
+  utcOffsetMinutes: -new Date().getTimezoneOffset(),
+  graceDays: 1, // one missed day is forgiven
+  reward: (game, days) => gold.add(100 * days),
+});
+
+const { status, streak: days } = streak.checkIn(); // 'started' | 'continued' | 'reset' | 'already'
+if (streak.canClaim) streak.claim(); // one reward a day
+streak.msUntilNextDay; // for a countdown
+```
+
+`checkIn` is idempotent within a day. The streak counts consecutive days (a gap larger than `graceDays` resets it to 1), `best` keeps the longest, and `claim` pays once per day for the current streak. Everything is saved. Set `autoCheckIn: true` to check in when the game starts.
+
+### Daily quests
+
+```ts
+import { DailyQuests } from 'portojs/idle';
+
+const daily = game.createObject('Daily').addComponent(DailyQuests, {
+  count: 3,
+  pool: [
+    { id: 'mine', description: 'Mine 50 times', target: 50, reward: () => gold.add(500) },
+    { id: 'buy', description: 'Buy 5 miners', target: 5, reward: () => gems.add(2) },
+    {
+      id: 'earn',
+      description: 'Earn 10K gold',
+      target: 10_000,
+      weight: 2,
+      reward: () => gems.add(1),
+    },
+  ],
+});
+
+onMine(() => daily.add('mine')); // report progress from your game code
+for (const quest of daily.quests) render(quest); // { definition, progress, complete, claimed }
+daily.claim('mine'); // or daily.claimAll()
+daily.completed.addListener((quest) => toast(quest.definition.description));
+```
+
+Each day draws `count` different quests from the pool, weighted by `weight`. The draw depends only on the day and the `seed` option, so every device sees the same quests. Progress stops at the target, a reward is paid once, and the quests roll over by themselves at midnight (`refreshed` fires). A save made on an earlier day loads as a fresh day. Keep quest ids stable: they are what is saved.
