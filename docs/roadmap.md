@@ -120,11 +120,12 @@ The CPU-heavy part that really benefits from WebAssembly, physics, already ships
 
 1. Merge PRs with Conventional Commit titles (`feat:`, `fix:`, `perf:`, `docs:` ...).
 2. `release-please` keeps a release PR open that bumps the version and writes `CHANGELOG.md` from those commits. Before 1.0, `feat` bumps the minor and `fix` bumps the patch; a `!` or `BREAKING CHANGE:` also bumps the minor.
-3. Merging the release PR tags the release and creates the GitHub release. **Nothing is published to npm**: publishing is deliberately not automated yet.
+3. Merging the release PR tags the release and creates the GitHub release. A `publish` job then builds, runs `pnpm check:package` and publishes every package with `pnpm -r publish --provenance`. It skips versions that are already on npm.
 
 One-time setup on GitHub:
 
 - Settings → Actions → General → allow GitHub Actions to create pull requests.
-- Optionally set the PR merge method to "squash" so each PR title becomes one changelog line.
 
-When it is time to publish, add a job to `.github/workflows/release.yml` that runs after a release is created (`release_created` output), with an `NPM_TOKEN` secret and `pnpm publish --provenance`. The package already passes `publint` and `attw` (`pnpm check:package`).
+- Add an `NPM_TOKEN` repository secret (an npm automation token for the `@portojs` scope and for `portojs` and `create-portojs`). Until it exists the publish job only prints a warning, so nothing breaks.
+- The first release of each package needs the scope to exist on npm and the account to be allowed to publish there.
+- Because each PR is merged with its commits (rebase), every Conventional Commit becomes a changelog line.
