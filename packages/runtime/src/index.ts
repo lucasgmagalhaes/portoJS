@@ -46,3 +46,5 @@ export { SaveSlots, SlotEmptyError } from './save-slots.ts';
 export type { SaveSlotsOptions, SlotInfo } from './save-slots.ts';
 export { CloudSync } from './cloud-sync.ts';
 export type { CloudSyncOptions, ConflictPolicy, SyncResult } from './cloud-sync.ts';
+export { TabLock } from './tab-lock.ts';
+export type { LockManagerLike, TabLockOptions } from './tab-lock.ts';
