@@ -7,7 +7,8 @@ A headless TypeScript game engine with a **Unity-style model**: a `Game` runs a 
 It runs in browsers, Node and Electron, and has zero runtime dependencies.
 
 ```
-pnpm add portojs
+npm create portojs@latest my-game   # a new project from a template
+pnpm add portojs                    # or add it to an existing one
 ```
 
 ## Why
@@ -121,6 +122,7 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/assets`   | Asset manifest, bundles, retry, reference counting and progress        |
 | `@portojs/tween`    | Tweens, easing and timelines driven by game time                       |
 | `@portojs/math`     | Vectors, rectangles, geometry, colours and a seeded, serialisable RNG  |
+| `create-portojs`    | `npm create portojs@latest`: scaffold a game from a template           |
 | `@portojs/physics`  | 2D rigid bodies and collision events on Rapier                         |
 | `@portojs/worker`   | Run a game in a Web Worker, driven over a typed channel                |
 | `@portojs/platform` | Telegram, TikTok and web adapters: storage, lifecycle, haptics         |

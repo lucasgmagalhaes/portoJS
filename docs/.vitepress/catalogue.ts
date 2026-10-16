@@ -96,6 +96,13 @@ const PACKAGES: readonly Row[] = [
     '/assets',
   ],
   [
+    'create-portojs',
+    'package',
+    '',
+    'npm create portojs@latest: scaffolds a game from the blank, idle or sprites template.',
+    '/getting-started',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',
