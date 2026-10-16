@@ -1,6 +1,26 @@
 # Getting started
 
+## Start a project
+
+```
+npm create portojs@latest my-game
+```
+
+It asks for a template, or take one with `--template`:
+
+| Template  | What you get                                                                     |
+| --------- | -------------------------------------------------------------------------------- |
+| `blank`   | A `Game` with one component, a Vite project and TypeScript in strict mode        |
+| `idle`    | A resource, a generator, offline progress, a welcome-back message and autosave   |
+| `sprites` | An ECS world, the batched renderer, a screen-fitting viewport and a seeded `Rng` |
+
+PortoJS is not on npm yet. Until the first release, build the repository (`pnpm build`) and run `node packages/create-portojs/bin.mjs my-game` from a clone; the generated project then needs the packages from your own build or registry.
+
+Then `cd my-game`, install with your package manager and run `dev`. The scaffolder works with npm, pnpm, yarn and bun (`pnpm create portojs`, and so on).
+
 ## Install
+
+To add PortoJS to an existing project instead:
 
 ```
 pnpm add portojs
