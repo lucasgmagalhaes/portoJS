@@ -14,9 +14,13 @@ export class AudioEngine {
     readonly context: AudioContext;
     decode(data: ArrayBuffer): Promise<Sound>;
     dispose(): Promise<void>;
+    exportVolumes(): VolumeSettings;
+    importVolumes(settings: Partial<VolumeSettings>): void;
     load(url: string, fetcher?: Fetcher): Promise<Sound>;
     get masterVolume(): number;
     set masterVolume(value: number);
+    get muted(): boolean;
+    set muted(value: boolean);
     play(sound: Sound, options?: PlayOptions): Playback;
     get playing(): number;
     resume(): Promise<void>;
@@ -52,34 +56,176 @@ export type Fetcher = (url: string) => Promise<{
 }>;
 
 // @public
+export interface KeyValueStorage {
+    // (undocumented)
+    getItem(key: string): string | null;
+    // (undocumented)
+    setItem(key: string, value: string): void;
+}
+
+// @public
+export function loadVolumes(engine: AudioEngine, storage: KeyValueStorage, key?: string): boolean;
+
+// @public
+export class MusicPlayer {
+    constructor(engine: AudioEngine, options?: MusicPlayerOptions);
+    get current(): Sound | undefined;
+    next(): void;
+    play(sound: Sound, options?: MusicPlayOptions): Playback;
+    playlist(sounds: readonly Sound[], options?: PlaylistOptions): void;
+    stop(fade?: number): void;
+    update(): void;
+}
+
+// @public
+export interface MusicPlayerOptions {
+    readonly bus?: string;
+    readonly crossfade?: number;
+    readonly random?: () => number;
+}
+
+// @public
+export interface MusicPlayOptions {
+    readonly fade?: number;
+    readonly loop?: boolean;
+    // (undocumented)
+    readonly loopEnd?: number;
+    readonly loopStart?: number;
+    readonly volume?: number;
+}
+
+// @public
 export class Playback {
     // @internal
-    constructor(source: AudioBufferSourceNode, gain: GainNode, panner: StereoPannerNode | undefined, onFinished: (playback: Playback) => void);
+    constructor(source: AudioBufferSourceNode, gain: GainNode, panner: StereoPannerNode | undefined, onFinished: (playback: Playback) => void, now?: () => number);
     readonly ended: Promise<void>;
+    fadeTo(volume: number, seconds: number): void;
     get isPlaying(): boolean;
     get pan(): number;
     set pan(value: number);
     get rate(): number;
     set rate(value: number);
-    stop(): void;
+    stop(fadeSeconds?: number): void;
     get volume(): number;
     set volume(value: number);
+}
+
+// @public
+export interface PlaylistOptions {
+    readonly repeat?: boolean;
+    readonly shuffle?: boolean;
+    // (undocumented)
+    readonly volume?: number;
 }
 
 // @public
 export interface PlayOptions {
     readonly bus?: string;
     readonly delay?: number;
+    readonly duration?: number;
     readonly loop?: boolean;
+    readonly loopEnd?: number;
+    readonly loopStart?: number;
+    readonly offset?: number;
     readonly pan?: number;
     readonly rate?: number;
     readonly volume?: number;
 }
 
 // @public
+export function saveVolumes(engine: AudioEngine, storage: KeyValueStorage, key?: string): void;
+
+// @public
 export interface Sound {
     readonly buffer: AudioBuffer;
     readonly duration: number;
+}
+
+// @public
+export class SoundBank {
+    constructor(engine: AudioEngine, options?: SoundBankOptions);
+    add(name: string, definition: SoundDefinition): this;
+    addSprites(sound: Sound, regions: Readonly<Record<string, {
+        start: number;
+        duration: number;
+    }>>, defaults?: Omit<SoundDefinition, 'sound' | 'region'>): this;
+    has(name: string): boolean;
+    play(name: string, overrides?: PlayOptions): Playback | undefined;
+    stop(name?: string): void;
+    voiceCount(name?: string): number;
+}
+
+// @public
+export interface SoundBankOptions {
+    readonly maxVoices?: number;
+    readonly policy?: VoiceLimitPolicy;
+    readonly random?: () => number;
+}
+
+// @public
+export interface SoundDefinition {
+    readonly bus?: string;
+    readonly maxVoices?: number;
+    readonly pitchVariation?: number;
+    readonly rate?: number;
+    readonly region?: {
+        readonly start: number;
+        readonly duration: number;
+    };
+    // (undocumented)
+    readonly sound: Sound;
+    readonly volume?: number;
+    readonly volumeVariation?: number;
+}
+
+// @public
+export interface Spatial {
+    readonly pan: number;
+    readonly volume: number;
+}
+
+// @public
+export class SpatialAudio {
+    constructor(engine: AudioEngine, options?: SpatialOptions);
+    listenAt(x: number, y: number): void;
+    play(sound: Sound, options: PlayOptions, x: number, y: number): SpatialVoice;
+    resolve(x: number, y: number): Spatial;
+}
+
+// @public
+export function spatialize(lx: number, ly: number, sx: number, sy: number, options?: SpatialOptions): Spatial;
+
+// @public
+export interface SpatialOptions {
+    readonly maxDistance?: number;
+    readonly panDistance?: number;
+    readonly refDistance?: number;
+    readonly rolloff?: number;
+}
+
+// @public
+export class SpatialVoice {
+    constructor(playback: Playback, space: SpatialAudio, baseVolume: number, posX: number, posY: number);
+    // @internal (undocumented)
+    get isPlaying(): boolean;
+    moveTo(x: number, y: number): void;
+    // (undocumented)
+    readonly playback: Playback;
+    refresh(): void;
+    stop(fade?: number): void;
+}
+
+// @public
+export type VoiceLimitPolicy = 'steal-oldest' | 'reject';
+
+// @public
+export interface VolumeSettings {
+    // (undocumented)
+    readonly buses: Readonly<Record<string, number>>;
+    // (undocumented)
+    readonly master: number;
+    // (undocumented)
+    readonly muted: boolean;
 }
 
 // (No @packageDocumentation comment for this package)
