@@ -147,6 +147,8 @@ importers:
 
   packages/core: {}
 
+  packages/create-portojs: {}
+
   packages/devtools:
     dependencies:
       '@portojs/tools':

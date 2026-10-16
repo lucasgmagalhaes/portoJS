@@ -1,0 +1,57 @@
+{
+  "name": "create-portojs",
+  "version": "0.0.0",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "author": "Lucas Gomes",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucasgmagalhaes/portojs.git",
+    "directory": "packages/create-portojs"
+  },
+  "bugs": {
+    "url": "https://github.com/lucasgmagalhaes/portojs/issues"
+  },
+  "homepage": "https://github.com/lucasgmagalhaes/portojs#readme",
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
+  "files": [
+    "dist",
+    "templates",
+    "versions.json",
+    "bin.mjs",
+    "README.md",
+    "LICENSE"
+  ],
+  "description": "Scaffold a PortoJS game: npm create portojs@latest.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "scripts": {
+    "build": "node scripts/gen-versions.mjs && vite build && tsc -p tsconfig.build.json && node ../../scripts/build-cjs-types.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "check:package": "publint && attw --pack ."
+  },
+  "bin": {
+    "create-portojs": "./bin.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
