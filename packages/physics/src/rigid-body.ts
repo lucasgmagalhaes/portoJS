@@ -9,10 +9,15 @@ import { PhysicsWorld } from './physics-world.ts';
 export type BodyType = 'dynamic' | 'fixed' | 'kinematic';
 
 /**
- * The collider shape: a box of `width` by `height` centred on the body, or a circle.
+ * The collider shape, centred on the body: a box of `width` by `height`, a circle, a capsule (a
+ * `length` between the centres of its two round ends, lying along x) or the convex hull of a polygon
+ * given by its points around the centre.
  */
 export type BodyShape =
-  { kind: 'box'; width: number; height: number } | { kind: 'circle'; radius: number };
+  | { kind: 'box'; width: number; height: number }
+  | { kind: 'circle'; radius: number }
+  | { kind: 'capsule'; length: number; radius: number }
+  | { kind: 'polygon'; points: readonly { x: number; y: number }[] };
 
 /**
  * Options of {@link RigidBody2D}.
@@ -136,10 +141,7 @@ export class RigidBody2D extends Component {
     this.rigidBody = world.createRigidBody(description);
 
     const shape = options.shape;
-    const collider =
-      shape.kind === 'box'
-        ? rapier.ColliderDesc.cuboid(shape.width / 2, shape.height / 2)
-        : rapier.ColliderDesc.ball(shape.radius);
+    const collider = describeShape(rapier, shape);
     collider
       .setRestitution(options.restitution ?? 0)
       .setFriction(options.friction ?? 0.5)
@@ -209,4 +211,64 @@ export class RigidBody2D extends Component {
     this.physics.unregister(this.colliderHandle);
     this.physics.world.removeRigidBody(this.rigidBody);
   }
+}
+
+function describeShape(
+  rapier: PhysicsWorld['rapier'],
+  shape: BodyShape,
+): InstanceType<PhysicsWorld['rapier']['ColliderDesc']> {
+  switch (shape.kind) {
+    case 'box':
+      return rapier.ColliderDesc.cuboid(shape.width / 2, shape.height / 2);
+    case 'circle':
+      return rapier.ColliderDesc.ball(shape.radius);
+    case 'capsule':
+      return rapier.ColliderDesc.capsule(shape.length / 2, shape.radius).setRotation(Math.PI / 2);
+    case 'polygon': {
+      if (isFlat(shape.points)) {
+        throw new RangeError(
+          'RigidBody2D: a polygon needs at least 3 points that are not in a line',
+        );
+      }
+      const flat = new Float32Array(shape.points.length * 2);
+      for (const [index, point] of shape.points.entries()) {
+        flat[index * 2] = point.x;
+        flat[index * 2 + 1] = point.y;
+      }
+      const hull = hullOf(rapier, flat);
+      if (hull === null) {
+        throw new RangeError(
+          'RigidBody2D: a polygon needs at least 3 points that are not in a line',
+        );
+      }
+      return hull;
+    }
+  }
+}
+
+function hullOf(
+  rapier: PhysicsWorld['rapier'],
+  points: Float32Array,
+): InstanceType<PhysicsWorld['rapier']['ColliderDesc']> | null {
+  try {
+    return rapier.ColliderDesc.convexHull(points);
+  } catch {
+    return null;
+  }
+}
+
+function isFlat(points: readonly { x: number; y: number }[]): boolean {
+  const first = points[0];
+  if (first === undefined || points.length < 3) return true;
+  let second: { x: number; y: number } | undefined;
+  for (const point of points) {
+    if (second === undefined) {
+      if (point.x !== first.x || point.y !== first.y) second = point;
+      continue;
+    }
+    const cross =
+      (second.x - first.x) * (point.y - first.y) - (second.y - first.y) * (point.x - first.x);
+    if (Math.abs(cross) > 1e-9) return false;
+  }
+  return true;
 }

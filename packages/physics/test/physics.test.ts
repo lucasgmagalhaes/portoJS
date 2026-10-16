@@ -434,3 +434,63 @@ describe('joints', () => {
     );
   });
 });
+
+describe('more shapes', () => {
+  function world() {
+    const game = new Game({ clock: new ManualClock(0), stepMs: 20 });
+    const physics = game
+      .createObject('Physics')
+      .addComponent(PhysicsWorld, { rapier, gravity: { x: 0, y: 0 } });
+    return { game, physics };
+  }
+
+  it('a capsule lies along x, with round ends', () => {
+    const { game, physics } = world();
+    const capsule = game.createObject('Capsule').addComponent(RigidBody2D, {
+      type: 'fixed',
+      shape: { kind: 'capsule', length: 4, radius: 0.5 },
+    });
+    game.advance(20);
+    expect(physics.overlapPoint(2.4, 0)).toEqual([capsule]);
+    expect(physics.overlapPoint(0, 0.4)).toEqual([capsule]);
+    expect(physics.overlapPoint(0, 1.5)).toEqual([]);
+    expect(physics.overlapPoint(2.6, 0)).toEqual([]);
+    expect(physics.overlapPoint(2.4, 0.4)).toEqual([]);
+  });
+
+  it('a polygon is the convex hull of its points', () => {
+    const { game, physics } = world();
+    const triangle = game.createObject('Triangle').addComponent(RigidBody2D, {
+      type: 'fixed',
+      shape: {
+        kind: 'polygon',
+        points: [
+          { x: -1, y: 1 },
+          { x: 1, y: 1 },
+          { x: 0, y: -1 },
+          { x: 0, y: 0 },
+        ],
+      },
+    });
+    game.advance(20);
+    expect(physics.overlapPoint(0, 0.5)).toEqual([triangle]);
+    expect(physics.overlapPoint(-0.9, 0.9)).toEqual([triangle]);
+    expect(physics.overlapPoint(-0.9, -0.5)).toEqual([]);
+  });
+
+  it('rejects a degenerate polygon', () => {
+    const { game } = world();
+    expect(() =>
+      game.createObject('Line').addComponent(RigidBody2D, {
+        shape: {
+          kind: 'polygon',
+          points: [
+            { x: 0, y: 0 },
+            { x: 1, y: 1 },
+            { x: 2, y: 2 },
+          ],
+        },
+      }),
+    ).toThrow(RangeError);
+  });
+});
