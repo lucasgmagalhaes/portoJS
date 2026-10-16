@@ -80,3 +80,47 @@ engine.unlockOnGesture(window);
 ```
 
 Both packages are covered by automated tests that use fake targets and a fake audio context, so they run in plain Node without a browser.
+
+## Clicking objects and gestures
+
+### Per-object pointer events
+
+Add a `PointerSystem` once, then give any object a `Pointable` with a hit test. The system finds the top-most object under the pointer (highest `order`, then the newest) and raises events on it:
+
+```ts
+import { Pointable, PointerSystem, rectHitTest } from '@portojs/input';
+
+game.createObject('Pointer').addComponent(PointerSystem, {
+  pointer,
+  toWorld: (x, y) => camera.screenToWorld(x, y),
+});
+
+const play = game.createObject('Play').addComponent(Pointable, {
+  hitTest: rectHitTest(() => ({ x: 10, y: 10, width: 120, height: 40 })),
+});
+play.click.addListener(() => startGame());
+play.pointerEnter.addListener(() => highlight(true));
+play.pointerExit.addListener(() => highlight(false));
+```
+
+Events: `pointerDown`, `pointerUp`, `click` (press and release on the object, without a drag), `pointerEnter`, `pointerExit`, `dragStart`, `drag` and `dragEnd`. Each carries the pointer id, the position in drawing space and in world space, and `dx`/`dy` for drags. A drag keeps going when the pointer leaves the object. `rectHitTest` and `circleHitTest` read their shape on every test, so they follow a moving object; any `(worldX, worldY) => boolean` works. Disabled objects and objects whose game object is inactive are skipped.
+
+### Gestures
+
+`GestureRecognizer` turns the stream of a `Pointer` into taps, double taps, long presses, swipes, pans and pinches:
+
+```ts
+import { GestureRecognizer } from '@portojs/input';
+
+const gestures = new GestureRecognizer();
+gestures.attach(pointer);
+gestures.tap.addListener(({ x, y }) => select(x, y));
+gestures.swipe.addListener(({ direction }) => flick(direction));
+gestures.pan.addListener(({ dx, dy }) => camera.move(-dx, -dy));
+gestures.pinch.addListener(({ delta }) => (camera.zoom *= delta));
+
+// every step, with the clock the events use (performance.now() for browser events)
+gestures.update(performance.now());
+```
+
+Thresholds (`tapMaxMs`, `longPressMs`, `swipeMinDistance`, `panThreshold` and others) are options. Only the primary button counts. A second finger ends any pan in progress and starts a pinch. `update` is what lets a long press fire while the finger is still down. `pointer.events` also gives you the raw down, move, up and cancel stream if you need something else.
