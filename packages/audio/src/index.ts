@@ -15,3 +15,5 @@ export type {
 } from './sound-bank.ts';
 export { MusicPlayer } from './music-player.ts';
 export type { MusicPlayOptions, MusicPlayerOptions, PlaylistOptions } from './music-player.ts';
+export { SpatialAudio, SpatialVoice, spatialize } from './spatial.ts';
+export type { Spatial, SpatialOptions } from './spatial.ts';
