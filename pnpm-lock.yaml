@@ -295,6 +295,12 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/tilemap:
+    dependencies:
+      '@portojs/render':
+        specifier: workspace:*
+        version: link:../render
+
   packages/tools:
     dependencies:
       '@portojs/core':
