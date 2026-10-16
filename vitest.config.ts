@@ -16,6 +16,7 @@ export default defineConfig({
       'create-portojs': at('./packages/create-portojs/src/index.ts'),
       '@portojs/i18n': at('./packages/i18n/src/index.ts'),
       '@portojs/tilemap': at('./packages/tilemap/src/index.ts'),
+      '@portojs/ui': at('./packages/ui/src/index.ts'),
       '@portojs/testing': at('./packages/testing/src/index.ts'),
       '@portojs/ecs': at('./packages/ecs/src/index.ts'),
       '@portojs/render': at('./packages/render/src/index.ts'),

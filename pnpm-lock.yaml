@@ -328,6 +328,15 @@ importers:
         specifier: workspace:*
         version: link:../runtime
 
+  packages/ui:
+    dependencies:
+      '@portojs/render':
+        specifier: workspace:*
+        version: link:../render
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
   packages/vue:
     dependencies:
       '@portojs/core':
