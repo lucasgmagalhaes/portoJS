@@ -85,3 +85,29 @@ describe('isValidName', () => {
     }
   });
 });
+
+describe('shipped templates', () => {
+  const templatesDir = join(import.meta.dirname, '..', 'templates');
+
+  it('has the blank template with a valid manifest', () => {
+    expect(listTemplates(templatesDir)).toContain('blank');
+    const dir = mkdtempSync(join(tmpdir(), 'blank-'));
+    const files = scaffold({
+      targetDir: dir,
+      name: 'blank-game',
+      templatesDir,
+      template: 'blank',
+      versions: { portojs: '0.10.0' },
+    });
+    expect(files).toEqual(
+      expect.arrayContaining(['package.json', 'index.html', 'src/main.ts', '.gitignore']),
+    );
+    const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
+      name: string;
+      dependencies: Record<string, string>;
+    };
+    expect(manifest.name).toBe('blank-game');
+    expect(manifest.dependencies['portojs']).toBe('^0.10.0');
+    expect(files.every((file) => !readFileSync(join(dir, file), 'utf8').includes('{{'))).toBe(true);
+  });
+});
