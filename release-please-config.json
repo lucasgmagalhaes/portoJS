@@ -29,7 +29,10 @@
         "tools",
         "devtools",
         "worker",
-        "platform"
+        "platform",
+        "math",
+        "tween",
+        "assets"
       ]
     }
   ],
@@ -789,6 +792,194 @@
     "packages/platform": {
       "package-name": "@portojs/platform",
       "component": "platform",
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "test",
+          "section": "Tests",
+          "hidden": true
+        },
+        {
+          "type": "build",
+          "section": "Build",
+          "hidden": true
+        },
+        {
+          "type": "ci",
+          "section": "CI",
+          "hidden": true
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    },
+    "packages/math": {
+      "package-name": "@portojs/math",
+      "component": "math",
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "test",
+          "section": "Tests",
+          "hidden": true
+        },
+        {
+          "type": "build",
+          "section": "Build",
+          "hidden": true
+        },
+        {
+          "type": "ci",
+          "section": "CI",
+          "hidden": true
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    },
+    "packages/tween": {
+      "package-name": "@portojs/tween",
+      "component": "tween",
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "test",
+          "section": "Tests",
+          "hidden": true
+        },
+        {
+          "type": "build",
+          "section": "Build",
+          "hidden": true
+        },
+        {
+          "type": "ci",
+          "section": "CI",
+          "hidden": true
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    },
+    "packages/assets": {
+      "package-name": "@portojs/assets",
+      "component": "assets",
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "test",
+          "section": "Tests",
+          "hidden": true
+        },
+        {
+          "type": "build",
+          "section": "Build",
+          "hidden": true
+        },
+        {
+          "type": "ci",
+          "section": "CI",
+          "hidden": true
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    },
+    "packages/create-portojs": {
+      "package-name": "create-portojs",
+      "component": "create-portojs",
       "changelog-path": "CHANGELOG.md",
       "changelog-sections": [
         {

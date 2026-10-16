@@ -15,5 +15,9 @@
   "packages/tools": "0.10.0",
   "packages/devtools": "0.10.0",
   "packages/worker": "0.10.0",
-  "packages/platform": "0.10.0"
+  "packages/platform": "0.10.0",
+  "packages/math": "0.10.0",
+  "packages/tween": "0.10.0",
+  "packages/assets": "0.10.0",
+  "packages/create-portojs": "0.0.0"
 }
