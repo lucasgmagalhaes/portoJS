@@ -175,6 +175,7 @@ export class World {
   private nextId = 0;
   private liveCount = 0;
   private structure = 0;
+  private restores = 0;
 
   /**
    * @throws {RangeError} if `capacity` or `maxComponents` is not a positive integer.
@@ -205,6 +206,14 @@ export class World {
    */
   get structureVersion(): number {
     return this.structure;
+  }
+
+  /**
+   * Counts how many times the world was cleared or restored. Code that holds entity ids can
+   * compare it to know its ids may now mean something else.
+   */
+  get restoreVersion(): number {
+    return this.restores;
   }
 
   /**
@@ -258,6 +267,7 @@ export class World {
     this.nextId = 0;
     this.liveCount = 0;
     this.structure += 1;
+    this.restores += 1;
   }
 
   /**
