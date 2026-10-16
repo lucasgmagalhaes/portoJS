@@ -196,3 +196,37 @@ label.draw(batch, { x: 400, y: 20, anchorX: 0.5 });
 ```
 
 The font size must be in `px`. Use `rasterizeText` directly if you want the canvas without the cache. Both take the canvas as a function, so they work with `OffscreenCanvas` in a worker, a DOM canvas, or a fake in tests. Prefer bitmap fonts for text that changes often (a score counter), and canvas text for labels and for scripts a bitmap font does not cover.
+
+## Camera control and several views
+
+`CameraController` moves a `Camera2D` over time. Call `update(dt)` once per frame; it writes the camera.
+
+```ts
+import { CameraController } from '@portojs/render';
+
+const controller = new CameraController(camera);
+controller.setBounds({ x: 0, y: 0, width: 2000, height: 1000 }); // never show outside the world
+controller.follow({
+  target: () => player, // anything with x and y
+  smoothTime: 0.2, // seconds to close most of the gap; 0 snaps
+  deadZone: { width: 40, height: 20 }, // the target can move this far before the camera follows
+  offset: { x: 30, y: 0 }, // look a little ahead
+});
+controller.shake(6, 0.3); // world units, seconds; shakes add up and fade out
+controller.zoomTo(2, 0.5, easings.cubicOut); // smooth zoom, any (t) => t curve
+
+controller.update(dt);
+```
+
+Following uses exponential smoothing, so the result does not depend on the frame rate. The bounds account for the current zoom and centre the camera when the world is smaller than the view. The shake does not change `controller.x` and `controller.y`, so it never drifts.
+
+For split screen or a minimap, pass a viewport (in drawing-buffer pixels, origin top left) and give each camera the same size. Clear on the first call only:
+
+```ts
+renderer.render(mainCamera, mainBatch.build()); // clears the whole canvas
+minimapCamera.setViewport(160, 120);
+renderer.render(minimapCamera, minimapBatch.build(), {
+  viewport: { x: canvas.width - 170, y: 10, width: 160, height: 120 },
+  clear: false,
+});
+```
