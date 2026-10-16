@@ -9,6 +9,17 @@ import { GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
 
 // @public
+export interface ButtonSource {
+    endFrame?(): void;
+    // (undocumented)
+    isDown(id: string): boolean;
+    // (undocumented)
+    wasPressed(id: string): boolean;
+    // (undocumented)
+    wasReleased(id: string): boolean;
+}
+
+// @public
 export class ButtonState {
     get down(): readonly string[];
     endFrame(): void;
@@ -26,6 +37,16 @@ export function circleHitTest(circle: () => {
     readonly y: number;
     readonly radius: number;
 }): HitTest;
+
+// @public
+export class CoyoteTime {
+    constructor(windowSeconds: number);
+    allows(time: number): boolean;
+    spend(): void;
+    touch(time: number): void;
+    // (undocumented)
+    readonly windowSeconds: number;
+}
 
 // @public
 export interface GamepadLike {
@@ -100,16 +121,31 @@ export type HitTest = (worldX: number, worldY: number) => boolean;
 // @public
 export class Input {
     constructor(options?: InputOptions);
+    addSource(name: string, source: ButtonSource): void;
     axis(negative: string, positive: string): number;
     bind(action: string, ...bindings: string[]): void;
+    bindingsOf(action: string): readonly string[];
     dispose(): void;
     endFrame(): void;
+    exportBindings(): Record<string, string[]>;
     readonly gamepads: Gamepads;
+    importBindings(data: Record<string, readonly string[]>): void;
     isDown(action: string): boolean;
     readonly keyboard: Keyboard;
     readonly pointer: Pointer;
     wasPressed(action: string): boolean;
     wasReleased(action: string): boolean;
+}
+
+// @public
+export class InputBuffer {
+    constructor(windowSeconds: number);
+    clear(): void;
+    consume(time: number): boolean;
+    has(time: number): boolean;
+    press(time: number): void;
+    // (undocumented)
+    readonly windowSeconds: number;
 }
 
 // @public
@@ -132,6 +168,14 @@ export interface InputOptions {
     readonly keyboard?: KeyboardOptions;
     readonly keyboardTarget?: EventTarget;
     readonly pointerTarget?: PointerTarget;
+}
+
+// @public
+export interface JoystickOptions {
+    readonly deadZone?: number;
+    readonly floating?: boolean;
+    readonly radius?: number;
+    readonly region: Region;
 }
 
 // @public
@@ -283,6 +327,20 @@ export function rectHitTest(rect: () => {
 }): HitTest;
 
 // @public
+export type Region = {
+    readonly kind: 'circle';
+    readonly x: number;
+    readonly y: number;
+    readonly radius: number;
+} | {
+    readonly kind: 'rect';
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+};
+
+// @public
 export type SwipeDirection = 'left' | 'right' | 'up' | 'down';
 
 // @public
@@ -296,6 +354,35 @@ export interface SwipeGesture extends GesturePoint {
     // (undocumented)
     readonly dy: number;
     readonly velocity: number;
+}
+
+// @public
+export class VirtualControls implements ButtonSource {
+    constructor(options: VirtualControlsOptions);
+    attach(pointer: Pointer): () => void;
+    // (undocumented)
+    endFrame(): void;
+    readonly feed: (event: PointerStreamEvent) => void;
+    // (undocumented)
+    isDown(id: string): boolean;
+    reset(): void;
+    get stickActive(): boolean;
+    get stickOrigin(): {
+        readonly x: number;
+        readonly y: number;
+    };
+    // (undocumented)
+    wasPressed(id: string): boolean;
+    // (undocumented)
+    wasReleased(id: string): boolean;
+    x: number;
+    y: number;
+}
+
+// @public
+export interface VirtualControlsOptions {
+    readonly buttons?: Readonly<Record<string, Region>>;
+    readonly joystick?: JoystickOptions;
 }
 
 // (No @packageDocumentation comment for this package)
