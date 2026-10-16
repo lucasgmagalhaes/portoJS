@@ -129,6 +129,9 @@ export class Game {
     find(name: string): GameObject | undefined;
     findObjectOfType<C extends Component>(type: ComponentType<C>): C | undefined;
     findObjectsOfType<C extends Component>(type: ComponentType<C>): C[];
+    findObjectsOnLayer(layer: number): GameObject[];
+    findObjectsWithTag(tag: string): GameObject[];
+    findWithTag(tag: string): GameObject | undefined;
     importSave(encoded: string, options?: LoadOptions): OfflineReport | undefined;
     instantiate<P>(prefab: Prefab<P>, name: string, ...options: undefined extends P ? [options?: InstantiateOptions<P>] : [options: InstantiateOptions<P>]): GameObject;
     load(input: SaveData | string, options?: LoadOptions): OfflineReport | undefined;
@@ -232,8 +235,12 @@ export class GameObject {
     // (undocumented)
     readonly game: Game;
     getComponent<C extends Component>(type: ComponentType<C>): C | undefined;
+    getComponentInParent<C extends Component>(type: ComponentType<C>, includeSelf?: boolean): C | undefined;
     getComponents<C extends Component>(type: ComponentType<C>): C[];
+    getComponentsInChildren<C extends Component>(type: ComponentType<C>, includeSelf?: boolean): C[];
     get isDestroyed(): boolean;
+    get layer(): number;
+    set layer(value: number);
     // (undocumented)
     readonly name: string;
     // (undocumented)
@@ -241,6 +248,7 @@ export class GameObject {
     removeComponent(component: Component): void;
     requireComponent<C extends Component>(type: ComponentType<C>): C;
     setActive(active: boolean): void;
+    tag: string;
 }
 
 // @public
@@ -309,6 +317,29 @@ export class MemorySaveStorage implements SaveStorage {
 
 // @public
 export type OfflineSource = 'load' | 'background' | 'manual';
+
+// @public
+export class Pool<A = undefined> {
+    constructor(options: PoolOptions<A>);
+    get available(): number;
+    clear(): void;
+    get(...argument: undefined extends A ? [argument?: A] : [argument: A]): GameObject;
+    get inUse(): number;
+    release(object: GameObject): void;
+    releaseAll(): void;
+    get size(): number;
+    tryGet(...argument: undefined extends A ? [argument?: A] : [argument: A]): GameObject | undefined;
+}
+
+// @public
+export interface PoolOptions<A> {
+    readonly create: (name: string) => GameObject;
+    readonly max?: number;
+    readonly name: string;
+    readonly onGet?: (object: GameObject, argument: A) => void;
+    readonly onRelease?: (object: GameObject) => void;
+    readonly prewarm?: number;
+}
 
 // @public
 export class Prefab<P = undefined> {
