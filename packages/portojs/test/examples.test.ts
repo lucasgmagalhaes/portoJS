@@ -1,5 +1,6 @@
 import { TileMapView } from '@portojs/tilemap';
 import { describe, expect, it } from 'vitest';
+import { Puzzle } from '../../../examples/puzzle/src/game.ts';
 import { Platformer } from '../../../examples/platformer/src/game.ts';
 import type { PlatformerInput } from '../../../examples/platformer/src/game.ts';
 import { LEVEL, TILE, loadLevel } from '../../../examples/platformer/src/level.ts';
@@ -213,5 +214,133 @@ describe('example: platformer', () => {
     const time = game.time;
     game.step(1, idle);
     expect(game.time).toBe(time);
+  });
+});
+
+describe('example: puzzle', () => {
+  function board(rows: number[][]): Puzzle {
+    const game = new Puzzle({ seed: 1 });
+    game.load({
+      size: 4,
+      cells: rows.flat(),
+      score: 0,
+      best: 0,
+      rng: game.save().rng,
+    });
+    return game;
+  }
+
+  const values = (game: Puzzle): number[] => game.cells.filter((v) => v !== 0).sort((a, b) => a - b);
+
+  it('starts with two tiles', () => {
+    const game = new Puzzle({ seed: 3 });
+    expect(game.cells.filter((v) => v !== 0)).toHaveLength(2);
+  });
+
+  it('merges equal neighbours once per move and scores them', () => {
+    const game = board([
+      [2, 2, 2, 2],
+      [4, 4, 8, 0],
+      [0, 0, 0, 0],
+      [2, 0, 0, 2],
+    ]);
+    const result = game.move('left');
+    expect(result.moved).toBe(true);
+    expect([0, 1, 2, 3].map((x) => game.at(x, 0))).toEqual([4, 4, 0, 0]);
+    expect([0, 1, 2].map((x) => game.at(x, 1))).toEqual([8, 8, 0]);
+    expect(game.at(0, 3)).toBe(4);
+    expect(result.gained).toBe(4 + 4 + 8 + 4);
+    expect(game.score).toBe(20);
+    expect(result.spawned).toBeDefined();
+  });
+
+  it('moves in every direction', () => {
+    const rows = [
+      [2, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+    ];
+    const right = board(rows);
+    right.move('right');
+    expect(right.at(3, 0)).toBe(2);
+    const down = board(rows);
+    down.move('down');
+    expect(down.at(0, 3)).toBe(2);
+    const up = board([[0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 4, 0, 0]]);
+    up.move('up');
+    expect(up.at(1, 0)).toBe(4);
+  });
+
+  it('ignores a move that changes nothing', () => {
+    const game = board([
+      [2, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+      [0, 0, 0, 0],
+    ]);
+    const before = game.save();
+    expect(game.move('left').moved).toBe(false);
+    expect(game.move('up').moved).toBe(false);
+    expect(game.save()).toEqual(before);
+    expect(game.canUndo).toBe(false);
+  });
+
+  it('detects the end only when nothing can move or merge', () => {
+    const stuck = board([
+      [2, 4, 2, 4],
+      [4, 2, 4, 2],
+      [2, 4, 2, 4],
+      [4, 2, 4, 2],
+    ]);
+    expect(stuck.over).toBe(true);
+    const mergeable = board([
+      [2, 2, 2, 4],
+      [4, 2, 4, 2],
+      [2, 4, 2, 4],
+      [4, 2, 4, 2],
+    ]);
+    expect(mergeable.over).toBe(false);
+  });
+
+  it('undo restores the board, the score and the same random future', () => {
+    const game = new Puzzle({ seed: 11 });
+    const start = game.save();
+    const directions = ['left', 'up', 'right', 'down'] as const;
+    const direction = directions.find((d) => new Puzzle({ seed: 11 }).move(d).moved) ?? 'left';
+    expect(game.move(direction).moved).toBe(true);
+    expect(game.canUndo).toBe(true);
+    expect(game.undo()).toBe(true);
+    expect(game.cells).toEqual(start.cells);
+    expect(game.score).toBe(start.score);
+    expect(game.undo()).toBe(false);
+    const replay = game.move(direction);
+    const reference = new Puzzle({ seed: 11 }).move(direction);
+    expect(replay).toEqual(reference);
+    expect(values(game).length).toBeGreaterThan(1);
+  });
+
+  it('saves and resumes into an identical game', () => {
+    const game = new Puzzle({ seed: 7 });
+    const moves = ['left', 'up', 'right', 'down'] as const;
+    for (let i = 0; i < 20; i++) game.move(moves[i % 4] ?? 'left');
+    const copy = new Puzzle({ seed: 99 });
+    copy.load(JSON.parse(JSON.stringify(game.save())) as ReturnType<Puzzle['save']>);
+    for (let i = 0; i < 30; i++) {
+      const direction = moves[(i * 3) % 4] ?? 'left';
+      expect(copy.move(direction)).toEqual(game.move(direction));
+    }
+    expect(copy.cells).toEqual(game.cells);
+    expect(() => new Puzzle({ size: 5 }).load(game.save())).toThrow(RangeError);
+  });
+
+  it('keeps the best score across restarts', () => {
+    const game = new Puzzle({ seed: 2 });
+    for (let i = 0; i < 40 && !game.over; i++) game.move((['left', 'down', 'right', 'up'] as const)[i % 4] ?? 'left');
+    const best = game.best;
+    game.restart();
+    expect(game.score).toBe(0);
+    expect(game.best).toBe(best);
+    expect(game.canUndo).toBe(false);
   });
 });
