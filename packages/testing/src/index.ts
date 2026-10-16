@@ -7,3 +7,4 @@
 export { createTestGame } from './test-game.ts';
 export type { TestGame } from './test-game.ts';
 export { roundTrip, stableSave } from './save-helpers.ts';
+export { FakeEventTarget } from './fake-events.ts';
