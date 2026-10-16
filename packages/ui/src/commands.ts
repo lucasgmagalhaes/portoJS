@@ -87,6 +87,6 @@ export interface PopClipCommand {
 }
 
 /**
- * One drawing instruction produced by {@link Ui.draw}, in paint order.
+ * One drawing instruction produced by {@link Ui.commands}, in paint order.
  */
 export type UiCommand = RectCommand | SkinCommand | TextCommand | PushClipCommand | PopClipCommand;
