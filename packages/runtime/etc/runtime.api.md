@@ -251,10 +251,20 @@ export interface Scene {
 }
 
 // @public
+export type SceneBuilder = (context: SceneContext) => void | Promise<void>;
+
+// @public
 export interface SceneComponent {
     readonly enabled?: boolean;
     readonly options?: unknown;
     readonly type: string;
+}
+
+// @public
+export interface SceneContext {
+    createObject(name: string, options?: CreateObjectOptions): GameObject;
+    readonly game: Game;
+    readonly name: string;
 }
 
 // @public
@@ -264,11 +274,51 @@ export class SceneError extends Error {
 }
 
 // @public
+export interface SceneLoadOptions {
+    readonly transition?: SceneTransition;
+}
+
+// @public
+export class SceneManager {
+    constructor(game: Game, options?: SceneManagerOptions);
+    get current(): string | undefined;
+    has(name: string): boolean;
+    isLoaded(name: string): boolean;
+    load(name: string, options?: SceneLoadOptions): Promise<void>;
+    loadAdditive(name: string): Promise<void>;
+    readonly loaded: GameEvent<{
+        name: string;
+        additive: boolean;
+    }>;
+    get loadedScenes(): readonly string[];
+    persist(object: GameObject): void;
+    register(name: string, source: SceneSource): this;
+    unload(name: string): Promise<void>;
+    readonly unloaded: GameEvent<string>;
+}
+
+// @public
+export interface SceneManagerOptions {
+    readonly registry?: ComponentRegistry;
+}
+
+// @public
 export interface SceneObject {
     readonly active?: boolean;
     readonly children?: readonly SceneObject[];
     readonly components?: readonly SceneComponent[];
     readonly name: string;
+}
+
+// @public
+export type SceneSource = SceneBuilder | {
+    readonly objects: readonly unknown[];
+};
+
+// @public
+export interface SceneTransition {
+    readonly in?: () => void | Promise<void>;
+    readonly out?: () => void | Promise<void>;
 }
 
 // @public
