@@ -117,6 +117,13 @@ const PACKAGES: readonly Row[] = [
     '/tilemap',
   ],
   [
+    '@portojs/ui',
+    'package',
+    '',
+    'In-canvas UI: layout, buttons, panels, sliders, scroll views and focus navigation.',
+    '/ui',
+  ],
+  [
     '@portojs/testing',
     'package',
     '',
