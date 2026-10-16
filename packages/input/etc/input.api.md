@@ -5,6 +5,7 @@
 ```ts
 
 import { Component } from '@portojs/runtime';
+import { GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
 
 // @public
@@ -18,6 +19,13 @@ export class ButtonState {
     wasPressed(id: string): boolean;
     wasReleased(id: string): boolean;
 }
+
+// @public
+export function circleHitTest(circle: () => {
+    readonly x: number;
+    readonly y: number;
+    readonly radius: number;
+}): HitTest;
 
 // @public
 export interface GamepadLike {
@@ -48,6 +56,46 @@ export interface GamepadsOptions {
     readonly deadzone?: number;
     readonly provider?: GamepadProvider;
 }
+
+// @public
+export interface GestureOptions {
+    readonly doubleTapDistance?: number;
+    readonly doubleTapMs?: number;
+    readonly longPressMs?: number;
+    readonly panThreshold?: number;
+    readonly swipeMaxMs?: number;
+    readonly swipeMinDistance?: number;
+    readonly tapMaxDistance?: number;
+    readonly tapMaxMs?: number;
+}
+
+// @public
+export interface GesturePoint {
+    // (undocumented)
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
+}
+
+// @public
+export class GestureRecognizer {
+    constructor(options?: GestureOptions);
+    attach(pointer: Pointer): () => void;
+    readonly doubleTap: GameEvent<GesturePoint>;
+    readonly feed: (event: PointerStreamEvent) => void;
+    readonly longPress: GameEvent<GesturePoint>;
+    readonly pan: GameEvent<PanGesture>;
+    readonly panEnd: GameEvent<GesturePoint>;
+    readonly panStart: GameEvent<GesturePoint>;
+    readonly pinch: GameEvent<PinchGesture>;
+    reset(): void;
+    readonly swipe: GameEvent<SwipeGesture>;
+    readonly tap: GameEvent<GesturePoint>;
+    update(now: number): void;
+}
+
+// @public
+export type HitTest = (worldX: number, worldY: number) => boolean;
 
 // @public
 export class Input {
@@ -102,10 +150,50 @@ export interface KeyboardOptions {
 }
 
 // @public
+export interface PanGesture extends GesturePoint {
+    readonly dx: number;
+    // (undocumented)
+    readonly dy: number;
+    readonly totalDx: number;
+    // (undocumented)
+    readonly totalDy: number;
+}
+
+// @public
+export interface PinchGesture extends GesturePoint {
+    readonly delta: number;
+    readonly scale: number;
+}
+
+// @public
+export class Pointable extends Component {
+    constructor(gameObject: GameObject, options: PointableOptions);
+    readonly click: GameEvent<PointerHit>;
+    contains(worldX: number, worldY: number): boolean;
+    readonly drag: GameEvent<PointerHit>;
+    readonly dragEnd: GameEvent<PointerHit>;
+    readonly dragStart: GameEvent<PointerHit>;
+    order: number;
+    readonly pointerDown: GameEvent<PointerHit>;
+    readonly pointerEnter: GameEvent<PointerHit>;
+    readonly pointerExit: GameEvent<PointerHit>;
+    readonly pointerUp: GameEvent<PointerHit>;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface PointableOptions {
+    readonly hitTest: HitTest;
+    readonly order?: number;
+}
+
+// @public
 export class Pointer {
     constructor(target: PointerTarget);
     dispose(): void;
     endFrame(): void;
+    readonly events: GameEvent<PointerStreamEvent>;
     isDown(button: string): boolean;
     readonly state: ButtonState;
     get touches(): ReadonlyMap<number, PointerPosition>;
@@ -117,11 +205,61 @@ export class Pointer {
 }
 
 // @public
+export interface PointerHit {
+    readonly button: number;
+    readonly dx: number;
+    // (undocumented)
+    readonly dy: number;
+    // (undocumented)
+    readonly pointerId: number;
+    readonly worldX: number;
+    // (undocumented)
+    readonly worldY: number;
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
+}
+
+// @public
 export interface PointerPosition {
     // (undocumented)
     readonly x: number;
     // (undocumented)
     readonly y: number;
+}
+
+// @public
+export interface PointerStreamEvent {
+    readonly button: number;
+    readonly pointerId: number;
+    readonly time: number;
+    readonly type: 'down' | 'move' | 'up' | 'cancel';
+    // (undocumented)
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
+}
+
+// @public
+export class PointerSystem extends Component {
+    constructor(gameObject: GameObject, options: PointerSystemOptions);
+    // (undocumented)
+    awake(): void;
+    // (undocumented)
+    onDestroy(): void;
+    pick(x: number, y: number): Pointable | undefined;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface PointerSystemOptions {
+    readonly dragThreshold?: number;
+    readonly pointer: Pointer;
+    readonly toWorld?: (x: number, y: number) => {
+        readonly x: number;
+        readonly y: number;
+    };
 }
 
 // @public
@@ -135,6 +273,30 @@ export type PointerTarget = EventTarget & {
         readonly height: number;
     };
 };
+
+// @public
+export function rectHitTest(rect: () => {
+    readonly x: number;
+    readonly y: number;
+    readonly width: number;
+    readonly height: number;
+}): HitTest;
+
+// @public
+export type SwipeDirection = 'left' | 'right' | 'up' | 'down';
+
+// @public
+export interface SwipeGesture extends GesturePoint {
+    // (undocumented)
+    readonly direction: SwipeDirection;
+    // (undocumented)
+    readonly distance: number;
+    // (undocumented)
+    readonly dx: number;
+    // (undocumented)
+    readonly dy: number;
+    readonly velocity: number;
+}
 
 // (No @packageDocumentation comment for this package)
 
