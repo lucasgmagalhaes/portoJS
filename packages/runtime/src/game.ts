@@ -22,6 +22,8 @@ import type { CoroutineYield } from './coroutine.ts';
 import { GameObject } from './game-object.ts';
 import type { Prefab } from './prefab.ts';
 import { Time } from './time.ts';
+import { Timers } from './timers.ts';
+import type { Timer } from './timers.ts';
 
 /**
  * Where a credited away-time span came from.
@@ -148,6 +150,14 @@ export interface GameEvents {
    */
   overflow: { droppedMs: number };
   /**
+   * The game was paused with {@link Game.pause}.
+   */
+  pause: { at: number };
+  /**
+   * The game was resumed with {@link Game.resume}.
+   */
+  resume: { at: number };
+  /**
    * A game object was created.
    */
   objectCreated: { object: GameObject };
@@ -246,6 +256,8 @@ export class Game {
   private readonly updatable: Component[] = [];
   private pendingStart: Component[] = [];
   private coroutines: Coroutine[] = [];
+  private readonly timers = new Timers();
+  private isPaused = false;
   private structure = 0;
   private readonly typeCache = new Map<
     ComponentType,
@@ -258,11 +270,15 @@ export class Game {
   private readonly step = (dtMs: number): void => {
     this.time.advance();
     this.startPending();
-    const dt = dtMs / 1000;
-    for (const component of [...this.updatable]) {
-      if (component.isActive) component.fixedUpdate?.(dt);
+    if (!this.isPaused && this.time.timeScale > 0) {
+      const scaledMs = dtMs * this.time.timeScale;
+      const dt = scaledMs / 1000;
+      for (const component of [...this.updatable]) {
+        if (component.isActive) component.fixedUpdate?.(dt);
+      }
+      this.stepCoroutines(dt);
+      this.timers.step(scaledMs);
     }
-    this.stepCoroutines(dt);
     this.bus.emit('tick', { dtMs, tick: this.engine.stepCount });
   };
 
@@ -321,6 +337,65 @@ export class Game {
    */
   get stepMs(): number {
     return this.engine.stepMs;
+  }
+
+  /**
+   * How fast game time runs: `1` is normal, `0.5` slow motion, `0` stops it. Components, coroutines
+   * and timers all follow it. Away-time credited by {@link Game.load} is not affected.
+   *
+   * @throws {RangeError} when set to a negative or non-finite number.
+   */
+  get timeScale(): number {
+    return this.time.timeScale;
+  }
+
+  set timeScale(value: number) {
+    this.time.timeScale = value;
+  }
+
+  /**
+   * `true` between {@link Game.pause} and {@link Game.resume}.
+   */
+  get paused(): boolean {
+    return this.isPaused;
+  }
+
+  /**
+   * Freezes game time: `fixedUpdate`, coroutines and timers stop, while the loop keeps running
+   * so the UI and input stay live. No-op when already paused.
+   */
+  pause(): void {
+    if (this.isPaused) return;
+    this.isPaused = true;
+    this.bus.emit('pause', { at: this.clock.now() });
+  }
+
+  /**
+   * Resumes after {@link Game.pause}. No-op when not paused.
+   */
+  resume(): void {
+    if (!this.isPaused) return;
+    this.isPaused = false;
+    this.bus.emit('resume', { at: this.clock.now() });
+  }
+
+  /**
+   * Calls `callback` once after `delayMs` of game time. Unlike the global `setTimeout`, it
+   * stops while paused, follows {@link Game.timeScale} and is dropped on {@link Game.dispose}.
+   *
+   * @throws {RangeError} if `delayMs` is negative or not finite.
+   */
+  setTimeout(callback: () => void, delayMs: number): Timer {
+    return this.timers.add(callback, delayMs, false);
+  }
+
+  /**
+   * Calls `callback` every `intervalMs` of game time until the returned timer is cancelled.
+   *
+   * @throws {RangeError} if `intervalMs` is not a finite number above zero.
+   */
+  setInterval(callback: () => void, intervalMs: number): Timer {
+    return this.timers.add(callback, intervalMs, true);
   }
 
   /**
@@ -398,6 +473,7 @@ export class Game {
    */
   dispose(): void {
     this.stop();
+    this.timers.clear();
     for (const object of [...this.objectList]) object.destroy();
     this.bus.clear();
   }

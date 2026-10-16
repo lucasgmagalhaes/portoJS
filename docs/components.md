@@ -281,3 +281,17 @@ Its multipliers apply to production while playing and not to offline gains, whic
 - Test with `ManualClock`: `clock.advance(ms); game.update();` is fully deterministic.
 - Keep state JSON-friendly. Use `BigNum#toJSON()` and `BigNum.fromJSON()` for large values.
 - Give every saved component a `typeId`.
+
+## Time scale, pause and timers
+
+`game.timeScale` changes how fast game time runs: `0.5` is slow motion, `2` is double speed, `0` stops it. `fixedUpdate` receives the scaled delta, and coroutines and timers follow it. `game.pause()` and `game.resume()` freeze all three while the loop keeps running, so the UI and input stay live. Away-time credited by `load` is not affected.
+
+```ts
+game.timeScale = 0.25; // slow motion
+
+const timer = game.setTimeout(() => spawnWave(), 5000); // 5 s of game time
+game.setInterval(() => tickPoison(), 1000);
+timer.cancel();
+```
+
+Unlike the global `setTimeout`, these stop while paused and are dropped by `game.dispose()`. `game.time.unscaledDeltaTime` and `game.time.scaledTime` expose the unscaled step and the accumulated scaled time.
