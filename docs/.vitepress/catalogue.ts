@@ -81,6 +81,13 @@ const PACKAGES: readonly Row[] = [
     '/input-and-audio',
   ],
   [
+    '@portojs/math',
+    'package',
+    '',
+    'Vectors, rectangles, geometry, colours and a seeded, serialisable RNG.',
+    '/math',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',
