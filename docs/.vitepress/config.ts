@@ -33,6 +33,7 @@ export default defineConfig({
           { text: 'Components and the game model', link: '/components' },
           { text: 'ECS and rendering', link: '/ecs-and-render' },
           { text: 'Input and audio', link: '/input-and-audio' },
+          { text: 'Assets', link: '/assets' },
           { text: 'Tweens and easing', link: '/tween' },
           { text: 'Math and random numbers', link: '/math' },
           { text: 'Physics', link: '/physics' },
@@ -97,6 +98,9 @@ export default defineConfig({
           new URL('../../packages/solid/src/index.ts', import.meta.url),
         ),
         '@portojs/vue': fileURLToPath(new URL('../../packages/vue/src/index.ts', import.meta.url)),
+        '@portojs/assets': fileURLToPath(
+          new URL('../../packages/assets/src/index.ts', import.meta.url),
+        ),
         '@portojs/tween': fileURLToPath(
           new URL('../../packages/tween/src/index.ts', import.meta.url),
         ),

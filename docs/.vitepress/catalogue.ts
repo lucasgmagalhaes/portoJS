@@ -89,6 +89,13 @@ const PACKAGES: readonly Row[] = [
     '/math',
   ],
   [
+    '@portojs/assets',
+    'package',
+    '',
+    'Asset manifest, bundles, retry, reference counting and progress.',
+    '/assets',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',
@@ -212,6 +219,13 @@ const CODE: readonly Row[] = [
     'audio',
     'Owns an AudioEngine and suspends it with the game.',
     '/input-and-audio',
+  ],
+  [
+    'Preloader',
+    'component',
+    'assets',
+    'Loads asset bundles at start and reports progress for a loading screen.',
+    '/assets',
   ],
   [
     'TweenSystem',
