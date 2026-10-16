@@ -39,6 +39,7 @@ export default defineConfig({
           { text: 'Translations', link: '/i18n' },
           { text: 'Tilemaps', link: '/tilemap' },
           { text: 'In-canvas UI', link: '/ui' },
+          { text: 'Accessibility', link: '/accessibility' },
           { text: 'Testing', link: '/testing' },
           { text: 'Physics', link: '/physics' },
           { text: 'Web Worker', link: '/worker' },
