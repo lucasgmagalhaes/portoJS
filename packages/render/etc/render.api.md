@@ -137,6 +137,28 @@ export class Camera2D {
 }
 
 // @public
+export class CameraController {
+    constructor(camera: Camera2D, options?: CameraControllerOptions);
+    // (undocumented)
+    readonly camera: Camera2D;
+    follow(options: FollowOptions): void;
+    setBounds(bounds: WorldRect | undefined): void;
+    shake(intensity: number, duration: number): void;
+    snapTo(x: number, y: number): void;
+    stopFollowing(): void;
+    update(deltaSeconds: number): void;
+    x: number;
+    // (undocumented)
+    y: number;
+    zoomTo(zoom: number, duration?: number, ease?: (t: number) => number): void;
+}
+
+// @public
+export interface CameraControllerOptions {
+    readonly random?: () => number;
+}
+
+// @public
 class CanvasText_2<C extends TextCanvas & TextureSource> {
     constructor(host: TextureHost, createCanvas: (width: number, height: number) => C);
     dispose(): void;
@@ -203,6 +225,17 @@ export interface DrawTextOptions extends TextLayoutOptions {
     readonly x: number;
     // (undocumented)
     readonly y: number;
+}
+
+// @public
+export interface FollowOptions {
+    readonly deadZone?: {
+        readonly width: number;
+        readonly height: number;
+    };
+    readonly offset?: Point;
+    readonly smoothTime?: number;
+    readonly target: () => Point;
 }
 
 // @public
@@ -304,7 +337,7 @@ export interface Renderer {
     createTexture(source: TextureSource): Texture;
     deleteTexture(texture: Texture): void;
     destroy(): void;
-    render(camera: Camera2D, batch: BatchResult): void;
+    render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
     resize(width: number, height: number): void;
 }
 
@@ -315,6 +348,24 @@ export type RendererBackend = 'webgpu' | 'webgl2';
 export interface RendererOptions {
     readonly backend?: 'auto' | RendererBackend;
     readonly clearColor?: ClearColor;
+}
+
+// @public
+export interface RenderOptions {
+    readonly clear?: boolean;
+    readonly viewport?: RenderViewport;
+}
+
+// @public
+export interface RenderViewport {
+    // (undocumented)
+    readonly height: number;
+    // (undocumented)
+    readonly width: number;
+    // (undocumented)
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
 }
 
 // @public
@@ -530,7 +581,7 @@ export class WebGL2Renderer implements Renderer {
     // (undocumented)
     destroy(): void;
     // (undocumented)
-    render(camera: Camera2D, batch: BatchResult): void;
+    render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
     // (undocumented)
     resize(width: number, height: number): void;
 }
@@ -549,9 +600,21 @@ export class WebGPURenderer implements Renderer {
     // (undocumented)
     destroy(): void;
     // (undocumented)
-    render(camera: Camera2D, batch: BatchResult): void;
+    render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
     // (undocumented)
     resize(width: number, height: number): void;
+}
+
+// @public
+export interface WorldRect {
+    // (undocumented)
+    readonly height: number;
+    // (undocumented)
+    readonly width: number;
+    // (undocumented)
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
 }
 
 // (No @packageDocumentation comment for this package)
