@@ -124,3 +124,68 @@ gestures.update(performance.now());
 ```
 
 Thresholds (`tapMaxMs`, `longPressMs`, `swipeMinDistance`, `panThreshold` and others) are options. Only the primary button counts. A second finger ends any pan in progress and starts a pinch. `update` is what lets a long press fire while the finger is still down. `pointer.events` also gives you the raw down, move, up and cancel stream if you need something else.
+
+## Touch controls, remapping and forgiving input
+
+### On-screen controls
+
+`VirtualControls` is a thumb stick and buttons for touch screens. Each finger is tracked on its own, so the player can steer and press a button at once. Regions are in the pointer's drawing space (canvas pixels).
+
+```ts
+import { Input, VirtualControls } from '@portojs/input';
+
+const input = new Input({ pointerTarget: canvas });
+const controls = new VirtualControls({
+  joystick: {
+    region: { kind: 'rect', x: 0, y: 200, width: 200, height: 200 }, // where a touch starts the stick
+    radius: 60, // how far is "fully pushed"
+    floating: true, // centre it where the touch lands
+    deadZone: 0.15,
+  },
+  buttons: {
+    jump: { kind: 'circle', x: 700, y: 330, radius: 40 },
+    fire: { kind: 'rect', x: 600, y: 300, width: 40, height: 40 },
+  },
+});
+controls.attach(input.pointer);
+input.addSource('virtual', controls);
+
+input.bind('left', 'key:KeyA', 'virtual:stick-left');
+input.bind('jump', 'key:Space', 'virtual:jump');
+player.move(controls.x, controls.y); // the analog push, -1 to 1
+```
+
+The stick also presses `stick-left`, `stick-right`, `stick-up` and `stick-down` when pushed past half way, so it can drive the same actions as the keys. `controls.stickActive` and `controls.stickOrigin` tell you where to draw it. `reset()` lets go of everything, for example when the game is paused.
+
+`input.addSource(name, source)` accepts anything that reports buttons by id (`isDown`, `wasPressed`, `wasReleased` and an optional `endFrame`), so you can plug in your own.
+
+### Letting players rebind keys
+
+```ts
+const saved = input.exportBindings(); // { jump: ['key:Space', 'virtual:jump'], ... }, plain JSON
+localStorage.setItem('controls', JSON.stringify(saved));
+
+input.importBindings(JSON.parse(localStorage.getItem('controls') ?? '{}'));
+input.bindingsOf('jump'); // what a settings screen shows
+input.bind('jump', 'key:KeyW'); // the rebind itself
+```
+
+`importBindings` changes nothing if any entry is invalid.
+
+### Jump buffering and coyote time
+
+Two tiny helpers make platformers feel fair. Both take the time in seconds of game time.
+
+```ts
+import { CoyoteTime, InputBuffer } from '@portojs/input';
+
+const jumpBuffer = new InputBuffer(0.15); // a jump pressed just before landing still happens
+const coyote = new CoyoteTime(0.1); // a jump just after leaving a ledge still works
+
+if (input.wasPressed('jump')) jumpBuffer.press(time);
+if (onGround) coyote.touch(time);
+if (coyote.allows(time) && jumpBuffer.consume(time)) {
+  player.jump();
+  coyote.spend(); // no second jump in the air
+}
+```
