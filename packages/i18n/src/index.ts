@@ -6,3 +6,5 @@
 
 export { MessageError, formatMessage } from './message.ts';
 export type { MessageParams } from './message.ts';
+export { I18n } from './i18n.ts';
+export type { I18nOptions, LocaleChange, Messages } from './i18n.ts';
