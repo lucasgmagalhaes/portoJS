@@ -5,7 +5,9 @@
 ```ts
 
 import { Component } from '@portojs/runtime';
+import type { Game } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
+import type { JsonValue } from '@portojs/core';
 
 // @public
 export class ComponentDef<S extends Schema = Schema> {
@@ -20,12 +22,48 @@ export function defineComponent<S extends Schema>(schema: S): ComponentDef<S>;
 
 // @public
 export class EcsWorld extends Component {
-    constructor(gameObject: GameObject, options?: WorldOptions);
+    constructor(gameObject: GameObject, options?: EcsWorldOptions);
     // (undocumented)
     fixedUpdate(deltaTime: number): void;
     // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue | undefined;
+    // (undocumented)
     static typeId: string;
     readonly world: World;
+}
+
+// @public
+export interface EcsWorldOptions extends WorldOptions {
+    readonly components?: Readonly<Record<string, ComponentDef>>;
+}
+
+// @public
+export class EntityLink extends Component {
+    constructor(gameObject: GameObject, options?: EntityLinkOptions);
+    add<S extends Schema>(component: ComponentDef<S>, values?: Values<S>): this;
+    get entity(): number;
+    // (undocumented)
+    static executionOrder: number;
+    has(component: ComponentDef): boolean;
+    static objectOf(game: Game, entity: number): GameObject | undefined;
+    // (undocumented)
+    onDestroy(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    remove(component: ComponentDef): this;
+    // (undocumented)
+    static typeId: string;
+    get world(): World;
+}
+
+// @public
+export interface EntityLinkOptions {
+    readonly components?: readonly LinkedComponent[];
+    readonly world?: World;
 }
 
 // @public
@@ -52,6 +90,14 @@ export interface FieldArrays {
 export type FieldType = keyof FieldArrays;
 
 // @public
+export interface LinkedComponent {
+    // (undocumented)
+    readonly component: ComponentDef;
+    // (undocumented)
+    readonly values?: Readonly<Record<string, number>>;
+}
+
+// @public
 export interface Not {
     // (undocumented)
     readonly not: ComponentDef;
@@ -72,6 +118,12 @@ export type QueryTerm = ComponentDef | Not;
 
 // @public
 export type Schema = Readonly<Record<string, FieldType>>;
+
+// @public
+export class SnapshotError extends Error {
+    // (undocumented)
+    readonly name = "SnapshotError";
+}
 
 // @public
 export type Store<S extends Schema> = {
@@ -97,15 +149,20 @@ export class World {
     addComponent<S extends Schema>(entity: number, component: ComponentDef<S>, values?: Values<S>): void;
     addSystem(system: System, options?: SystemOptions): () => void;
     readonly capacity: number;
+    clear(): void;
     // @internal
     collect(include: readonly number[], exclude: readonly number[], into: number[]): number[];
     createEntity(): number;
+    createEntityAt(id: number): void;
     destroyEntity(entity: number): void;
     hasComponent(entity: number, component: ComponentDef): boolean;
     isAlive(entity: number): boolean;
     query(...terms: QueryTerm[]): Query;
     removeComponent(entity: number, component: ComponentDef): void;
+    restore(snapshot: unknown, components: Readonly<Record<string, ComponentDef>>): void;
+    get restoreVersion(): number;
     get size(): number;
+    snapshot(components: Readonly<Record<string, ComponentDef>>): WorldSnapshot;
     // @internal
     get structureVersion(): number;
     update(deltaTime: number): void;
@@ -116,6 +173,15 @@ export class World {
 export interface WorldOptions {
     readonly capacity?: number;
     readonly maxComponents?: number;
+}
+
+// @public
+export interface WorldSnapshot {
+    // (undocumented)
+    readonly entities: readonly {
+        readonly id: number;
+        readonly components: Readonly<Record<string, readonly number[]>>;
+    }[];
 }
 
 // (No @packageDocumentation comment for this package)
