@@ -55,6 +55,7 @@ export default tseslint.config(
       '**/temp',
       'node_modules',
       'examples/**/dist',
+      'packages/create-portojs/templates',
       'coverage',
       'docs/api',
       'docs/.vitepress/dist',
