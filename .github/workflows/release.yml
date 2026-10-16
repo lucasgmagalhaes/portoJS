@@ -2,8 +2,9 @@ name: Release
 
 # On every push to main, release-please keeps a "release PR" up to date. It reads the
 # Conventional Commits since the last release, bumps the version, and writes CHANGELOG.md.
-# Merging that PR creates the tag and GitHub release. Publishing to npm is intentionally
-# not automated yet: add a publish job (needs an NPM_TOKEN secret) when the time comes.
+# Merging that PR creates the tag and GitHub release, and the publish job then pushes every
+# package to npm with provenance. Publishing needs an NPM_TOKEN repository secret (an npm
+# "automation" token); without it the job builds and stops before publishing.
 
 on:
   push:
@@ -17,6 +18,8 @@ permissions:
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      released: ${{ steps.release.outputs.releases_created }}
     steps:
       - id: release
         uses: googleapis/release-please-action@v5
@@ -33,3 +36,31 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH: ${{ fromJSON(steps.release.outputs.pr || '{}').headBranchName }}
         run: gh workflow run ci.yml --repo "${{ github.repository }}" --ref "$BRANCH"
+
+  publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.released == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write # npm provenance
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm check:package
+      # pnpm rewrites workspace:* to the real versions and skips versions already on npm.
+      - name: Publish to npm
+        if: ${{ env.NODE_AUTH_TOKEN != '' }}
+        run: pnpm -r publish --access public --no-git-checks --provenance
+      - name: Missing NPM_TOKEN
+        if: ${{ env.NODE_AUTH_TOKEN == '' }}
+        run: echo "::warning::NPM_TOKEN is not set, so nothing was published."
