@@ -26,6 +26,10 @@ export type { PrefabBuilder } from './prefab.ts';
 export { ComponentRegistry, SceneError, loadScene } from './scene.ts';
 export type { Scene, SceneComponent, SceneObject } from './scene.ts';
 export { Time } from './time.ts';
+export { Autosave } from './autosave.ts';
+export type { AutosaveLoadResult, AutosaveOptions } from './autosave.ts';
+export { IndexedDbSaveStorage, MemorySaveStorage, WebSaveStorage } from './storage.ts';
+export type { IndexedDbSaveStorageOptions, SaveStorage, WebStorageLike } from './storage.ts';
 export { SceneManager } from './scene-manager.ts';
 export type {
   SceneBuilder,
