@@ -35,3 +35,4 @@ export type {
   SceneSource,
   SceneTransition,
 } from './scene-manager.ts';
+export { Timer } from './timers.ts';

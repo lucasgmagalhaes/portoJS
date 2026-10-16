@@ -304,3 +304,17 @@ await scenes.unload('hud');
 Objects made through `ctx.createObject` belong to the scene and are destroyed when it unloads. `scenes.persist(object)` keeps one alive across changes, like Unity's `DontDestroyOnLoad`. Loads are queued, so calling `load` twice runs the changes in order, and a builder that throws leaves nothing behind.
 
 Saves only hold live objects. Keep state that must outlive a scene on persistent objects.
+
+## Time scale, pause and timers
+
+`game.timeScale` changes how fast game time runs: `0.5` is slow motion, `2` is double speed, `0` stops it. `fixedUpdate` receives the scaled delta, and coroutines and timers follow it. `game.pause()` and `game.resume()` freeze all three while the loop keeps running, so the UI and input stay live. Away-time credited by `load` is not affected.
+
+```ts
+game.timeScale = 0.25; // slow motion
+
+const timer = game.setTimeout(() => spawnWave(), 5000); // 5 s of game time
+game.setInterval(() => tickPoison(), 1000);
+timer.cancel();
+```
+
+Unlike the global `setTimeout`, these stop while paused and are dropped by `game.dispose()`. `game.time.unscaledDeltaTime` and `game.time.scaledTime` expose the unscaled step and the accumulated scaled time.
