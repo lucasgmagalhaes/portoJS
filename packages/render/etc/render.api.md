@@ -287,6 +287,14 @@ export interface GlyphInfo {
 }
 
 // @public
+export interface GpuConnection {
+    // (undocumented)
+    readonly device: GPUDevice;
+    // (undocumented)
+    readonly format: GPUTextureFormat;
+}
+
+// @public
 export const INSTANCE_BYTES = 48;
 
 // @public
@@ -394,12 +402,17 @@ export interface Renderer {
     createTexture(source: TextureSource): Texture;
     deleteTexture(texture: Texture): void;
     destroy(): void;
+    readonly lost: boolean;
+    on(event: RendererEvent, listener: () => void): () => void;
     render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
     resize(width: number, height: number): void;
 }
 
 // @public
 export type RendererBackend = 'webgpu' | 'webgl2';
+
+// @public
+export type RendererEvent = 'contextlost' | 'contextrestored';
 
 // @public
 export interface RendererOptions {
@@ -650,6 +663,10 @@ export class WebGL2Renderer implements Renderer {
     // (undocumented)
     destroy(): void;
     // (undocumented)
+    get lost(): boolean;
+    // (undocumented)
+    on(event: RendererEvent, listener: () => void): () => void;
+    // (undocumented)
     render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
     // (undocumented)
     resize(width: number, height: number): void;
@@ -657,7 +674,7 @@ export class WebGL2Renderer implements Renderer {
 
 // @public
 export class WebGPURenderer implements Renderer {
-    constructor(canvas: HTMLCanvasElement | OffscreenCanvas, device: GPUDevice, context: GPUCanvasContext, format: GPUTextureFormat, clearColor: ClearColor);
+    constructor(canvas: HTMLCanvasElement | OffscreenCanvas, device: GPUDevice, context: GPUCanvasContext, format: GPUTextureFormat, clearColor: ClearColor, reconnect?: (() => Promise<GpuConnection>) | undefined);
     // (undocumented)
     readonly backend: "webgpu";
     // (undocumented)
@@ -669,9 +686,14 @@ export class WebGPURenderer implements Renderer {
     // (undocumented)
     destroy(): void;
     // (undocumented)
+    get lost(): boolean;
+    // (undocumented)
+    on(event: RendererEvent, listener: () => void): () => void;
+    // (undocumented)
     render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
     // (undocumented)
     resize(width: number, height: number): void;
+    restore(): Promise<boolean>;
 }
 
 // @public
