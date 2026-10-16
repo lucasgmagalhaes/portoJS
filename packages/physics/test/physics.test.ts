@@ -330,3 +330,107 @@ describe('queries and layers', () => {
     expect(() => box('X', 0, 0, { layer: 'zzz' })).toThrow(/unknown layer/);
   });
 });
+
+describe('joints', () => {
+  function two(gravity = { x: 0, y: 0 }) {
+    const game = new Game({ clock: new ManualClock(0), stepMs: 20 });
+    const physics = game.createObject('Physics').addComponent(PhysicsWorld, { rapier, gravity });
+    const body = (name: string, x: number, y: number, type: 'fixed' | 'dynamic' = 'dynamic') =>
+      game.createObject(name).addComponent(RigidBody2D, {
+        type,
+        shape: { kind: 'circle', radius: 0.25 },
+        x,
+        y,
+      });
+    return { game, physics, body };
+  }
+
+  it('revolute: a pendulum swings at a constant distance from its pivot', () => {
+    const { game, physics, body } = two({ x: 0, y: 9.81 });
+    const pivot = body('Pivot', 0, 0, 'fixed');
+    const bob = body('Bob', 3, 0);
+    physics.createJoint(pivot, bob, { kind: 'revolute' }, { worldAnchor: { x: 0, y: 0 } });
+    let lowest = 0;
+    for (let i = 0; i < 100; i++) {
+      game.advance(20);
+      expect(Math.hypot(bob.x, bob.y)).toBeCloseTo(3, 1);
+      lowest = Math.max(lowest, bob.y);
+    }
+    expect(lowest).toBeGreaterThan(2.5);
+  });
+
+  it('rope: the bodies cannot get further apart than the length, but may come closer', () => {
+    const { game, physics, body } = two({ x: 0, y: 9.81 });
+    const anchor = body('Anchor', 0, 0, 'fixed');
+    const weight = body('Weight', 0, 1);
+    physics.createJoint(anchor, weight, { kind: 'rope', length: 3 });
+    game.advance(2000);
+    expect(Math.hypot(weight.x, weight.y)).toBeLessThanOrEqual(3.1);
+    expect(weight.y).toBeGreaterThan(2.5);
+  });
+
+  it('spring: bodies oscillate around the rest length', () => {
+    const { game, physics, body } = two();
+    const wall = body('Wall', 0, 0, 'fixed');
+    const mass = body('Mass', 5, 0);
+    physics.createJoint(wall, mass, { kind: 'spring', restLength: 2, stiffness: 50, damping: 2 });
+    let nearest = Infinity;
+    for (let i = 0; i < 100; i++) {
+      game.advance(20);
+      nearest = Math.min(nearest, mass.x);
+    }
+    expect(nearest).toBeLessThan(3);
+    game.advance(10_000);
+    expect(mass.x).toBeCloseTo(2, 0);
+  });
+
+  it('prismatic: the second body only slides along the axis', () => {
+    const { game, physics, body } = two({ x: 3, y: 4 });
+    const rail = body('Rail', 0, 0, 'fixed');
+    const slider = body('Slider', 1, 0);
+    physics.createJoint(rail, slider, { kind: 'prismatic', axis: { x: 1, y: 0 } });
+    game.advance(1000);
+    expect(slider.x).toBeGreaterThan(2);
+    expect(Math.abs(slider.y)).toBeLessThan(0.05);
+  });
+
+  it('fixed: welded bodies keep their relative pose while moving', () => {
+    const { game, physics, body } = two({ x: 0, y: 9.81 });
+    const a = body('A', 0, 0);
+    const b = body('B', 2, 0);
+    physics.createJoint(a, b, { kind: 'fixed' });
+    game.advance(1000);
+    expect(b.x - a.x).toBeCloseTo(2, 1);
+    expect(b.y - a.y).toBeCloseTo(0, 1);
+    expect(a.y).toBeGreaterThan(3);
+  });
+
+  it('can be removed, and goes away with a destroyed body', () => {
+    const { game, physics, body } = two();
+    const a = body('A', 0, 0, 'fixed');
+    const b = body('B', 2, 0);
+    const joint = physics.createJoint(a, b, { kind: 'rope', length: 2 });
+    expect(joint.removed).toBe(false);
+    joint.remove();
+    joint.remove();
+    expect(joint.removed).toBe(true);
+    const c = body('C', 1, 1);
+    const second = physics.createJoint(a, c, { kind: 'rope', length: 2 });
+    c.gameObject.destroy();
+    game.advance(40);
+    expect(second.removed).toBe(true);
+  });
+
+  it('validates its arguments', () => {
+    const { physics, body } = two();
+    const a = body('A', 0, 0, 'fixed');
+    const b = body('B', 1, 0);
+    expect(() => physics.createJoint(a, b, { kind: 'rope', length: 0 })).toThrow(RangeError);
+    expect(() =>
+      physics.createJoint(a, b, { kind: 'spring', restLength: 1, stiffness: -1 }),
+    ).toThrow(RangeError);
+    expect(() => physics.createJoint(a, b, { kind: 'prismatic', axis: { x: 0, y: 0 } })).toThrow(
+      RangeError,
+    );
+  });
+});

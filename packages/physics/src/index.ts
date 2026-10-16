@@ -10,3 +10,5 @@ export { PhysicsWorld } from './physics-world.ts';
 export type { CollisionEvent, PhysicsWorldOptions, QueryOptions, RayHit } from './physics-world.ts';
 export { RigidBody2D } from './rigid-body.ts';
 export type { BodyShape, BodyType, RigidBodyOptions } from './rigid-body.ts';
+export { Joint } from './joint.ts';
+export type { Anchor, JointOptions, JointSpec } from './joint.ts';
