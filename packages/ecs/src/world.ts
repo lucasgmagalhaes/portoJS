@@ -13,6 +13,26 @@ const ARRAY_TYPES: { readonly [K in FieldType]: new (length: number) => FieldArr
 };
 
 /**
+ * A world saved by {@link World.snapshot}: plain JSON.
+ */
+export interface WorldSnapshot {
+  readonly entities: readonly {
+    readonly id: number;
+    /**
+     * Field values by component name, in the order of the component's schema.
+     */
+    readonly components: Readonly<Record<string, readonly number[]>>;
+  }[];
+}
+
+/**
+ * Thrown by {@link World.restore} when the snapshot does not fit the world or the components.
+ */
+export class SnapshotError extends Error {
+  override readonly name = 'SnapshotError';
+}
+
+/**
  * Options for {@link World}.
  */
 export interface WorldOptions {
@@ -64,6 +84,10 @@ interface Registered {
 interface SystemEntry {
   readonly system: System;
   readonly order: number;
+}
+
+function isNumber(value: unknown): boolean {
+  return typeof value === 'number' && Number.isFinite(value);
 }
 
 function byNumber(a: number, b: number): number {
@@ -199,6 +223,129 @@ export class World {
     this.liveCount += 1;
     this.structure += 1;
     return id;
+  }
+
+  /**
+   * Creates an entity with a given id, for restoring a saved world. Ids below the highest one
+   * that were never used stay free.
+   *
+   * @throws {RangeError} if `id` is not an integer below `capacity`.
+   * @throws {Error} if the id is already alive.
+   */
+  createEntityAt(id: number): void {
+    if (!Number.isInteger(id) || id < 0 || id >= this.capacity) {
+      throw new RangeError(`World: entity id ${id} is outside the capacity`);
+    }
+    if (this.isAlive(id)) throw new Error(`World: entity ${id} is already alive`);
+    if (id >= this.nextId) {
+      for (let unused = this.nextId; unused < id; unused++) this.free.push(unused);
+      this.nextId = id + 1;
+    } else {
+      this.free.splice(this.free.indexOf(id), 1);
+    }
+    this.alive[id] = 1;
+    this.liveCount += 1;
+    this.structure += 1;
+  }
+
+  /**
+   * Destroys every entity and forgets all ids, so the next entity is `0` again.
+   */
+  clear(): void {
+    this.masks.fill(0);
+    this.alive.fill(0);
+    this.free.length = 0;
+    this.nextId = 0;
+    this.liveCount = 0;
+    this.structure += 1;
+  }
+
+  /**
+   * Captures the live entities and the data of the named components as plain JSON. Components
+   * that are not in `components` are not saved. Values that are not finite are saved as `0`.
+   *
+   * @example
+   * const snapshot = world.snapshot({ Position, Health });
+   */
+  snapshot(components: Readonly<Record<string, ComponentDef>>): WorldSnapshot {
+    const entities: { id: number; components: Record<string, number[]> }[] = [];
+    for (let id = 0; id < this.nextId; id++) {
+      if (this.alive[id] !== 1) continue;
+      const saved: Record<string, number[]> = {};
+      for (const [name, definition] of Object.entries(components)) {
+        const registered = this.registry.get(definition);
+        if (registered === undefined || !this.hasBit(id, registered.bit)) continue;
+        const values: number[] = [];
+        for (const field of Object.keys(definition.schema)) {
+          const value = registered.store[field]?.[id] ?? 0;
+          values.push(Number.isFinite(value) ? value : 0);
+        }
+        saved[name] = values;
+      }
+      entities.push({ id, components: saved });
+    }
+    return { entities };
+  }
+
+  /**
+   * Replaces the whole world with a snapshot, keeping entity ids. Systems and queries stay.
+   * Nothing changes if the snapshot is invalid.
+   *
+   * @throws {SnapshotError} if the snapshot is malformed, names an unknown component or an
+   * entity that does not fit the capacity.
+   */
+  restore(snapshot: unknown, components: Readonly<Record<string, ComponentDef>>): void {
+    const entities = this.validate(snapshot, components);
+    this.clear();
+    for (const { id, saved } of entities) {
+      this.createEntityAt(id);
+      for (const [name, values] of saved) {
+        const definition = components[name] as ComponentDef;
+        const fields = Object.keys(definition.schema);
+        const given: Record<string, number> = {};
+        for (const [index, field] of fields.entries()) given[field] = values[index] ?? 0;
+        this.addComponent(id, definition, given);
+      }
+    }
+  }
+
+  private validate(
+    snapshot: unknown,
+    components: Readonly<Record<string, ComponentDef>>,
+  ): { id: number; saved: [string, number[]][] }[] {
+    const list = (snapshot as { entities?: unknown } | null)?.entities;
+    if (!Array.isArray(list)) throw new SnapshotError('snapshot.entities must be an array');
+    const seen = new Set<number>();
+    const result: { id: number; saved: [string, number[]][] }[] = [];
+    for (const entry of list as unknown[]) {
+      const { id, components: data } = (entry ?? {}) as { id?: unknown; components?: unknown };
+      if (typeof id !== 'number' || !Number.isInteger(id) || id < 0 || id >= this.capacity) {
+        throw new SnapshotError(
+          `an entity id is invalid or beyond the capacity of ${this.capacity}`,
+        );
+      }
+      if (seen.has(id)) throw new SnapshotError(`entity ${id} appears twice`);
+      seen.add(id);
+      if (typeof data !== 'object' || data === null || Array.isArray(data)) {
+        throw new SnapshotError(`entity ${id} has no components object`);
+      }
+      const saved: [string, number[]][] = [];
+      for (const [name, values] of Object.entries(data)) {
+        const definition = components[name];
+        if (definition === undefined) throw new SnapshotError(`unknown component "${name}"`);
+        const expected = Object.keys(definition.schema).length;
+        if (
+          !Array.isArray(values) ||
+          values.length !== expected ||
+          !(values as unknown[]).every(isNumber)
+        ) {
+          throw new SnapshotError(`entity ${id}: "${name}" needs ${expected} numbers`);
+        }
+        saved.push([name, values as number[]]);
+      }
+      result.push({ id, saved });
+    }
+    return result;
   }
 
   /**
