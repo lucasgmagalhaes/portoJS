@@ -318,3 +318,41 @@ timer.cancel();
 ```
 
 Unlike the global `setTimeout`, these stop while paused and are dropped by `game.dispose()`. `game.time.unscaledDeltaTime` and `game.time.scaledTime` expose the unscaled step and the accumulated scaled time.
+
+## Tags, layers and queries
+
+`object.tag` is a free-form string and `object.layer` an integer from `0` to `31`, like Unity's. They are for finding and grouping, and are not saved.
+
+```ts
+enemy.tag = 'enemy';
+enemy.layer = 3;
+
+game.findObjectsWithTag('enemy'); // every live enemy, in creation order
+game.findWithTag('player'); // the first one, or undefined
+game.findObjectsOnLayer(3);
+
+boss.getComponentsInChildren(Hitbox); // the boss and all its descendants, depth first
+hand.getComponentInParent(Skeleton); // the closest ancestor that has one
+```
+
+## Pooling
+
+Creating and destroying objects for bullets, particles or floating numbers is wasteful. A `Pool` keeps released objects switched off and hands them out again:
+
+```ts
+import { Pool } from 'portojs';
+
+const bullets = new Pool<{ x: number; y: number }>({
+  name: 'Bullet',
+  create: (name) => game.instantiate(bulletPrefab, name),
+  prewarm: 20,
+  max: 200,
+  onGet: (object, at) => object.requireComponent(Mover).moveTo(at.x, at.y), // reset state here
+  onRelease: (object) => object.requireComponent(Mover).stop(),
+});
+
+const bullet = bullets.get({ x: 10, y: 20 }); // throws at max; tryGet returns undefined instead
+bullets.release(bullet);
+```
+
+Pooled objects remain part of the game: their components are saved and found by `findObjectsOfType` even while switched off, so keep `max` modest and reset state in `onGet`. `releaseAll()` gives everything back and `clear()` destroys the waiting objects.
