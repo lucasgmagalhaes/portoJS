@@ -37,3 +37,4 @@ export type {
   TextLayout,
   TextLayoutOptions,
 } from './text-layout.ts';
+export { parseBmfont } from './bmfont.ts';
