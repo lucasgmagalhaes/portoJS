@@ -103,6 +103,13 @@ const PACKAGES: readonly Row[] = [
     '/getting-started',
   ],
   [
+    '@portojs/i18n',
+    'package',
+    '',
+    'Translations, plurals and locale-aware numbers and dates.',
+    '/i18n',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',
@@ -240,6 +247,13 @@ const CODE: readonly Row[] = [
     'tween',
     'Advances tweens and timelines in game time; they follow pause and timeScale.',
     '/tween',
+  ],
+  [
+    'Localization',
+    'component',
+    'i18n',
+    'Owns an I18n and saves the chosen language with the game.',
+    '/i18n',
   ],
   [
     'PhysicsWorld',

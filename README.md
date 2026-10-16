@@ -123,13 +123,14 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/tween`    | Tweens, easing and timelines driven by game time                       |
 | `@portojs/math`     | Vectors, rectangles, geometry, colours and a seeded, serialisable RNG  |
 | `create-portojs`    | `npm create portojs@latest`: scaffold a game from a template           |
+| `@portojs/i18n`     | Translations, plurals and locale-aware numbers and dates               |
 | `@portojs/physics`  | 2D rigid bodies and collision events on Rapier                         |
 | `@portojs/worker`   | Run a game in a Web Worker, driven over a typed channel                |
 | `@portojs/platform` | Telegram, TikTok and web adapters: storage, lifecycle, haptics         |
 | `@portojs/tools`    | Balancing simulator and game inspector                                 |
 | `@portojs/devtools` | React panel to inspect, edit and fast-forward a game                   |
 
-`@portojs/assets`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte`, `@portojs/solid`, `@portojs/tween` and `@portojs/math` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/assets`, `@portojs/i18n`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte`, `@portojs/solid`, `@portojs/tween` and `@portojs/math` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -161,6 +162,7 @@ Full site (guides, four tutorials, a searchable catalogue, API reference for eve
 - [Assets](docs/assets.md): `@portojs/assets`, manifest, bundles, references and progress
 - [Tweens and easing](docs/tween.md): `@portojs/tween`, easing curves, timelines
 - [Math and random numbers](docs/math.md): `@portojs/math`, vectors, geometry and a seeded RNG
+- [Translations](docs/i18n.md): `@portojs/i18n`, plurals and locale-aware numbers
 - [Physics](docs/physics.md): `@portojs/physics`, rigid bodies and collisions
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
 - [Coming from Unity or Phaser](docs/from-unity.md): how the concepts map
