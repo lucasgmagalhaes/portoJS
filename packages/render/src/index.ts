@@ -21,6 +21,8 @@ export type {
 } from './renderer.ts';
 export { WebGL2Renderer, createWebGL2Renderer } from './webgl2.ts';
 export { WebGPURenderer, createWebGPURenderer } from './webgpu.ts';
+export type { GpuConnection } from './webgpu.ts';
+export type { RendererEvent } from './context-loss.ts';
 export { Sprite, Transform, createSpriteSystem, spawnSprite } from './sprites.ts';
 export type { SpawnSpriteOptions } from './sprites.ts';
 export { Atlas, parseAtlasJson } from './atlas.ts';

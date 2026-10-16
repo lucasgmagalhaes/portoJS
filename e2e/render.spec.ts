@@ -143,6 +143,75 @@ declare global {
   }
 }
 
+test.describe('context loss', () => {
+  test('WebGL2 recovers its textures and draws again after the context is lost', async ({
+    page,
+  }) => {
+    await page.goto(`${BASE}?paused=1&count=0`);
+    const base = process.cwd().replaceAll(String.fromCharCode(92), '/');
+    const modules = {
+      webgl2: `/@fs/${base}/packages/render/src/webgl2.ts`,
+      camera: `/@fs/${base}/packages/render/src/camera.ts`,
+      batch: `/@fs/${base}/packages/render/src/batch.ts`,
+    };
+    const result = await page.evaluate(async (urls) => {
+      const [{ createWebGL2Renderer }, { Camera2D }, { SpriteBatch }] = await Promise.all([
+        import(urls.webgl2) as Promise<WebGL2Module>,
+        import(urls.camera) as Promise<CameraModule>,
+        import(urls.batch) as Promise<BatchModule>,
+      ]);
+      const canvas = document.createElement('canvas');
+      canvas.width = 64;
+      canvas.height = 64;
+      const renderer = createWebGL2Renderer(canvas, [0, 0, 0, 1]);
+      if (renderer === undefined) return undefined;
+      const events: string[] = [];
+      renderer.on('contextlost', () => events.push('lost'));
+      renderer.on('contextrestored', () => events.push('restored'));
+      const surface = document.createElement('canvas');
+      surface.width = 4;
+      surface.height = 4;
+      const paint = surface.getContext('2d') as CanvasRenderingContext2D;
+      paint.fillStyle = '#ffffff';
+      paint.fillRect(0, 0, 4, 4);
+      const texture = renderer.createTexture(await createImageBitmap(surface));
+      const batch = new SpriteBatch(4);
+      batch.add(texture, { x: 0, y: 0, width: 32, height: 32, color: 0x00ff00ff });
+      const camera = new Camera2D(64, 64);
+      const read = (): number[] => {
+        const copy = document.createElement('canvas');
+        copy.width = 64;
+        copy.height = 64;
+        const context = copy.getContext('2d', {
+          willReadFrequently: true,
+        }) as CanvasRenderingContext2D;
+        context.drawImage(canvas, 0, 0);
+        return Array.from(context.getImageData(32, 32, 1, 1).data).slice(0, 3);
+      };
+      renderer.render(camera, batch.build());
+      const before = read();
+
+      const gl = canvas.getContext('webgl2') as WebGL2RenderingContext;
+      const extension = gl.getExtension('WEBGL_lose_context');
+      if (extension === null) return undefined;
+      extension.loseContext();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      const lostWhileLost = renderer.lost;
+      renderer.render(camera, batch.build());
+      extension.restoreContext();
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      renderer.render(camera, batch.build());
+      return { before, lostWhileLost, lostAfter: renderer.lost, events, after: read() };
+    }, modules);
+    test.skip(result === undefined, 'WebGL2 or WEBGL_lose_context is not available');
+    expect(result?.before).toEqual([0, 255, 0]);
+    expect(result?.lostWhileLost).toBe(true);
+    expect(result?.lostAfter).toBe(false);
+    expect(result?.events).toEqual(['lost', 'restored']);
+    expect(result?.after).toEqual([0, 255, 0]);
+  });
+});
+
 test.describe('viewports', () => {
   test('WebGL2 draws two views side by side without clearing the first', async ({ page }) => {
     await page.goto(`${BASE}?paused=1&count=0`);

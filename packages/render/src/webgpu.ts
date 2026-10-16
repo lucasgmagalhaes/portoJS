@@ -1,5 +1,7 @@
 import type { BatchResult, Texture } from './batch.ts';
 import type { Camera2D } from './camera.ts';
+import { RendererEvents } from './context-loss.ts';
+import type { RendererEvent } from './context-loss.ts';
 import { INSTANCE_BYTES, MATRIX_BYTES } from './renderer.ts';
 import type { ClearColor, RenderOptions, Renderer, TextureSource } from './renderer.ts';
 
@@ -42,20 +44,47 @@ fn fragmentMain(input : VertexOutput) -> @location(0) vec4<f32> {
 }
 `;
 
+interface Resources {
+  readonly pipeline: GPURenderPipeline;
+  readonly uniforms: GPUBuffer;
+  readonly sampler: GPUSampler;
+}
+
+interface TextureEntry {
+  texture: GPUTexture | undefined;
+  group: GPUBindGroup | undefined;
+  readonly source: TextureSource;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * A new device and the canvas format to use after the old one was lost.
+ */
+export interface GpuConnection {
+  readonly device: GPUDevice;
+  readonly format: GPUTextureFormat;
+}
+
 /**
  * The WebGPU backend: one instanced draw per texture group.
+ *
+ * When the device is lost (`device.lost`) drawing pauses. If a way to get a new device was given
+ * (it is, when made by {@link createWebGPURenderer}) the renderer asks for one, rebuilds the
+ * pipeline and re-uploads every texture from the images they came from.
  */
 export class WebGPURenderer implements Renderer {
   readonly backend = 'webgpu' as const;
 
-  private readonly pipeline: GPURenderPipeline;
-  private readonly uniforms: GPUBuffer;
-  private readonly sampler: GPUSampler;
+  private resources: Resources;
   private readonly matrix = new Float32Array(16);
-  private readonly textures = new Map<number, { texture: GPUTexture; group: GPUBindGroup }>();
+  private readonly textures = new Map<number, TextureEntry>();
+  private readonly events = new RendererEvents();
   private instances: GPUBuffer;
   private capacity = 1024;
   private nextTextureId = 1;
+  private isLost = false;
+  private destroyed = false;
 
   /**
    * @param canvas the canvas to draw to.
@@ -63,16 +92,143 @@ export class WebGPURenderer implements Renderer {
    * @param context the canvas' WebGPU context, already configured.
    * @param format the context's texture format.
    * @param clearColor colour to clear to every frame.
+   * @param reconnect gets a new device after a loss. Without it a lost device stays lost.
    */
   constructor(
     readonly canvas: HTMLCanvasElement | OffscreenCanvas,
-    private readonly device: GPUDevice,
+    private device: GPUDevice,
     private readonly context: GPUCanvasContext,
     format: GPUTextureFormat,
     private readonly clearColor: ClearColor,
+    private readonly reconnect?: () => Promise<GpuConnection>,
   ) {
+    this.resources = this.build(format);
+    this.instances = this.allocateInstances(this.capacity);
+    this.watch(device);
+  }
+
+  get lost(): boolean {
+    return this.isLost;
+  }
+
+  on(event: RendererEvent, listener: () => void): () => void {
+    return this.events.on(event, listener);
+  }
+
+  /**
+   * Tries to get a new device after a loss. Called by the renderer itself right after the loss;
+   * call it again if that failed (for example when the GPU was still resetting).
+   *
+   * @returns whether the renderer is working again.
+   */
+  async restore(): Promise<boolean> {
+    if (!this.isLost || this.reconnect === undefined || this.destroyed) return !this.isLost;
+    let connection: GpuConnection;
+    try {
+      connection = await this.reconnect();
+    } catch {
+      return false;
+    }
+    if (this.gone) return false;
+    this.device = connection.device;
+    this.context.configure({
+      device: connection.device,
+      format: connection.format,
+      alphaMode: 'premultiplied',
+    });
+    this.resources = this.build(connection.format);
+    this.capacity = 1024;
+    this.instances = this.allocateInstances(this.capacity);
+    for (const entry of this.textures.values()) this.upload(entry);
+    this.isLost = false;
+    this.watch(connection.device);
+    this.events.emit('contextrestored');
+    return true;
+  }
+
+  createTexture(source: TextureSource): Texture {
+    const id = this.nextTextureId;
+    this.nextTextureId += 1;
+    const entry: TextureEntry = {
+      texture: undefined,
+      group: undefined,
+      source,
+      width: source.width,
+      height: source.height,
+    };
+    if (!this.isLost) this.upload(entry);
+    this.textures.set(id, entry);
+    return { id, width: entry.width, height: entry.height };
+  }
+
+  deleteTexture(texture: Texture): void {
+    const entry = this.textures.get(texture.id);
+    if (entry === undefined) return;
+    entry.texture?.destroy();
+    this.textures.delete(texture.id);
+  }
+
+  resize(width: number, height: number): void {
+    this.canvas.width = width;
+    this.canvas.height = height;
+  }
+
+  render(camera: Camera2D, batch: BatchResult, options: RenderOptions = {}): void {
+    if (this.isLost) return;
+    const device = this.device;
+    const { pipeline, uniforms } = this.resources;
+    if (batch.count > this.capacity) {
+      this.instances.destroy();
+      this.capacity = Math.max(batch.count, this.capacity * 2);
+      this.instances = this.allocateInstances(this.capacity);
+    }
+    device.queue.writeBuffer(uniforms, 0, camera.viewProjection(this.matrix));
+    if (batch.count > 0) device.queue.writeBuffer(this.instances, 0, batch.data);
+    const encoder = device.createCommandEncoder();
+    const [r, g, b, a] = this.clearColor;
+    const pass = encoder.beginRenderPass({
+      colorAttachments: [
+        {
+          view: this.context.getCurrentTexture().createView(),
+          clearValue: { r, g, b, a },
+          loadOp: options.clear === false ? 'load' : 'clear',
+          storeOp: 'store',
+        },
+      ],
+    });
+    if (batch.count > 0) {
+      const region = options.viewport;
+      if (region !== undefined) {
+        pass.setViewport(region.x, region.y, region.width, region.height, 0, 1);
+        pass.setScissorRect(region.x, region.y, region.width, region.height);
+      }
+      pass.setPipeline(pipeline);
+      pass.setVertexBuffer(0, this.instances);
+      for (const group of batch.groups) {
+        const bindGroup = this.textures.get(group.texture.id)?.group;
+        if (bindGroup === undefined) continue;
+        pass.setBindGroup(0, bindGroup);
+        pass.draw(4, group.count, 0, group.start);
+      }
+    }
+    pass.end();
+    device.queue.submit([encoder.finish()]);
+  }
+
+  destroy(): void {
+    this.destroyed = true;
+    this.events.clear();
+    for (const entry of this.textures.values()) entry.texture?.destroy();
+    this.textures.clear();
+    this.instances.destroy();
+    this.resources.uniforms.destroy();
+    this.context.unconfigure();
+  }
+
+  private build(format: GPUTextureFormat): Resources {
+    const device = this.device;
     const module = device.createShaderModule({ code: SHADER });
-    this.pipeline = device.createRenderPipeline({
+    const pipeline = device.createRenderPipeline({
       layout: 'auto',
       vertex: {
         module,
@@ -105,17 +261,17 @@ export class WebGPURenderer implements Renderer {
       },
       primitive: { topology: 'triangle-strip' },
     });
-    this.uniforms = device.createBuffer({
+    const uniforms = device.createBuffer({
       size: MATRIX_BYTES,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
-    this.sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
-    this.instances = this.allocateInstances(this.capacity);
+    const sampler = device.createSampler({ magFilter: 'linear', minFilter: 'linear' });
+    return { pipeline, uniforms, sampler };
   }
 
-  createTexture(source: TextureSource): Texture {
-    const width = source.width;
-    const height = source.height;
+  private upload(entry: TextureEntry): void {
+    const { pipeline, uniforms, sampler } = this.resources;
+    const { width, height, source } = entry;
     const texture = this.device.createTexture({
       size: [width, height],
       format: 'rgba8unorm',
@@ -125,78 +281,33 @@ export class WebGPURenderer implements Renderer {
         GPUTextureUsage.RENDER_ATTACHMENT,
     });
     this.device.queue.copyExternalImageToTexture({ source }, { texture }, [width, height]);
-    const group = this.device.createBindGroup({
-      layout: this.pipeline.getBindGroupLayout(0),
+    entry.texture = texture;
+    entry.group = this.device.createBindGroup({
+      layout: pipeline.getBindGroupLayout(0),
       entries: [
-        { binding: 0, resource: { buffer: this.uniforms } },
-        { binding: 1, resource: this.sampler },
+        { binding: 0, resource: { buffer: uniforms } },
+        { binding: 1, resource: sampler },
         { binding: 2, resource: texture.createView() },
       ],
     });
-    const id = this.nextTextureId;
-    this.nextTextureId += 1;
-    this.textures.set(id, { texture, group });
-    return { id, width, height };
   }
 
-  deleteTexture(texture: Texture): void {
-    const entry = this.textures.get(texture.id);
-    if (entry === undefined) return;
-    entry.texture.destroy();
-    this.textures.delete(texture.id);
-  }
-
-  resize(width: number, height: number): void {
-    this.canvas.width = width;
-    this.canvas.height = height;
-  }
-
-  render(camera: Camera2D, batch: BatchResult, options: RenderOptions = {}): void {
-    const device = this.device;
-    if (batch.count > this.capacity) {
-      this.instances.destroy();
-      this.capacity = Math.max(batch.count, this.capacity * 2);
-      this.instances = this.allocateInstances(this.capacity);
-    }
-    device.queue.writeBuffer(this.uniforms, 0, camera.viewProjection(this.matrix));
-    if (batch.count > 0) device.queue.writeBuffer(this.instances, 0, batch.data);
-    const encoder = device.createCommandEncoder();
-    const [r, g, b, a] = this.clearColor;
-    const pass = encoder.beginRenderPass({
-      colorAttachments: [
-        {
-          view: this.context.getCurrentTexture().createView(),
-          clearValue: { r, g, b, a },
-          loadOp: options.clear === false ? 'load' : 'clear',
-          storeOp: 'store',
-        },
-      ],
-    });
-    if (batch.count > 0) {
-      const region = options.viewport;
-      if (region !== undefined) {
-        pass.setViewport(region.x, region.y, region.width, region.height, 0, 1);
-        pass.setScissorRect(region.x, region.y, region.width, region.height);
+  private watch(device: GPUDevice): void {
+    const handle = (info: GPUDeviceLostInfo): void => {
+      if (this.destroyed || device !== this.device || info.reason === 'destroyed') return;
+      this.isLost = true;
+      for (const entry of this.textures.values()) {
+        entry.texture = undefined;
+        entry.group = undefined;
       }
-      pass.setPipeline(this.pipeline);
-      pass.setVertexBuffer(0, this.instances);
-      for (const group of batch.groups) {
-        const entry = this.textures.get(group.texture.id);
-        if (entry === undefined) continue;
-        pass.setBindGroup(0, entry.group);
-        pass.draw(4, group.count, 0, group.start);
-      }
-    }
-    pass.end();
-    device.queue.submit([encoder.finish()]);
+      this.events.emit('contextlost');
+      void this.restore();
+    };
+    void device.lost.then(handle);
   }
 
-  destroy(): void {
-    for (const entry of this.textures.values()) entry.texture.destroy();
-    this.textures.clear();
-    this.instances.destroy();
-    this.uniforms.destroy();
-    this.context.unconfigure();
+  private get gone(): boolean {
+    return this.destroyed;
   }
 
   private allocateInstances(capacity: number): GPUBuffer {
@@ -216,12 +327,21 @@ export async function createWebGPURenderer(
 ): Promise<WebGPURenderer | undefined> {
   const gpu = (globalThis as { navigator?: { gpu?: GPU } }).navigator?.gpu;
   if (gpu === undefined) return undefined;
-  const adapter = await gpu.requestAdapter();
-  if (adapter === null) return undefined;
-  const device = await adapter.requestDevice();
+  const connect = async (): Promise<GpuConnection | undefined> => {
+    const adapter = await gpu.requestAdapter();
+    if (adapter === null) return undefined;
+    const device = await adapter.requestDevice();
+    return { device, format: gpu.getPreferredCanvasFormat() };
+  };
+  const first = await connect();
+  if (first === undefined) return undefined;
   const context = canvas.getContext('webgpu');
   if (context === null) return undefined;
-  const format = gpu.getPreferredCanvasFormat();
-  context.configure({ device, format, alphaMode: 'premultiplied' });
-  return new WebGPURenderer(canvas, device, context, format, clearColor);
+  context.configure({ device: first.device, format: first.format, alphaMode: 'premultiplied' });
+  const reconnect = async (): Promise<GpuConnection> => {
+    const next = await connect();
+    if (next === undefined) throw new Error('WebGPU: no adapter after device loss');
+    return next;
+  };
+  return new WebGPURenderer(canvas, first.device, context, first.format, clearColor, reconnect);
 }

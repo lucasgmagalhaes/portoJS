@@ -1,5 +1,6 @@
 import type { BatchResult, Texture } from './batch.ts';
 import type { Camera2D } from './camera.ts';
+import type { RendererEvent } from './context-loss.ts';
 
 /**
  * Anything a texture can be created from.
@@ -54,6 +55,19 @@ export interface Renderer {
    * The canvas being drawn to.
    */
   readonly canvas: HTMLCanvasElement | OffscreenCanvas;
+  /**
+   * Whether the GPU has taken the resources away and they are not back yet. While `true`,
+   * `render` draws nothing and textures created are uploaded when the context returns.
+   */
+  readonly lost: boolean;
+  /**
+   * Listens to context loss and recovery. The renderer keeps what it needs to rebuild itself:
+   * keep the image behind every texture alive (do not `close()` an `ImageBitmap` you gave it)
+   * and re-draw when `contextrestored` fires.
+   *
+   * @returns a function that removes the listener.
+   */
+  on(event: RendererEvent, listener: () => void): () => void;
   /**
    * Uploads an image to the GPU.
    */
