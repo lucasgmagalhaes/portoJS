@@ -63,3 +63,5 @@ export { LiveEvent } from './live-event.ts';
 export type { EventWindow, LiveEventOptions } from './live-event.ts';
 export { DailyStreak, dayNumber, nextDayStart } from './daily-streak.ts';
 export type { CheckIn, DailyStreakOptions, StreakStatus } from './daily-streak.ts';
+export { DailyQuests } from './daily-quests.ts';
+export type { DailyQuestDefinition, DailyQuestState, DailyQuestsOptions } from './daily-quests.ts';

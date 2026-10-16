@@ -3,6 +3,7 @@ import { Achievement } from './achievement.ts';
 import { AutoBuyer } from './auto-buyer.ts';
 import { Boost } from './boost.ts';
 import { Challenge } from './challenge.ts';
+import { DailyQuests } from './daily-quests.ts';
 import { DailyStreak } from './daily-streak.ts';
 import { DataStore } from './data-store.ts';
 import { Generator } from './generator.ts';
@@ -33,4 +34,5 @@ export const idleComponents: ReadonlyArray<ComponentConstructor<Component, never
   Quest,
   PrestigeTree,
   DailyStreak,
+  DailyQuests,
 ];
