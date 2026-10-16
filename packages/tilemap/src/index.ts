@@ -16,3 +16,5 @@ export type {
   TiledMap,
   Tileset,
 } from './tiled.ts';
+export { TileMapView } from './view.ts';
+export type { DrawMapOptions } from './view.ts';
