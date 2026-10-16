@@ -48,3 +48,5 @@ export type {
   TextStyle,
   TextureHost,
 } from './canvas-text.ts';
+export { CameraController } from './camera-controller.ts';
+export type { CameraControllerOptions, FollowOptions, WorldRect } from './camera-controller.ts';
