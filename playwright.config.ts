@@ -40,5 +40,12 @@ export default defineConfig({
       reuseExistingServer: !process.env['CI'],
       timeout: 60_000,
     },
+    {
+      command: 'npx vite --port 4176 --strictPort',
+      cwd: 'examples/platformer',
+      url: 'http://localhost:4176',
+      reuseExistingServer: !process.env['CI'],
+      timeout: 60_000,
+    },
   ],
 });
