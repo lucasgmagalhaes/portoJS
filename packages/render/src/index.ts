@@ -40,3 +40,11 @@ export type {
 export { parseBmfont } from './bmfont.ts';
 export { BitmapFont } from './bitmap-font.ts';
 export type { DrawTextOptions } from './bitmap-font.ts';
+export { CanvasText, rasterizeText } from './canvas-text.ts';
+export type {
+  RasterizedText,
+  TextCanvas,
+  TextContext,
+  TextStyle,
+  TextureHost,
+} from './canvas-text.ts';
