@@ -230,3 +230,36 @@ renderer.render(minimapCamera, minimapBatch.build(), {
   clear: false,
 });
 ```
+
+## ECS and game objects together
+
+Use game objects and components for the few things that have rules and identity (the player, a boss, a shop), and the ECS for the many that are just data (bullets, particles, tiles). `EntityLink` joins the two:
+
+```ts
+import { EcsWorld, EntityLink, defineComponent } from '@portojs/ecs';
+
+const Position = defineComponent({ x: 'f32', y: 'f32' });
+const Health = defineComponent({ hp: 'u16' });
+
+const ecs = game.createObject('Ecs').addComponent(EcsWorld, {
+  components: { Position, Health }, // saved with the game, by these names
+});
+
+const player = game.createObject('Player').addComponent(EntityLink, {
+  components: [{ component: Position }, { component: Health, values: { hp: 100 } }],
+});
+
+const health = ecs.world.use(Health);
+health.hp[player.entity] -= 10; // fast, typed-array access
+EntityLink.objectOf(game, someEntity)?.name; // from an entity back to its object
+```
+
+The entity is created with the object and destroyed with it.
+
+### Saving
+
+Without the `components` option the ECS data is not saved. With it, every live entity and the values of the listed components are in the save and come back with the same ids, so a link keeps pointing at the same entity. Components that are not listed are not saved, and values that are not finite are saved as `0`. A link whose object did not exist when the save was made gets a fresh entity.
+
+You can also save a world yourself: `world.snapshot({ Position, Health })` returns plain JSON, and `world.restore(snapshot, { Position, Health })` replaces the world with it, rejecting a malformed snapshot with `SnapshotError` before anything changes.
+
+An entity id is only stable between a save and the load that follows. Do not keep ids in long-lived places; read `link.entity` when you need it.
