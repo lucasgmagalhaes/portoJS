@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{name}}</title>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        background: #14161f;
+        color: #e8eaf6;
+        font:
+          16px/1.4 system-ui,
+          sans-serif;
+      }
+      main {
+        width: min(92vw, 420px);
+        text-align: center;
+      }
+      #gold {
+        font-size: 2.4rem;
+        font-weight: 700;
+      }
+      button {
+        margin: 6px;
+        padding: 10px 16px;
+        border: 0;
+        border-radius: 8px;
+        background: #4c5bd4;
+        color: white;
+        font: inherit;
+        cursor: pointer;
+      }
+      button:disabled {
+        background: #2b2f45;
+        color: #7b819e;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>{{name}}</h1>
+      <p id="gold"></p>
+      <p id="rate"></p>
+      <button id="click">Mine gold</button>
+      <button id="buy"></button>
+      <p id="away" hidden></p>
+    </main>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

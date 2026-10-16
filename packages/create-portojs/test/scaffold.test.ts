@@ -88,26 +88,39 @@ describe('isValidName', () => {
 
 describe('shipped templates', () => {
   const templatesDir = join(import.meta.dirname, '..', 'templates');
+  const versions = {
+    portojs: '0.10.0',
+    '@portojs/render': '0.10.0',
+    '@portojs/ecs': '0.10.0',
+    '@portojs/runtime': '0.10.0',
+  };
 
-  it('has the blank template with a valid manifest', () => {
-    expect(listTemplates(templatesDir)).toContain('blank');
-    const dir = mkdtempSync(join(tmpdir(), 'blank-'));
-    const files = scaffold({
-      targetDir: dir,
-      name: 'blank-game',
-      templatesDir,
-      template: 'blank',
-      versions: { portojs: '0.10.0' },
-    });
+  it('has the blank and idle templates', () => {
+    expect(listTemplates(templatesDir)).toEqual(expect.arrayContaining(['blank', 'idle']));
+  });
+
+  it.each(listTemplates(templatesDir))('%s scaffolds a complete project', (template) => {
+    const dir = mkdtempSync(join(tmpdir(), `${template}-`));
+    const files = scaffold({ targetDir: dir, name: 'my-game', templatesDir, template, versions });
     expect(files).toEqual(
-      expect.arrayContaining(['package.json', 'index.html', 'src/main.ts', '.gitignore']),
+      expect.arrayContaining([
+        'package.json',
+        'index.html',
+        'tsconfig.json',
+        'src/main.ts',
+        '.gitignore',
+      ]),
     );
     const manifest = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as {
       name: string;
+      scripts: Record<string, string>;
       dependencies: Record<string, string>;
     };
-    expect(manifest.name).toBe('blank-game');
-    expect(manifest.dependencies['portojs']).toBe('^0.10.0');
-    expect(files.every((file) => !readFileSync(join(dir, file), 'utf8').includes('{{'))).toBe(true);
+    expect(manifest.name).toBe('my-game');
+    expect(Object.keys(manifest.scripts)).toEqual(expect.arrayContaining(['dev', 'build']));
+    for (const version of Object.values(manifest.dependencies)) expect(version).toBe('^0.10.0');
+    for (const file of files) {
+      expect(readFileSync(join(dir, file), 'utf8'), file).not.toContain('{{');
+    }
   });
 });
