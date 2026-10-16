@@ -53,3 +53,24 @@ The adapters are written against the documented shape of each platform's API and
 | `run`        | The loop keeps running (browsers may throttle) | Dropped time is credited by the game.      |
 
 `offline` is the default. On the web, `webPlatform` treats `visibilitychange`, `pagehide` and `pageshow` all as suspend and resume, so a page put in the back-forward cache is saved too. Audio contexts that browsers suspend are resumed by `AudioManager` when the game resumes, and `engine.unlockOnGesture(window)` handles the first user gesture.
+
+## Analytics, ads and purchases
+
+Game code should not know which ad network or store sits behind it. `@portojs/platform` defines three small interfaces and ships adapters that do nothing, print, or keep things in memory; real providers (CrazyGames, Poki, Telegram Stars, a payment SDK...) are a class that implements the same interface.
+
+```ts
+import { AdGate, BufferedAnalytics, MemoryPurchases, SimulatedAds, noServices } from '@portojs/platform';
+
+const analytics = new BufferedAnalytics(); // collects events until the SDK has loaded
+analytics.track('level_start', { level: 1 });
+loadSdk().then((sdk) => analytics.attach(sdk.asAnalytics()));
+```
+
+- `Analytics`: `track(event, props)`, optional `identify(userId)` and `flush()`. `noAnalytics`, `consoleAnalytics(log)`, `MemoryAnalytics` (for tests) and `BufferedAnalytics` are included. `typedAnalytics<Events>(analytics)` makes the compiler check event names and properties, so funnels and retention events stay consistent.
+- `Ads`: `isAvailable(kind)`, `showInterstitial()` and `showRewarded()`, which resolve to `completed`, `skipped`, `unavailable` or `error`. Reward the player only for `completed`. `SimulatedAds` answers with the results you queue.
+- `Purchases`: `products()`, `purchase(id)` and `restore()`. A purchase resolves to `purchased`, `cancelled`, `already-owned`, `unavailable` or `error`, with the store receipt; verify it on a server before granting anything valuable. `MemoryPurchases` is a working fake store.
+- `Services` bundles the three and `noServices` is the default when nothing is configured.
+
+`AdGate` keeps interstitials polite: call `gate.breakpoint()` at natural pauses and it only shows an ad when the cooldown has passed and enough pauses happened since the last one. `gate.rewarded()` is never limited (the player asked for it) and tells you whether to give the reward. Both report the result to your analytics.
+
+No provider SDKs are bundled; they differ per platform and change often, so they belong in your game or in a separate adapter package.
