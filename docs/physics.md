@@ -60,3 +60,35 @@ Each body raises `collisionStarted` and `collisionEnded` with the other body, an
 `physics.world` is the Rapier `World`, and `physics.rapier` the module, for joints, ray casts and everything else Rapier does.
 
 The package is covered by automated tests that run the real Rapier in Node: gravity, determinism, resting contact, bounce, events, sensors, kinematic motion, impulses and clean-up.
+
+## Layers and queries
+
+Declare collision layers on the world, up to 16, and put bodies on them:
+
+```ts
+const physics = game.createObject('Physics').addComponent(PhysicsWorld, {
+  rapier,
+  layers: ['ground', 'player', 'enemy', 'pickup'],
+});
+
+game.createObject('Player').addComponent(RigidBody2D, {
+  shape: { kind: 'circle', radius: 0.5 },
+  layer: 'player',
+  collidesWith: ['ground', 'enemy'], // passes through pickups' solids
+});
+```
+
+A pair collides only when each body's layer is in the other's `collidesWith`. Without `layers`, everything collides with everything. A `sensor: true` body raises `collisionStarted` and `collisionEnded` without pushing anything.
+
+Queries run against the bodies as of the last fixed step:
+
+```ts
+const hit = physics.raycast({ x: 0, y: 0 }, { x: 1, y: 0 }, 20, { layers: ['ground'] });
+if (hit) console.log(hit.body.gameObject.name, hit.distance, hit.point, hit.normal);
+
+physics.overlapPoint(x, y); // bodies under a point, for example a click
+physics.overlapCircle(x, y, radius); // an explosion
+physics.overlapBox(x, y, width, height, rotation); // a melee hit area
+```
+
+All of them take `{ layers, includeSensors, exclude }`; sensors are skipped unless you ask, and `exclude` ignores the body doing the casting. `body.rigidBody` and `physics.world` expose Rapier for anything not wrapped, such as shape casts.

@@ -215,3 +215,118 @@ describe('PhysicsWorld', () => {
     expect(() => game.advance(100)).not.toThrow();
   });
 });
+
+describe('queries and layers', () => {
+  function scene(layers?: string[]) {
+    const game = new Game({ clock: new ManualClock(0), stepMs: 20 });
+    const options = layers === undefined ? { rapier } : { rapier, layers, gravity: { x: 0, y: 0 } };
+    const physics = game.createObject('Physics').addComponent(PhysicsWorld, options);
+    const box = (
+      name: string,
+      x: number,
+      y: number,
+      extra: Partial<ConstructorParameters<typeof RigidBody2D>[1]> = {},
+    ) =>
+      game.createObject(name).addComponent(RigidBody2D, {
+        type: 'fixed',
+        shape: { kind: 'box', width: 2, height: 2 },
+        x,
+        y,
+        ...extra,
+      });
+    return { game, physics, box };
+  }
+
+  it('raycasts to the nearest body with point, normal and distance', () => {
+    const { game, physics, box } = scene(['a']);
+    const near = box('Near', 5, 0);
+    box('Far', 10, 0);
+    game.advance(20);
+    const hit = physics.raycast({ x: 0, y: 0 }, { x: 3, y: 0 }, 100);
+    expect(hit?.body).toBe(near);
+    expect(hit?.distance).toBeCloseTo(4, 5);
+    expect(hit?.point.x).toBeCloseTo(4, 5);
+    expect(hit?.normal.x).toBeCloseTo(-1, 5);
+    expect(physics.raycast({ x: 0, y: 0 }, { x: 1, y: 0 }, 2)).toBeUndefined();
+    expect(physics.raycast({ x: 0, y: 0 }, { x: 0, y: 1 }, 100)).toBeUndefined();
+    expect(() => physics.raycast({ x: 0, y: 0 }, { x: 0, y: 0 }, 1)).toThrow(RangeError);
+  });
+
+  it('skips sensors unless asked, and the excluded body', () => {
+    const { game, physics, box } = scene(['a']);
+    const sensor = box('Sensor', 3, 0, { sensor: true });
+    const wall = box('Wall', 8, 0);
+    game.advance(20);
+    expect(physics.raycast({ x: 0, y: 0 }, { x: 1, y: 0 }, 100)?.body).toBe(wall);
+    expect(
+      physics.raycast({ x: 0, y: 0 }, { x: 1, y: 0 }, 100, { includeSensors: true })?.body,
+    ).toBe(sensor);
+    expect(physics.raycast({ x: 0, y: 0 }, { x: 1, y: 0 }, 100, { exclude: wall })).toBeUndefined();
+  });
+
+  it('filters queries by layer', () => {
+    const { game, physics, box } = scene(['ground', 'enemy']);
+    const ground = box('Ground', 4, 0, { layer: 'ground' });
+    const enemy = box('Enemy', 8, 0, { layer: 'enemy' });
+    game.advance(20);
+    const origin = { x: 0, y: 0 };
+    const right = { x: 1, y: 0 };
+    expect(physics.raycast(origin, right, 100)?.body).toBe(ground);
+    expect(physics.raycast(origin, right, 100, { layers: ['enemy'] })?.body).toBe(enemy);
+    expect(() => physics.raycast(origin, right, 100, { layers: ['nope'] })).toThrow(
+      /unknown layer/,
+    );
+  });
+
+  it('finds bodies overlapping a point, circle and box', () => {
+    const { game, physics, box } = scene(['a']);
+    const one = box('One', 0, 0);
+    const two = box('Two', 3, 0);
+    game.advance(20);
+    expect(physics.overlapPoint(0.5, 0.5)).toEqual([one]);
+    expect(physics.overlapPoint(10, 10)).toEqual([]);
+    expect(new Set(physics.overlapCircle(1.5, 0, 1.2))).toEqual(new Set([one, two]));
+    expect(physics.overlapBox(3, 0, 1, 1)).toEqual([two]);
+    expect(physics.overlapBox(3, 3, 1, 1, Math.PI / 4)).toEqual([]);
+    expect(physics.overlapCircle(0, 0, 0.5, { exclude: one })).toEqual([]);
+  });
+
+  it('collides only with the layers a body lists', () => {
+    const { game, box } = scene(['player', 'enemy', 'coin']);
+    const floor = box('Floor', 0, 5, { layer: 'player' });
+    const dynamic = (name: string, layer: string, collidesWith: string[]) =>
+      game.createObject(name).addComponent(RigidBody2D, {
+        shape: { kind: 'circle', radius: 0.5 },
+        y: 0,
+        layer,
+        collidesWith,
+      });
+    const solid = dynamic('Solid', 'enemy', ['player']);
+    const ghost = dynamic('Ghost', 'coin', ['coin']);
+    solid.setVelocity(0, 20);
+    ghost.setVelocity(0, 20);
+    const hits: string[] = [];
+    solid.collisionStarted.addListener((other) => hits.push(`solid:${other.gameObject.name}`));
+    ghost.collisionStarted.addListener((other) => hits.push(`ghost:${other.gameObject.name}`));
+    game.advance(1000);
+    expect(hits).toContain(`solid:${floor.gameObject.name}`);
+    expect(hits.some((h) => h.startsWith('ghost'))).toBe(false);
+    expect(ghost.y).toBeGreaterThan(solid.y);
+  });
+
+  it('validates layers', () => {
+    const game = new Game({ clock: new ManualClock(0) });
+    expect(() =>
+      game.createObject('P').addComponent(PhysicsWorld, {
+        rapier,
+        layers: Array.from({ length: 17 }, (_, i) => `l${i}`),
+      }),
+    ).toThrow(RangeError);
+    const dup = new Game({ clock: new ManualClock(0) });
+    expect(() =>
+      dup.createObject('P').addComponent(PhysicsWorld, { rapier, layers: ['a', 'a'] }),
+    ).toThrow(/duplicate/);
+    const { box } = scene(['a']);
+    expect(() => box('X', 0, 0, { layer: 'zzz' })).toThrow(/unknown layer/);
+  });
+});

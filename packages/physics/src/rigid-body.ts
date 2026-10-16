@@ -54,6 +54,14 @@ export interface RigidBodyOptions {
    * A sensor detects overlaps and raises collision events but does not push anything.
    */
   sensor?: boolean;
+  /**
+   * The collision layer this body is on, one of the `layers` of the {@link PhysicsWorld}.
+   */
+  layer?: string;
+  /**
+   * The layers this body collides with. Default all.
+   */
+  collidesWith?: readonly string[];
 }
 
 /**
@@ -94,7 +102,10 @@ export class RigidBody2D extends Component {
   rotation: number;
 
   private readonly physics: PhysicsWorld;
-  private readonly body: ReturnType<PhysicsWorld['world']['createRigidBody']>;
+  /**
+   * The underlying Rapier body, for anything this package does not wrap.
+   */
+  readonly rigidBody: ReturnType<PhysicsWorld['world']['createRigidBody']>;
   private readonly colliderHandle: number;
 
   /**
@@ -122,7 +133,7 @@ export class RigidBody2D extends Component {
           ? rapier.RigidBodyDesc.fixed()
           : rapier.RigidBodyDesc.kinematicVelocityBased();
     description.setTranslation(this.x, this.y).setRotation(this.rotation);
-    this.body = world.createRigidBody(description);
+    this.rigidBody = world.createRigidBody(description);
 
     const shape = options.shape;
     const collider =
@@ -134,8 +145,9 @@ export class RigidBody2D extends Component {
       .setFriction(options.friction ?? 0.5)
       .setDensity(options.density ?? 1)
       .setSensor(options.sensor ?? false)
+      .setCollisionGroups(physics.groupsFor(options.layer, options.collidesWith))
       .setActiveEvents(rapier.ActiveEvents.COLLISION_EVENTS);
-    const created = world.createCollider(collider, this.body);
+    const created = world.createCollider(collider, this.rigidBody);
     this.colliderHandle = created.handle;
     physics.register(this.colliderHandle, this);
   }
@@ -144,7 +156,7 @@ export class RigidBody2D extends Component {
    * Linear velocity in world units per second.
    */
   get velocity(): { x: number; y: number } {
-    const { x, y } = this.body.linvel();
+    const { x, y } = this.rigidBody.linvel();
     return { x, y };
   }
 
@@ -155,7 +167,7 @@ export class RigidBody2D extends Component {
    * @param y world units per second.
    */
   setVelocity(x: number, y: number): void {
-    this.body.setLinvel({ x, y }, true);
+    this.rigidBody.setLinvel({ x, y }, true);
   }
 
   /**
@@ -165,7 +177,7 @@ export class RigidBody2D extends Component {
    * @param y impulse along y.
    */
   applyImpulse(x: number, y: number): void {
-    this.body.applyImpulse({ x, y }, true);
+    this.rigidBody.applyImpulse({ x, y }, true);
   }
 
   /**
@@ -176,8 +188,8 @@ export class RigidBody2D extends Component {
    * @param rotation new rotation in radians; keeps the current one when omitted.
    */
   setPosition(x: number, y: number, rotation: number = this.rotation): void {
-    this.body.setTranslation({ x, y }, true);
-    this.body.setRotation(rotation, true);
+    this.rigidBody.setTranslation({ x, y }, true);
+    this.rigidBody.setRotation(rotation, true);
     this.x = x;
     this.y = y;
     this.rotation = rotation;
@@ -187,14 +199,14 @@ export class RigidBody2D extends Component {
    * Copies the simulated pose into `x`, `y` and `rotation`. Called by {@link PhysicsWorld}.
    */
   syncFromPhysics(): void {
-    const position = this.body.translation();
+    const position = this.rigidBody.translation();
     this.x = position.x;
     this.y = position.y;
-    this.rotation = this.body.rotation();
+    this.rotation = this.rigidBody.rotation();
   }
 
   override onDestroy(): void {
     this.physics.unregister(this.colliderHandle);
-    this.physics.world.removeRigidBody(this.body);
+    this.physics.world.removeRigidBody(this.rigidBody);
   }
 }

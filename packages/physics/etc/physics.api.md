@@ -40,9 +40,20 @@ export class PhysicsWorld extends Component {
     // (undocumented)
     static executionOrder: number;
     fixedUpdate(deltaTime: number): void;
+    groupsFor(layer: string | undefined, collidesWith: readonly string[] | undefined): number;
     // (undocumented)
     onDestroy(): void;
+    overlapBox(x: number, y: number, width: number, height: number, rotation?: number, options?: QueryOptions): RigidBody2D[];
+    overlapCircle(x: number, y: number, radius: number, options?: QueryOptions): RigidBody2D[];
+    overlapPoint(x: number, y: number, options?: QueryOptions): RigidBody2D[];
     readonly rapier: Rapier;
+    raycast(origin: {
+        x: number;
+        y: number;
+    }, direction: {
+        x: number;
+        y: number;
+    }, maxDistance: number, options?: QueryOptions): RayHit | undefined;
     register(colliderHandle: number, body: RigidBody2D): void;
     // (undocumented)
     static typeId: string;
@@ -56,11 +67,33 @@ export interface PhysicsWorldOptions {
         x: number;
         y: number;
     };
+    layers?: readonly string[];
     rapier: Rapier;
 }
 
 // @public
+export interface QueryOptions {
+    exclude?: RigidBody2D;
+    includeSensors?: boolean;
+    layers?: readonly string[];
+}
+
+// @public
 export type Rapier = typeof RapierNamespace;
+
+// @public
+export interface RayHit {
+    body: RigidBody2D;
+    distance: number;
+    normal: {
+        x: number;
+        y: number;
+    };
+    point: {
+        x: number;
+        y: number;
+    };
+}
 
 // @public
 export class RigidBody2D extends Component {
@@ -70,6 +103,7 @@ export class RigidBody2D extends Component {
     readonly collisionStarted: GameEvent<RigidBody2D>;
     // (undocumented)
     onDestroy(): void;
+    readonly rigidBody: ReturnType<PhysicsWorld['world']['createRigidBody']>;
     rotation: number;
     setPosition(x: number, y: number, rotation?: number): void;
     setVelocity(x: number, y: number): void;
@@ -86,8 +120,10 @@ export class RigidBody2D extends Component {
 
 // @public
 export interface RigidBodyOptions {
+    collidesWith?: readonly string[];
     density?: number;
     friction?: number;
+    layer?: string;
     restitution?: number;
     rotation?: number;
     sensor?: boolean;
