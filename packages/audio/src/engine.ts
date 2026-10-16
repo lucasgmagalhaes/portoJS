@@ -75,6 +75,19 @@ export interface AudioEngineOptions {
 }
 
 /**
+ * Volumes of an {@link AudioEngine}, as saved by {@link AudioEngine.exportVolumes}.
+ */
+export interface VolumeSettings {
+  readonly master: number;
+  readonly muted: boolean;
+  readonly buses: Readonly<Record<string, number>>;
+}
+
+function isVolume(value: unknown): value is number {
+  return typeof value === 'number' && Number.isFinite(value) && value >= 0;
+}
+
+/**
  * Fetches bytes for {@link AudioEngine.load}, like `fetch`.
  */
 export type Fetcher = (url: string) => Promise<{ arrayBuffer(): Promise<ArrayBuffer> }>;
@@ -242,6 +255,8 @@ export class AudioEngine {
   private readonly buses = new Map<string, GainNode>();
   private readonly live = new Set<Playback>();
   private disposed = false;
+  private level: number;
+  private mutedNow = false;
 
   /**
    * @throws {Error} if there is no Web Audio support and no context is given.
@@ -249,7 +264,8 @@ export class AudioEngine {
   constructor(options: AudioEngineOptions = {}) {
     this.context = options.context ?? createContext();
     this.master = this.context.createGain();
-    this.master.gain.value = options.masterVolume ?? 1;
+    this.level = Math.max(0, options.masterVolume ?? 1);
+    this.master.gain.value = this.level;
     this.master.connect(this.context.destination);
   }
 
@@ -257,11 +273,45 @@ export class AudioEngine {
    * Master volume from `0` up.
    */
   get masterVolume(): number {
-    return this.master.gain.value;
+    return this.level;
   }
 
   set masterVolume(value: number) {
-    this.master.gain.value = Math.max(0, value);
+    this.level = Math.max(0, value);
+    this.master.gain.value = this.mutedNow ? 0 : this.level;
+  }
+
+  /**
+   * Silences everything without losing the master volume. Setting `false` restores it.
+   */
+  get muted(): boolean {
+    return this.mutedNow;
+  }
+
+  set muted(value: boolean) {
+    this.mutedNow = value;
+    this.master.gain.value = value ? 0 : this.level;
+  }
+
+  /**
+   * The master volume, the mute flag and the volume of every bus, as plain data you can save.
+   */
+  exportVolumes(): VolumeSettings {
+    const buses: Record<string, number> = {};
+    for (const [name, node] of this.buses) buses[name] = node.gain.value;
+    return { master: this.level, muted: this.mutedNow, buses };
+  }
+
+  /**
+   * Applies settings saved by {@link AudioEngine.exportVolumes}. Missing or invalid values are
+   * ignored, so old saves keep working.
+   */
+  importVolumes(settings: Partial<VolumeSettings>): void {
+    if (isVolume(settings.master)) this.masterVolume = settings.master;
+    if (typeof settings.muted === 'boolean') this.muted = settings.muted;
+    for (const [name, volume] of Object.entries(settings.buses ?? {})) {
+      if (isVolume(volume)) this.setBusVolume(name, volume);
+    }
   }
 
   /**

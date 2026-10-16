@@ -1,7 +1,7 @@
 import { ManualClock } from '@portojs/core';
 import { Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
-import { AudioEngine, AudioManager } from '../src/index.ts';
+import { AudioEngine, AudioManager, loadVolumes, saveVolumes } from '../src/index.ts';
 
 class FakeParam {
   value = 1;
@@ -257,6 +257,60 @@ describe('AudioEngine', () => {
     expect(engine.busVolume('music')).toBe(0);
     engine.setBusVolume('music', 0.4);
     expect(engine.busVolume('music')).toBe(0.4);
+  });
+
+  it('mutes without losing the volume and exports and imports settings', () => {
+    const { context, engine } = make();
+    engine.masterVolume = 0.6;
+    engine.setBusVolume('music', 0.3);
+    engine.muted = true;
+    const master = context.gains[0] as FakeGain;
+    expect(master.gain.value).toBe(0);
+    expect(engine.masterVolume).toBe(0.6);
+    engine.masterVolume = 0.8;
+    expect(master.gain.value).toBe(0);
+    expect(engine.exportVolumes()).toEqual({ master: 0.8, muted: true, buses: { music: 0.3 } });
+    engine.muted = false;
+    expect(master.gain.value).toBe(0.8);
+    engine.importVolumes({ master: 0.1, muted: true, buses: { music: 0.9, sfx: -1, ui: 0.5 } });
+    expect(engine.masterVolume).toBe(0.1);
+    expect(engine.muted).toBe(true);
+    expect(engine.busVolume('music')).toBe(0.9);
+    expect(engine.busVolume('ui')).toBe(0.5);
+    expect(engine.busVolume('sfx')).toBe(1);
+    engine.importVolumes({ master: Number.NaN });
+    expect(engine.masterVolume).toBe(0.1);
+  });
+
+  it('saves and loads volumes through a storage, tolerating bad data', () => {
+    const { engine } = make();
+    const data = new Map<string, string>();
+    const storage = {
+      getItem: (key: string) => data.get(key) ?? null,
+      setItem: (key: string, value: string) => void data.set(key, value),
+    };
+    expect(loadVolumes(engine, storage)).toBe(false);
+    engine.masterVolume = 0.25;
+    engine.setBusVolume('music', 0.5);
+    saveVolumes(engine, storage);
+    const other = make().engine;
+    expect(loadVolumes(other, storage)).toBe(true);
+    expect(other.masterVolume).toBe(0.25);
+    expect(other.busVolume('music')).toBe(0.5);
+    data.set('portojs.audio', '{nope');
+    expect(loadVolumes(other, storage)).toBe(false);
+    data.set('portojs.audio', '7');
+    expect(loadVolumes(other, storage)).toBe(false);
+    const broken = {
+      getItem: (): string | null => {
+        throw new Error('denied');
+      },
+      setItem: (): void => {
+        throw new Error('quota');
+      },
+    };
+    expect(loadVolumes(other, broken)).toBe(false);
+    expect(() => saveVolumes(other, broken)).not.toThrow();
   });
 
   it('stops everything and refuses to play after dispose', async () => {
