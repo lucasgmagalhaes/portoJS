@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/idle-v0.11.0...idle-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **idle:** add DailyQuests, a few quests drawn each day from a pool ([d346396](https://github.com/lucasgmagalhaes/portoJS/commit/d346396625f7aee3ee7e4cc08320725b42155523))
+* **idle:** add DailyStreak for consecutive-day login streaks ([b5322bb](https://github.com/lucasgmagalhaes/portoJS/commit/b5322bb21bd6cb3daf00a328b8eefdeeb911f10a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.12.0
+    * @portojs/runtime bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/idle-v0.10.0...idle-v0.11.0) (2026-10-16)
 
 

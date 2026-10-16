@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/ecs-v0.11.0...ecs-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **ecs:** add World.snapshot, restore, createEntityAt and clear ([98cb448](https://github.com/lucasgmagalhaes/portoJS/commit/98cb4487ff0afd03148014c0ac9e1b0db381377c))
+* **ecs:** save the ECS world with the game and link entities to game objects ([6c1b9de](https://github.com/lucasgmagalhaes/portoJS/commit/6c1b9defdedd3d0912d1b63d4bb08fe83445eed7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.12.0
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/ecs-v0.10.0...ecs-v0.11.0) (2026-10-16)
 
 

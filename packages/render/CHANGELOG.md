@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/render-v0.11.0...render-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **render:** add ParticleEmitter ([3556e64](https://github.com/lucasgmagalhaes/portoJS/commit/3556e644ae73591967cfb410091dc449182d1ee0))
+* **render:** recover WebGL2 and WebGPU resources after context loss, with contextlost/contextrestored events ([f9acb66](https://github.com/lucasgmagalhaes/portoJS/commit/f9acb66ebc0b89979eae9da5045129fe76c936df))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/ecs bumped to 0.12.0
+  * devDependencies
+    * @portojs/core bumped to 0.12.0
+    * @portojs/runtime bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/render-v0.10.0...render-v0.11.0) (2026-10-16)
 
 

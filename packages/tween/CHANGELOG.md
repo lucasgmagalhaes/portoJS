@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/tween-v0.11.0...tween-v0.12.0) (2026-10-16)
+
+
+### Chores
+
+* **tween:** Synchronize portojs versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.12.0
+    * @portojs/runtime bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/tween-v0.10.0...tween-v0.11.0) (2026-10-16)
 
 

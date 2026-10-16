@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/math-v0.11.0...math-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **math:** add colour-blindness simulation, WCAG contrast ratio and the Okabe-Ito palette ([013bb2c](https://github.com/lucasgmagalhaes/portoJS/commit/013bb2c8c98e02baf7da382e67b727f55d3587e7))
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/math-v0.10.0...math-v0.11.0) (2026-10-16)
 
 

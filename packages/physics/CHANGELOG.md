@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/physics-v0.11.0...physics-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **physics:** add capsule and polygon (convex hull) body shapes ([92da98a](https://github.com/lucasgmagalhaes/portoJS/commit/92da98af5d902b333e36d75c3c684f82d44ca6e2))
+* **physics:** add joints (revolute, rope, spring, prismatic, fixed) ([1679be1](https://github.com/lucasgmagalhaes/portoJS/commit/1679be15800e359baa4929fd5d8574dfbf084d8a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.12.0
+  * devDependencies
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/physics-v0.10.0...physics-v0.11.0) (2026-10-16)
 
 
