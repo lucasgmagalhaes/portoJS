@@ -13,3 +13,5 @@ export type {
   SoundDefinition,
   VoiceLimitPolicy,
 } from './sound-bank.ts';
+export { MusicPlayer } from './music-player.ts';
+export type { MusicPlayOptions, MusicPlayerOptions, PlaylistOptions } from './music-player.ts';
