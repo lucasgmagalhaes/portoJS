@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node", "vite/client", "@webgpu/types"],
+    "paths": {
+      "@portojs/core/bignum": ["../../packages/core/src/bignum.ts"],
+      "@portojs/core": ["../../packages/core/src/index.ts"],
+      "@portojs/runtime": ["../../packages/runtime/src/index.ts"],
+      "@portojs/ecs": ["../../packages/ecs/src/index.ts"],
+      "@portojs/render": ["../../packages/render/src/index.ts"],
+      "@portojs/math": ["../../packages/math/src/index.ts"],
+      "@portojs/input": ["../../packages/input/src/index.ts"]
+    },
+    "allowImportingTsExtensions": true
+  },
+  "include": ["src", "vite.config.ts"]
+}

@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PortoJS shooter</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #05060a;
+        color: #cfd3ff;
+        font:
+          16px/1.4 system-ui,
+          sans-serif;
+      }
+      canvas {
+        position: absolute;
+        touch-action: none;
+      }
+      #hud {
+        position: fixed;
+        top: 8px;
+        left: 12px;
+        pointer-events: none;
+        text-shadow: 0 1px 2px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <div id="hud">starting...</div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
