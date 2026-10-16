@@ -5,6 +5,8 @@
  */
 export class Time {
   private elapsedSteps = 0;
+  private scale = 1;
+  private scaledSeconds = 0;
 
   /**
    * @param fixedDeltaTime length of one fixed step, in seconds.
@@ -12,10 +14,41 @@ export class Time {
   constructor(readonly fixedDeltaTime: number) {}
 
   /**
-   * Alias of {@link Time.fixedDeltaTime}: the length of the step being simulated.
+   * How fast game time runs: `1` is normal, `0.5` is slow motion, `0` stops it. Never negative.
+   *
+   * @throws {RangeError} when set to a negative or non-finite number.
+   */
+  get timeScale(): number {
+    return this.scale;
+  }
+
+  set timeScale(value: number) {
+    if (!Number.isFinite(value) || value < 0) {
+      throw new RangeError('Time: timeScale must be a finite number >= 0');
+    }
+    this.scale = value;
+  }
+
+  /**
+   * The length of the step being simulated, scaled by {@link Time.timeScale}. This is what
+   * `fixedUpdate` receives.
    */
   get deltaTime(): number {
+    return this.fixedDeltaTime * this.scale;
+  }
+
+  /**
+   * The length of one step in seconds, ignoring {@link Time.timeScale}.
+   */
+  get unscaledDeltaTime(): number {
     return this.fixedDeltaTime;
+  }
+
+  /**
+   * Seconds of game time that flowed, which stops while paused and follows {@link Time.timeScale}.
+   */
+  get scaledTime(): number {
+    return this.scaledSeconds;
   }
 
   /**
@@ -44,5 +77,6 @@ export class Time {
    */
   advance(): void {
     this.elapsedSteps += 1;
+    this.scaledSeconds += this.deltaTime;
   }
 }

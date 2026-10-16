@@ -1,8 +1,8 @@
 import { BigNum } from '@portojs/core';
-import type { BigNumLike } from '@portojs/core';
+import type { BigNumLike, OfflineStatus } from '@portojs/core';
 import { forEachOfflineStep } from '@portojs/core';
 import { Component, GameEvent } from '@portojs/runtime';
-import type { Game, GameObject } from '@portojs/runtime';
+import type { Game, GameEvents, GameObject, OfflineSource } from '@portojs/runtime';
 import { solveFlows } from './flows.ts';
 import type { FlowSource } from './flows.ts';
 import { Generator } from './generator.ts';
@@ -55,6 +55,33 @@ export interface OfflineGains {
   readonly elapsedMs: number;
   /**
    * What each resource gained.
+   */
+  readonly gains: ReadonlyMap<Resource, BigNum>;
+}
+
+/**
+ * Everything about one away-time span, for a "welcome back" screen. Payload of
+ * {@link Economy.offlineSummary}.
+ */
+export interface OfflineSummary {
+  /**
+   * What triggered it: loading a save, a throttled background tab, or `simulateOffline`.
+   */
+  readonly source: OfflineSource;
+  /**
+   * How the span was treated. `'capped'` means the player was away longer than was credited.
+   */
+  readonly status: OfflineStatus;
+  /**
+   * The real time that passed.
+   */
+  readonly elapsedMs: number;
+  /**
+   * The time credited after the cap and efficiency.
+   */
+  readonly appliedMs: number;
+  /**
+   * What each resource gained. Empty when nothing was credited.
    */
   readonly gains: ReadonlyMap<Resource, BigNum>;
 }
@@ -113,6 +140,15 @@ export class Economy extends Component {
    * Fired after away-time production was credited.
    */
   readonly offlineGains = new GameEvent<OfflineGains>();
+
+  /**
+   * Fired after every away-time span, with the source, the cap status and the gains together.
+   * Use it for a "welcome back" screen.
+   */
+  readonly offlineSummary = new GameEvent<OfflineSummary>();
+
+  private lastGains: ReadonlyMap<Resource, BigNum> = new Map();
+  private stopListening: (() => void) | undefined;
 
   private readonly maxChain: number | undefined;
   private readonly maxSteps: number | undefined;
@@ -286,6 +322,27 @@ export class Economy extends Component {
   override fixedUpdate(deltaTime: number): void {
     this.step(deltaTime);
   }
+
+  override awake(): void {
+    this.stopListening = this.game.on('offline', this.summarise);
+  }
+
+  override onDestroy(): void {
+    this.stopListening?.();
+    this.stopListening = undefined;
+  }
+
+  private readonly summarise = (event: GameEvents['offline']): void => {
+    const gains = event.appliedMs > 0 ? this.lastGains : new Map<Resource, BigNum>();
+    this.lastGains = new Map();
+    this.offlineSummary.invoke({
+      source: event.source,
+      status: event.status,
+      elapsedMs: event.elapsedMs,
+      appliedMs: event.appliedMs,
+      gains,
+    });
+  };
 
   override onOffline(elapsedMs: number): void {
     this.inOffline = true;
@@ -478,6 +535,7 @@ export class Economy extends Component {
       const resource = this.resourceList[r] as Resource;
       gains.set(resource, resource.amount.sub(before[r] as BigNum));
     }
+    this.lastGains = gains;
     this.offlineGains.invoke({ elapsedMs: ms, gains });
   }
 }

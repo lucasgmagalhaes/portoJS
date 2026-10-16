@@ -9,6 +9,98 @@ import type { System } from '@portojs/ecs';
 import type { World } from '@portojs/ecs';
 
 // @public
+export interface AnimationClip {
+    readonly durationsMs?: readonly number[];
+    readonly events?: Readonly<Record<number, string>>;
+    readonly fps?: number;
+    readonly frames: readonly string[];
+    readonly loop?: LoopMode;
+    readonly name: string;
+}
+
+// @public
+export interface AnimationTransition {
+    // (undocumented)
+    readonly from: string;
+    // (undocumented)
+    readonly to: string;
+    readonly when: () => boolean;
+}
+
+// @public
+export class Animator {
+    constructor(clips: readonly AnimationClip[], options?: AnimatorOptions);
+    addTransition(transition: AnimationTransition): this;
+    get current(): string | undefined;
+    get finished(): boolean;
+    get frame(): string;
+    get frameIndex(): number;
+    play(name: string, restart?: boolean): void;
+    get speed(): number;
+    set speed(value: number);
+    update(deltaSeconds: number): void;
+}
+
+// @public
+export interface AnimatorOptions {
+    readonly onComplete?: (clip: string) => void;
+    readonly onEvent?: (event: string, clip: string) => void;
+}
+
+// @public
+export function applyViewport(camera: Camera2D, layout: ViewportLayout): void;
+
+// @public
+export class Atlas {
+    constructor(texture: Texture, data: AtlasData);
+    // (undocumented)
+    readonly data: AtlasData;
+    draw(batch: SpriteBatch, name: string, options: Omit<SpriteDraw, 'width' | 'height' | 'u' | 'v' | 'uWidth' | 'vHeight'> & {
+        readonly scale?: number;
+    }): void;
+    frame(name: string): AtlasFrame;
+    has(name: string): boolean;
+    get names(): readonly string[];
+    // (undocumented)
+    readonly texture: Texture;
+    uv(name: string): FrameUv;
+}
+
+// @public
+export interface AtlasData {
+    readonly frames: readonly AtlasFrame[];
+    readonly height: number;
+    readonly tags: readonly AtlasTag[];
+    readonly width: number;
+}
+
+// @public
+export interface AtlasFrame {
+    readonly durationMs: number | undefined;
+    readonly height: number;
+    readonly name: string;
+    readonly offsetX: number;
+    readonly offsetY: number;
+    readonly pivotX: number;
+    readonly pivotY: number;
+    readonly sourceHeight: number;
+    readonly sourceWidth: number;
+    readonly width: number;
+    readonly x: number;
+    readonly y: number;
+}
+
+// @public
+export interface AtlasTag {
+    // (undocumented)
+    readonly direction: 'forward' | 'reverse' | 'pingpong';
+    readonly durationsMs: readonly number[];
+    readonly frames: readonly string[];
+    // (undocumented)
+    readonly name: string;
+}
+
+// @public
 export interface BatchResult {
     readonly count: number;
     readonly data: Float32Array;
@@ -36,6 +128,21 @@ export class Camera2D {
 export type ClearColor = readonly [number, number, number, number];
 
 // @public
+export function clipFromTag(tag: AtlasTag, loop?: LoopMode): AnimationClip;
+
+// @public
+export function clipsFromAtlas(atlas: Atlas): AnimationClip[];
+
+// @public
+export function computeViewport(input: ViewportInput): ViewportLayout;
+
+// @public
+export function containerToViewport(layout: ViewportLayout, x: number, y: number): {
+    x: number;
+    y: number;
+};
+
+// @public
 export function createRenderer(canvas: HTMLCanvasElement | OffscreenCanvas, options?: RendererOptions): Promise<Renderer>;
 
 // @public
@@ -55,10 +162,28 @@ export interface DrawGroup {
 }
 
 // @public
+export interface FrameUv {
+    // (undocumented)
+    readonly u: number;
+    // (undocumented)
+    readonly uWidth: number;
+    // (undocumented)
+    readonly v: number;
+    // (undocumented)
+    readonly vHeight: number;
+}
+
+// @public
 export const INSTANCE_BYTES = 48;
 
 // @public
 export const INSTANCE_FLOATS = 12;
+
+// @public
+export type LoopMode = 'once' | 'loop' | 'pingpong';
+
+// @public
+export function parseAtlasJson(json: unknown): AtlasData;
 
 // @public
 export interface Point {
@@ -86,6 +211,17 @@ export type RendererBackend = 'webgpu' | 'webgl2';
 export interface RendererOptions {
     readonly backend?: 'auto' | RendererBackend;
     readonly clearColor?: ClearColor;
+}
+
+// @public
+export type ScaleMode = 'fit' | 'fill' | 'stretch' | 'fixedWidth' | 'fixedHeight' | 'pixelPerfect';
+
+// @public
+export class SortingLayers {
+    constructor(names: readonly string[]);
+    key(layer: string, order?: number): number;
+    get names(): readonly string[];
+    static ySort(y: number, unitsPerStep?: number): number;
 }
 
 // @public
@@ -169,6 +305,30 @@ rotation: "f32";
 scaleX: "f32";
 scaleY: "f32";
 }>;
+
+// @public
+export interface ViewportInput {
+    readonly containerHeight: number;
+    readonly containerWidth: number;
+    readonly designHeight: number;
+    readonly designWidth: number;
+    // (undocumented)
+    readonly mode: ScaleMode;
+    readonly pixelRatio?: number;
+}
+
+// @public
+export interface ViewportLayout {
+    readonly cssHeight: number;
+    readonly cssWidth: number;
+    readonly offsetX: number;
+    readonly offsetY: number;
+    readonly pixelHeight: number;
+    readonly pixelWidth: number;
+    readonly worldHeight: number;
+    readonly worldWidth: number;
+    readonly zoom: number;
+}
 
 // @public
 export class WebGL2Renderer implements Renderer {

@@ -12,6 +12,8 @@ import type { Game } from '@portojs/runtime';
 import { GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
 import type { JsonValue } from '@portojs/core';
+import type { OfflineSource } from '@portojs/runtime';
+import type { OfflineStatus } from '@portojs/core';
 
 // @public
 export class Achievement extends Component {
@@ -222,6 +224,8 @@ export class Economy extends Component {
     constructor(gameObject: GameObject, options?: EconomyOptions);
     allows(target: Generator_2 | Upgrade): boolean;
     // (undocumented)
+    awake(): void;
+    // (undocumented)
     static executionOrder: number;
     static existing(game: Game): Economy | undefined;
     // (undocumented)
@@ -231,6 +235,9 @@ export class Economy extends Component {
     multiplierOf(target: EffectTarget): BigNum;
     static of(game: Game): Economy;
     readonly offlineGains: GameEvent<OfflineGains>;
+    readonly offlineSummary: GameEvent<OfflineSummary>;
+    // (undocumented)
+    onDestroy(): void;
     // (undocumented)
     onOffline(elapsedMs: number): void;
     readonly purchased: GameEvent<Purchase>;
@@ -387,9 +394,29 @@ export interface ModifierContext {
 export type ModifierValue = BigNumLike | ((context: ModifierContext) => BigNumLike);
 
 // @public
+export interface NodeBought {
+    // (undocumented)
+    readonly node: PrestigeNode;
+    // (undocumented)
+    readonly tree: PrestigeTree;
+}
+
+// @public
+export type NodeStatus = 'owned' | 'available' | 'unaffordable' | 'locked' | 'blocked';
+
+// @public
 export interface OfflineGains {
     readonly elapsedMs: number;
     readonly gains: ReadonlyMap<Resource, BigNum>;
+}
+
+// @public
+export interface OfflineSummary {
+    readonly appliedMs: number;
+    readonly elapsedMs: number;
+    readonly gains: ReadonlyMap<Resource, BigNum>;
+    readonly source: OfflineSource;
+    readonly status: OfflineStatus;
 }
 
 // @public
@@ -421,6 +448,7 @@ export class Prestige extends Component {
     perform(): BigNum | undefined;
     readonly performed: GameEvent<PrestigeResult>;
     get points(): BigNum;
+    refund(amount: BigNumLike): void;
     spend(amount: BigNumLike): boolean;
     // (undocumented)
     static typeId: string;
@@ -435,6 +463,16 @@ export type PrestigeBonus = EffectTarget & ({
 
 // @public
 export type PrestigeFormula = RootFormula | ((basis: BigNum) => BigNumLike);
+
+// @public
+export interface PrestigeNode {
+    readonly bonus: TargetedMultiplier;
+    readonly cost: BigNumLike;
+    readonly description?: string;
+    readonly exclusiveWith?: readonly string[];
+    readonly id: string;
+    readonly requires?: readonly string[];
+}
 
 // @public
 export interface PrestigeOptions {
@@ -456,6 +494,33 @@ export interface PrestigeResult {
 }
 
 // @public
+export class PrestigeTree extends Component {
+    constructor(gameObject: GameObject, options: PrestigeTreeOptions);
+    readonly bought: GameEvent<NodeBought>;
+    buy(id: string): boolean;
+    has(id: string): boolean;
+    node(id: string): PrestigeNode | undefined;
+    // (undocumented)
+    onDestroy(): void;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    get owned(): readonly string[];
+    respec(): BigNum;
+    readonly respecced: GameEvent<PrestigeTree>;
+    status(id: string): NodeStatus;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface PrestigeTreeOptions {
+    readonly nodes: readonly PrestigeNode[];
+    readonly prestige: Prestige;
+}
+
+// @public
 export type Purchase = ({
     readonly kind: 'generator';
 } & GeneratorPurchase) | ({
@@ -464,6 +529,56 @@ export type Purchase = ({
 
 // @public
 export type PurchaseGuard = (target: Generator_2 | Upgrade) => boolean;
+
+// @public
+export class Quest extends Component {
+    constructor(gameObject: GameObject, options: QuestOptions);
+    get canClaim(): boolean;
+    claim(): boolean;
+    readonly claimed: GameEvent<QuestClaim>;
+    get current(): QuestStep | undefined;
+    readonly finished: GameEvent<Quest>;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    get index(): number;
+    isClaimed(id: string): boolean;
+    get isFinished(): boolean;
+    get length(): number;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    get progress(): number;
+    readonly ready: GameEvent<QuestClaim>;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface QuestClaim {
+    readonly index: number;
+    // (undocumented)
+    readonly quest: Quest;
+    // (undocumented)
+    readonly step: QuestStep;
+}
+
+// @public
+export interface QuestOptions {
+    readonly autoClaim?: boolean;
+    readonly checkIntervalMs?: number;
+    readonly steps: readonly QuestStep[];
+}
+
+// @public
+export interface QuestStep {
+    readonly condition: (game: Game) => boolean;
+    readonly description?: string;
+    readonly effect?: (game: Game) => void;
+    readonly id: string;
+    readonly progress?: (game: Game) => number;
+    readonly reward?: (game: Game) => void;
+}
 
 // @public
 export interface ResetKeep {
