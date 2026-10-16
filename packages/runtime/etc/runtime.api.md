@@ -16,6 +16,40 @@ import type { Scheduler } from '@portojs/core';
 import type { Unsubscribe } from '@portojs/core';
 
 // @public
+export class Autosave {
+    constructor(game: Game, storage: SaveStorage, options?: AutosaveOptions);
+    clear(): Promise<void>;
+    readonly failed: GameEvent<unknown>;
+    flush(): Promise<void>;
+    load(): Promise<AutosaveLoadResult | undefined>;
+    request(): void;
+    get running(): boolean;
+    save(): Promise<void>;
+    readonly saved: GameEvent<{
+        at: number;
+    }>;
+    start(): void;
+    stop(): void;
+}
+
+// @public
+export interface AutosaveLoadResult {
+    readonly report: OfflineReport | undefined;
+    readonly skipped: number;
+    readonly source: string;
+}
+
+// @public
+export interface AutosaveOptions {
+    readonly backups?: number;
+    readonly compress?: boolean;
+    readonly debounceMs?: number;
+    readonly intervalMs?: number;
+    readonly key?: string;
+    readonly scheduler?: Scheduler;
+}
+
+// @public
 export abstract class Component {
     constructor(gameObject: GameObject);
     awake?(): void;
@@ -216,6 +250,25 @@ export interface GameOptions {
 }
 
 // @public
+export class IndexedDbSaveStorage implements SaveStorage {
+    constructor(options?: IndexedDbSaveStorageOptions);
+    close(): Promise<void>;
+    // (undocumented)
+    get(key: string): Promise<string | null>;
+    // (undocumented)
+    remove(key: string): Promise<void>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
+
+// @public
+export interface IndexedDbSaveStorageOptions {
+    readonly database?: string;
+    readonly factory?: IDBFactory;
+    readonly store?: string;
+}
+
+// @public
 export type InstantiateOptions<P> = CreateObjectOptions & (undefined extends P ? {
     readonly params?: P;
 } : {
@@ -231,6 +284,17 @@ export interface LoadOptions {
 export function loadScene(game: Game, scene: unknown, registry: ComponentRegistry): GameObject[];
 
 // @public
+export class MemorySaveStorage implements SaveStorage {
+    // (undocumented)
+    get(key: string): Promise<string | null>;
+    keys(): string[];
+    // (undocumented)
+    remove(key: string): Promise<void>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
+
+// @public
 export type OfflineSource = 'load' | 'background' | 'manual';
 
 // @public
@@ -244,6 +308,13 @@ export class Prefab<P = undefined> {
 
 // @public
 export type PrefabBuilder<P> = (object: GameObject, params: P) => void;
+
+// @public
+export interface SaveStorage {
+    get(key: string): Promise<string | null>;
+    remove(key: string): Promise<void>;
+    set(key: string, value: string): Promise<void>;
+}
 
 // @public
 export interface Scene {
@@ -302,6 +373,27 @@ export class WaitWhile extends YieldInstruction {
     constructor(condition: () => boolean);
     // (undocumented)
     isDone(): boolean;
+}
+
+// @public
+export class WebSaveStorage implements SaveStorage {
+    constructor(store: WebStorageLike);
+    // (undocumented)
+    get(key: string): Promise<string | null>;
+    // (undocumented)
+    remove(key: string): Promise<void>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
+
+// @public
+export interface WebStorageLike {
+    // (undocumented)
+    getItem(key: string): string | null;
+    // (undocumented)
+    removeItem(key: string): void;
+    // (undocumented)
+    setItem(key: string, value: string): void;
 }
 
 // @public
