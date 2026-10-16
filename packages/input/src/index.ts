@@ -27,3 +27,4 @@ export { Pointable, PointerSystem, circleHitTest, rectHitTest } from './pointabl
 export type { HitTest, PointableOptions, PointerHit, PointerSystemOptions } from './pointable.ts';
 export { VirtualControls } from './virtual-controls.ts';
 export type { JoystickOptions, Region, VirtualControlsOptions } from './virtual-controls.ts';
+export { CoyoteTime, InputBuffer } from './timing.ts';
