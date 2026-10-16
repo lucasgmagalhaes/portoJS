@@ -14,6 +14,7 @@ export default defineConfig({
       '@portojs/tween': at('./packages/tween/src/index.ts'),
       '@portojs/math': at('./packages/math/src/index.ts'),
       'create-portojs': at('./packages/create-portojs/src/index.ts'),
+      '@portojs/i18n': at('./packages/i18n/src/index.ts'),
       '@portojs/ecs': at('./packages/ecs/src/index.ts'),
       '@portojs/render': at('./packages/render/src/index.ts'),
       '@portojs/input': at('./packages/input/src/index.ts'),

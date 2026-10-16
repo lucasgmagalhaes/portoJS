@@ -11,6 +11,7 @@
     "packages/assets/src/index.ts",
     "packages/tween/src/index.ts",
     "packages/math/src/index.ts",
+    "packages/i18n/src/index.ts",
     "packages/ecs/src/index.ts",
     "packages/render/src/index.ts",
     "packages/input/src/index.ts",
