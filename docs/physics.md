@@ -92,3 +92,30 @@ physics.overlapBox(x, y, width, height, rotation); // a melee hit area
 ```
 
 All of them take `{ layers, includeSensors, exclude }`; sensors are skipped unless you ask, and `exclude` ignores the body doing the casting. `body.rigidBody` and `physics.world` expose Rapier for anything not wrapped, such as shape casts.
+
+## Joints
+
+`physics.createJoint(bodyA, bodyB, spec, options)` connects two bodies with a constraint:
+
+```ts
+// a pendulum: a hinge at a world point
+physics.createJoint(ceiling, bob, { kind: 'revolute' }, { worldAnchor: { x: 0, y: 0 } });
+
+// a rope: at most 3 units between the centres, slack when closer
+physics.createJoint(anchor, weight, { kind: 'rope', length: 3 });
+
+// a spring pulling towards 2 units apart
+physics.createJoint(wall, mass, { kind: 'spring', restLength: 2, stiffness: 50, damping: 2 });
+
+// a piston: the second body slides along an axis
+physics.createJoint(rail, slider, { kind: 'prismatic', axis: { x: 1, y: 0 } });
+
+// a weld: the bodies move as one, keeping their current pose
+physics.createJoint(hull, turret, { kind: 'fixed' });
+```
+
+Place the joint with `worldAnchor` (one point in the world, as the bodies are now) or with `anchorA` and `anchorB` (offsets from each body's centre, in its own space). Without any, the joint attaches at the bodies' centres. The returned `Joint` has `remove()` and `removed`; a joint also goes away when either body is destroyed.
+
+## More shapes
+
+Besides `box` and `circle`, a body can be a `capsule` (a `length` between the centres of its two round ends, lying along x, and a `radius`) or a `polygon`: the convex hull of the points you give, around the body's centre. For a concave outline, build several bodies and join them with a `fixed` joint. A polygon needs at least three points that are not in a line.
