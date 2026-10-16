@@ -419,3 +419,36 @@ function nearestInDirection(
   }
   return best;
 }
+
+/**
+ * Turns a keyboard event into the navigation action the {@link Ui} understands: arrows move,
+ * Tab and Shift+Tab cycle, Enter and Space confirm, Escape cancels. Returns `undefined` for
+ * other keys.
+ *
+ * @example
+ * window.addEventListener('keydown', (e) => {
+ *   const action = navActionFromKey(e.key, e.shiftKey);
+ *   if (action && ui.navigate(action)) e.preventDefault();
+ * });
+ */
+export function navActionFromKey(key: string, shift = false): NavAction | undefined {
+  switch (key) {
+    case 'ArrowUp':
+      return 'up';
+    case 'ArrowDown':
+      return 'down';
+    case 'ArrowLeft':
+      return 'left';
+    case 'ArrowRight':
+      return 'right';
+    case 'Tab':
+      return shift ? 'previous' : 'next';
+    case 'Enter':
+    case ' ':
+      return 'confirm';
+    case 'Escape':
+      return 'cancel';
+    default:
+      return undefined;
+  }
+}

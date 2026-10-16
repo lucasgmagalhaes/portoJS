@@ -5,7 +5,7 @@
  * @module @portojs/ui
  */
 
-export { Ui } from './ui.ts';
+export { Ui, navActionFromKey } from './ui.ts';
 export type { UiOptions } from './ui.ts';
 export { UiNode, placeAnchored, sizeOf } from './node.ts';
 export type { NavAction, NodeOptions, UiContext } from './node.ts';
