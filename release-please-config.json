@@ -32,7 +32,8 @@
         "platform",
         "math",
         "tween",
-        "assets"
+        "assets",
+        "i18n"
       ]
     }
   ],
@@ -980,6 +981,53 @@
     "packages/create-portojs": {
       "package-name": "create-portojs",
       "component": "create-portojs",
+      "changelog-path": "CHANGELOG.md",
+      "changelog-sections": [
+        {
+          "type": "feat",
+          "section": "Features"
+        },
+        {
+          "type": "fix",
+          "section": "Bug Fixes"
+        },
+        {
+          "type": "perf",
+          "section": "Performance"
+        },
+        {
+          "type": "refactor",
+          "section": "Refactoring"
+        },
+        {
+          "type": "docs",
+          "section": "Documentation"
+        },
+        {
+          "type": "test",
+          "section": "Tests",
+          "hidden": true
+        },
+        {
+          "type": "build",
+          "section": "Build",
+          "hidden": true
+        },
+        {
+          "type": "ci",
+          "section": "CI",
+          "hidden": true
+        },
+        {
+          "type": "chore",
+          "section": "Chores",
+          "hidden": true
+        }
+      ]
+    },
+    "packages/i18n": {
+      "package-name": "@portojs/i18n",
+      "component": "i18n",
       "changelog-path": "CHANGELOG.md",
       "changelog-sections": [
         {
