@@ -188,6 +188,14 @@ export function clipFromTag(tag: AtlasTag, loop?: LoopMode): AnimationClip;
 export function clipsFromAtlas(atlas: Atlas): AnimationClip[];
 
 // @public
+export interface ColorOverLife {
+    // (undocumented)
+    readonly end: number;
+    // (undocumented)
+    readonly start: number;
+}
+
+// @public
 export function computeViewport(input: ViewportInput): ViewportLayout;
 
 // @public
@@ -291,10 +299,55 @@ export function layoutText(text: string, font: FontData, options?: TextLayoutOpt
 export type LoopMode = 'once' | 'loop' | 'pingpong';
 
 // @public
+export interface OverLife {
+    // (undocumented)
+    readonly end: number;
+    // (undocumented)
+    readonly start: number;
+}
+
+// @public
 export function parseAtlasJson(json: unknown): AtlasData;
 
 // @public
 export function parseBmfont(text: string): FontData;
+
+// @public
+export class ParticleEmitter {
+    constructor(options: ParticleOptions);
+    burst(count: number): void;
+    clear(): void;
+    get count(): number;
+    draw(batch: SpriteBatch): void;
+    emitting: boolean;
+    update(deltaSeconds: number): void;
+    x: number;
+    // (undocumented)
+    y: number;
+}
+
+// @public
+export interface ParticleOptions {
+    readonly angle?: Range_2;
+    readonly area?: SpawnArea;
+    readonly color?: ColorOverLife | number;
+    readonly drag?: number;
+    readonly ease?: (t: number) => number;
+    readonly gravity?: {
+        readonly x: number;
+        readonly y: number;
+    };
+    readonly layer?: number;
+    readonly lifetime?: Range_2;
+    readonly max?: number;
+    readonly random?: () => number;
+    readonly rate?: number;
+    readonly rotation?: Range_2;
+    readonly size?: OverLife | number;
+    readonly speed?: Range_2;
+    readonly spin?: Range_2;
+    readonly texture: Texture;
+}
 
 // @public
 export interface PlacedGlyph {
@@ -315,6 +368,10 @@ export interface Point {
     // (undocumented)
     readonly y: number;
 }
+
+// @public
+type Range_2 = number | readonly [number, number];
+export { Range_2 as Range }
 
 // @public
 export interface RasterizedText<C> {
@@ -378,6 +435,18 @@ export class SortingLayers {
     get names(): readonly string[];
     static ySort(y: number, unitsPerStep?: number): number;
 }
+
+// @public
+export type SpawnArea = {
+    readonly kind: 'point';
+} | {
+    readonly kind: 'rect';
+    readonly width: number;
+    readonly height: number;
+} | {
+    readonly kind: 'circle';
+    readonly radius: number;
+};
 
 // @public
 export function spawnSprite(world: World, texture: Texture, options?: SpawnSpriteOptions): number;
