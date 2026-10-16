@@ -68,6 +68,12 @@ export interface EngineOptions {
    */
   readonly onOverflow?: (droppedMs: number) => void;
   /**
+   * Called once at the end of every {@link Engine.update} and {@link Engine.advance}, after the
+   * fixed steps, with the time that passed (ms) and the steps run. Use it for per-frame work
+   * that is not part of the simulation, such as rendering.
+   */
+  readonly onFrame?: (deltaMs: number, steps: number) => void;
+  /**
    * Fixed timestep in ms. Default `100`.
    */
   readonly stepMs?: number;
@@ -116,6 +122,7 @@ export class Engine {
   private readonly pollMs: number;
   private readonly onStep: (dtMs: number) => void;
   private readonly onOverflow: ((droppedMs: number) => void) | undefined;
+  private readonly onFrame: ((deltaMs: number, steps: number) => void) | undefined;
   private accumulator = 0;
   private steps = 0;
   private stopLoop: (() => void) | undefined;
@@ -143,6 +150,7 @@ export class Engine {
     }
     this.onStep = options.onStep;
     this.onOverflow = options.onOverflow;
+    this.onFrame = options.onFrame;
     this.scheduler = options.scheduler ?? intervalScheduler;
     this.guard = new TimeGuard(options.clock ?? systemClock);
   }
@@ -210,7 +218,10 @@ export class Engine {
       due = this.maxCatchUpTicks;
       this.onOverflow?.(dropped);
     }
-    return this.run(due);
+    const nested = this.busy;
+    const steps = this.run(due);
+    if (!nested) this.onFrame?.(delta, steps);
+    return steps;
   }
 
   /**
@@ -223,7 +234,10 @@ export class Engine {
   advance(ms: number): number {
     if (!Number.isFinite(ms) || ms < 0) throw new RangeError('Engine.advance: ms must be >= 0');
     this.accumulator += ms;
-    return this.run(Math.floor(this.accumulator / this.stepMs));
+    const nested = this.busy;
+    const steps = this.run(Math.floor(this.accumulator / this.stepMs));
+    if (!nested) this.onFrame?.(ms, steps);
+    return steps;
   }
 
   private run(count: number): number {

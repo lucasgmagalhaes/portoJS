@@ -223,3 +223,51 @@ describe('createIntervalScheduler', () => {
     }
   });
 });
+
+describe('Engine onFrame', () => {
+  it('runs after the fixed steps of every update with the time passed and the steps run', () => {
+    const clock = new ManualClock(0);
+    const log: string[] = [];
+    const engine = new Engine({
+      clock,
+      stepMs: 100,
+      onStep: () => log.push('step'),
+      onFrame: (deltaMs, steps) => log.push(`frame ${deltaMs} ${steps}`),
+    });
+    clock.advance(250);
+    engine.update();
+    clock.advance(30);
+    engine.update();
+    expect(log).toEqual(['step', 'step', 'frame 250 2', 'frame 30 0']);
+  });
+
+  it('runs after advance() with the simulated time', () => {
+    const frames: Array<[number, number]> = [];
+    const engine = new Engine({
+      clock: new ManualClock(0),
+      stepMs: 100,
+      onStep: () => undefined,
+      onFrame: (deltaMs, steps) => frames.push([deltaMs, steps]),
+    });
+    engine.advance(350);
+    expect(frames).toEqual([[350, 3]]);
+  });
+
+  it('does not run again for an update started inside a step', () => {
+    const clock = new ManualClock(0);
+    const frames: number[] = [];
+    const holder: { engine?: Engine } = {};
+    holder.engine = new Engine({
+      clock,
+      stepMs: 100,
+      onStep: () => {
+        clock.advance(100);
+        holder.engine?.update();
+      },
+      onFrame: (deltaMs) => frames.push(deltaMs),
+    });
+    clock.advance(100);
+    holder.engine.update();
+    expect(frames).toEqual([100]);
+  });
+});
