@@ -23,3 +23,5 @@ export type {
   SwipeDirection,
   SwipeGesture,
 } from './gestures.ts';
+export { Pointable, PointerSystem, circleHitTest, rectHitTest } from './pointable.ts';
+export type { HitTest, PointableOptions, PointerHit, PointerSystemOptions } from './pointable.ts';
