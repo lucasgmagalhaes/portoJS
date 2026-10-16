@@ -1,3 +1,4 @@
+import { GameEvent } from '@portojs/runtime';
 import { ButtonState } from './button-state.ts';
 
 /**
@@ -23,7 +24,32 @@ export type PointerTarget = EventTarget & {
   };
 };
 
+/**
+ * One pointer event, in the target's drawing space, as published on {@link Pointer.events}.
+ */
+export interface PointerStreamEvent {
+  /**
+   * What happened. `cancel` means the system took the pointer away (a call, a palm).
+   */
+  readonly type: 'down' | 'move' | 'up' | 'cancel';
+  /**
+   * Which finger, mouse or pen.
+   */
+  readonly pointerId: number;
+  readonly x: number;
+  readonly y: number;
+  /**
+   * `0` left or touch, `1` middle, `2` right.
+   */
+  readonly button: number;
+  /**
+   * Time of the event in ms, from the browser's event clock.
+   */
+  readonly time: number;
+}
+
 interface PointerEventLike {
+  readonly timeStamp?: number;
   readonly pointerId: number;
   readonly button: number;
   readonly clientX: number;
@@ -49,6 +75,11 @@ export class Pointer {
    */
   readonly state = new ButtonState();
   /**
+   * Every down, move, up and cancel as it happens, for code that needs more than the per-step
+   * button state, such as gesture recognition and hit-testing.
+   */
+  readonly events = new GameEvent<PointerStreamEvent>();
+  /**
    * Last known x position.
    */
   x = 0;
@@ -70,6 +101,7 @@ export class Pointer {
     this.x = at.x;
     this.y = at.y;
     this.state.press(`Button${pointer.button}`);
+    this.publish('down', pointer, at);
   };
 
   private readonly onUp = (event: Event): void => {
@@ -79,12 +111,14 @@ export class Pointer {
     this.x = at.x;
     this.y = at.y;
     this.state.release(`Button${pointer.button}`);
+    this.publish('up', pointer, at);
   };
 
   private readonly onCancel = (event: Event): void => {
     const pointer = event as unknown as PointerEventLike;
     this.active.delete(pointer.pointerId);
     this.state.releaseAll();
+    this.publish('cancel', pointer, this.locate(pointer));
   };
 
   private readonly onMove = (event: Event): void => {
@@ -93,6 +127,7 @@ export class Pointer {
     this.x = at.x;
     this.y = at.y;
     if (this.active.has(pointer.pointerId)) this.active.set(pointer.pointerId, at);
+    this.publish('move', pointer, at);
   };
 
   private readonly onWheel = (event: Event): void => {
@@ -157,6 +192,23 @@ export class Pointer {
     this.target.removeEventListener('wheel', this.onWheel);
     this.state.releaseAll();
     this.active.clear();
+    this.events.removeAllListeners();
+  }
+
+  private publish(
+    type: PointerStreamEvent['type'],
+    event: PointerEventLike,
+    at: PointerPosition,
+  ): void {
+    if (this.events.listenerCount === 0) return;
+    this.events.invoke({
+      type,
+      pointerId: event.pointerId,
+      x: at.x,
+      y: at.y,
+      button: event.button,
+      time: event.timeStamp ?? 0,
+    });
   }
 
   private locate(event: PointerEventLike): PointerPosition {
