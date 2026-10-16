@@ -93,10 +93,13 @@ describe('shipped templates', () => {
     '@portojs/render': '0.10.0',
     '@portojs/ecs': '0.10.0',
     '@portojs/runtime': '0.10.0',
+    '@portojs/math': '0.10.0',
   };
 
-  it('has the blank and idle templates', () => {
-    expect(listTemplates(templatesDir)).toEqual(expect.arrayContaining(['blank', 'idle']));
+  it('has the blank, idle and sprites templates', () => {
+    expect(listTemplates(templatesDir)).toEqual(
+      expect.arrayContaining(['blank', 'idle', 'sprites']),
+    );
   });
 
   it.each(listTemplates(templatesDir))('%s scaffolds a complete project', (template) => {
