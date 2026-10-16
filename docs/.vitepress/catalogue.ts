@@ -110,6 +110,13 @@ const PACKAGES: readonly Row[] = [
     '/i18n',
   ],
   [
+    '@portojs/tilemap',
+    'package',
+    '',
+    'Tiled maps: culled drawing, animated tiles and merged collision rectangles.',
+    '/tilemap',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',
