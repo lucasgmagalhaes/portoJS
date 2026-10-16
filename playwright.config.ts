@@ -33,5 +33,12 @@ export default defineConfig({
       reuseExistingServer: !process.env['CI'],
       timeout: 60_000,
     },
+    {
+      command: 'npx vite --port 4175 --strictPort',
+      cwd: 'examples/shooter',
+      url: 'http://localhost:4175',
+      reuseExistingServer: !process.env['CI'],
+      timeout: 60_000,
+    },
   ],
 });
