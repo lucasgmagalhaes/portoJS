@@ -52,3 +52,5 @@ export type {
 } from './canvas-text.ts';
 export { CameraController } from './camera-controller.ts';
 export type { CameraControllerOptions, FollowOptions, WorldRect } from './camera-controller.ts';
+export { ParticleEmitter } from './particles.ts';
+export type { ColorOverLife, OverLife, ParticleOptions, Range, SpawnArea } from './particles.ts';
