@@ -231,6 +231,18 @@ renderer.render(minimapCamera, minimapBatch.build(), {
 });
 ```
 
+## When the GPU goes away
+
+On phones the browser can take the GPU context away at any time (the app goes to the background, the driver resets). The renderer survives it: it stops drawing while the context is lost, and when it comes back it rebuilds its program, buffers and **every texture from the image it was created from**, with the same `Texture` handles, so your batches keep working.
+
+```ts
+const stopLost = renderer.on('contextlost', () => pauseMusic());
+renderer.on('contextrestored', () => redrawNow());
+renderer.lost; // true between the two
+```
+
+Two rules: do not `close()` an `ImageBitmap` you gave to `createTexture` (the renderer needs it to rebuild), and draw again after `contextrestored` (the canvas content is gone). Textures created while the context is lost are uploaded when it returns. WebGL2 uses the standard `webglcontextlost`/`webglcontextrestored` events. WebGPU reacts to `device.lost`, asks for a new adapter and device, reconfigures the canvas and re-uploads; if that fails (the GPU is still resetting) `await renderer.restore()` tries again. Both are tested in a real browser or against a fake device.
+
 ## ECS and game objects together
 
 Use game objects and components for the few things that have rules and identity (the player, a boss, a shop), and the ECS for the many that are just data (bullets, particles, tiles). `EntityLink` joins the two:
