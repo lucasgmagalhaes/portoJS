@@ -40,6 +40,24 @@ export interface PlayOptions {
    * Seconds to wait before starting. Default `0`.
    */
   readonly delay?: number;
+  /**
+   * Where in the sound to start, in seconds. With `duration` this plays one region of a longer
+   * file (an audio sprite). Default `0`.
+   */
+  readonly offset?: number;
+  /**
+   * Seconds to play from `offset`. Default: to the end of the sound.
+   */
+  readonly duration?: number;
+  /**
+   * When looping, the point the loop returns to, in seconds. Default `0`.
+   */
+  readonly loopStart?: number;
+  /**
+   * When looping, the point where the loop jumps back to `loopStart`, in seconds. Default: the
+   * end of the sound.
+   */
+  readonly loopEnd?: number;
 }
 
 /**
@@ -81,6 +99,7 @@ export class Playback {
     private readonly gain: GainNode,
     private readonly panner: StereoPannerNode | undefined,
     private readonly onFinished: (playback: Playback) => void,
+    private readonly now: () => number = zero,
   ) {
     const pending = deferred();
     this.ended = pending.promise;
@@ -129,10 +148,31 @@ export class Playback {
   }
 
   /**
-   * Stops the sound. No-op when it already finished.
+   * Moves the volume to `volume` over `seconds`, in a straight line.
    */
-  stop(): void {
+  fadeTo(volume: number, seconds: number): void {
+    const param = this.gain.gain;
+    const now = this.now();
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(param.value, now);
+    param.linearRampToValueAtTime(Math.max(0, volume), now + Math.max(0, seconds));
+  }
+
+  /**
+   * Stops the sound. With `fadeSeconds` the volume falls to zero first and the sound ends when
+   * it gets there. No-op when it already finished.
+   */
+  stop(fadeSeconds = 0): void {
     if (!this.playing) return;
+    if (fadeSeconds > 0) {
+      this.fadeTo(0, fadeSeconds);
+      try {
+        this.source.stop(this.now() + fadeSeconds);
+      } catch (error) {
+        rethrowUnlessError(error);
+      }
+      return;
+    }
     try {
       this.source.stop();
     } catch (error) {
@@ -150,6 +190,10 @@ export class Playback {
     this.onFinished(this);
     this.settle();
   };
+}
+
+function zero(): number {
+  return 0;
 }
 
 function deferred(): { promise: Promise<void>; resolve: () => void } {
@@ -270,6 +314,8 @@ export class AudioEngine {
     source.buffer = sound.buffer;
     source.loop = options.loop ?? false;
     source.playbackRate.value = options.rate ?? 1;
+    if (options.loopStart !== undefined) source.loopStart = options.loopStart;
+    if (options.loopEnd !== undefined) source.loopEnd = options.loopEnd;
     const gain = context.createGain();
     gain.gain.value = Math.max(0, options.volume ?? 1);
     const panner =
@@ -281,9 +327,16 @@ export class AudioEngine {
       gain.connect(panner);
       panner.connect(this.bus(options.bus ?? 'sfx'));
     }
-    const playback = new Playback(source, gain, panner, this.release);
+    const playback = new Playback(source, gain, panner, this.release, this.time);
     this.live.add(playback);
-    source.start(context.currentTime + Math.max(0, options.delay ?? 0));
+    const when = context.currentTime + Math.max(0, options.delay ?? 0);
+    if (options.duration !== undefined) {
+      source.start(when, Math.max(0, options.offset ?? 0), Math.max(0, options.duration));
+    } else if (options.offset !== undefined) {
+      source.start(when, Math.max(0, options.offset));
+    } else {
+      source.start(when);
+    }
     return playback;
   }
 
@@ -339,6 +392,8 @@ export class AudioEngine {
     }
     return node;
   }
+
+  private readonly time = (): number => this.context.currentTime;
 
   private readonly release = (playback: Playback): void => {
     this.live.delete(playback);

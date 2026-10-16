@@ -5,6 +5,19 @@ import { AudioEngine, AudioManager } from '../src/index.ts';
 
 class FakeParam {
   value = 1;
+  readonly calls: [string, ...number[]][] = [];
+
+  cancelScheduledValues(time: number): void {
+    this.calls.push(['cancel', time]);
+  }
+
+  setValueAtTime(value: number, time: number): void {
+    this.calls.push(['set', value, time]);
+  }
+
+  linearRampToValueAtTime(value: number, time: number): void {
+    this.calls.push(['ramp', value, time]);
+  }
 }
 
 class FakeNode {
@@ -34,15 +47,21 @@ class FakeSource extends FakeNode {
   readonly playbackRate = new FakeParam();
   onended: (() => void) | null = null;
   startedAt: number | undefined;
+  startArgs: number[] = [];
+  stopAt: number | undefined;
+  loopStart = 0;
+  loopEnd = 0;
   stopped = false;
   throwOnStop = false;
 
-  start(when: number): void {
+  start(when: number, ...rest: number[]): void {
     this.startedAt = when;
+    this.startArgs = rest;
   }
 
-  stop(): void {
+  stop(when?: number): void {
     if (this.throwOnStop) throw new Error('InvalidStateError');
+    this.stopAt = when;
     this.stopped = true;
   }
 }
@@ -153,6 +172,40 @@ describe('AudioEngine', () => {
     expect(playback.volume).toBe(0.3);
     expect((context.sources[0] as FakeSource).playbackRate.value).toBe(2);
     expect((context.panners[0] as FakePanner).pan.value).toBe(-1);
+  });
+
+  it('fades a playback and stops after a fade out', async () => {
+    const { context, engine } = make();
+    const sound = await loadSound(engine);
+    context.currentTime = 4;
+    const playback = engine.play(sound, { volume: 0.8 });
+    playback.fadeTo(0.2, 2);
+    const gain = context.gains.find((node) => node.gain.calls.length > 0) as FakeGain;
+    expect(gain.gain.calls).toEqual([
+      ['cancel', 4],
+      ['set', 0.8, 4],
+      ['ramp', 0.2, 6],
+    ]);
+    playback.stop(1.5);
+    expect(gain.gain.calls.at(-1)).toEqual(['ramp', 0, 5.5]);
+    expect((context.sources[0] as FakeSource).stopAt).toBe(5.5);
+    expect(playback.isPlaying).toBe(true);
+    (context.sources[0] as FakeSource).onended?.();
+    expect(playback.isPlaying).toBe(false);
+  });
+
+  it('plays a region of a sound and sets loop points', async () => {
+    const { context, engine } = make();
+    const sound = await loadSound(engine);
+    engine.play(sound, { offset: 1, duration: 0.5 });
+    engine.play(sound, { offset: 2 });
+    engine.play(sound, { loop: true, loopStart: 0.5, loopEnd: 2 });
+    const [region, from, loop] = context.sources;
+    expect(region?.startArgs).toEqual([1, 0.5]);
+    expect(from?.startArgs).toEqual([2]);
+    expect(loop?.startArgs).toEqual([]);
+    expect(loop?.loopStart).toBe(0.5);
+    expect(loop?.loopEnd).toBe(2);
   });
 
   it('stops a sound and settles its ended promise', async () => {
