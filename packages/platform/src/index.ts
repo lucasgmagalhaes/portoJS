@@ -47,3 +47,19 @@ export type {
 export { AdGate } from './ad-gate.ts';
 export type { AdGateOptions } from './ad-gate.ts';
 export { MemoryPurchases, SimulatedAds } from './memory-store.ts';
+export { createManifest, createPwaFiles, createServiceWorker } from './pwa.ts';
+export type {
+  ManifestIcon,
+  ManifestOptions,
+  PwaFilesOptions,
+  ServiceWorkerOptions,
+} from './pwa.ts';
+export { InstallPrompt, registerServiceWorker } from './pwa-client.ts';
+export type {
+  InstallOutcome,
+  InstallTarget,
+  RegisterOptions,
+  ServiceWorkerHost,
+  ServiceWorkerRegistrationLike,
+  WorkerLike,
+} from './pwa-client.ts';
