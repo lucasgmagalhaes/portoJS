@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PortoJS puzzle</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        background: #1b1a17;
+        color: #cfd3ff;
+        font:
+          16px/1.4 system-ui,
+          sans-serif;
+      }
+      canvas {
+        position: absolute;
+        touch-action: none;
+      }
+      #buttons {
+        position: fixed;
+        top: 8px;
+        right: 12px;
+      }
+      #hud {
+        position: fixed;
+        top: 8px;
+        left: 12px;
+        pointer-events: none;
+        text-shadow: 0 1px 2px #000;
+      }
+    </style>
+  </head>
+  <body>
+    <canvas id="stage"></canvas>
+    <div id="hud">starting...</div>
+    <div id="buttons"><button id="undo">Undo</button> <button id="restart">New game</button></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
