@@ -12,6 +12,8 @@ import type { Game } from '@portojs/runtime';
 import { GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
 import type { JsonValue } from '@portojs/core';
+import type { OfflineSource } from '@portojs/runtime';
+import type { OfflineStatus } from '@portojs/core';
 
 // @public
 export class Achievement extends Component {
@@ -222,6 +224,8 @@ export class Economy extends Component {
     constructor(gameObject: GameObject, options?: EconomyOptions);
     allows(target: Generator_2 | Upgrade): boolean;
     // (undocumented)
+    awake(): void;
+    // (undocumented)
     static executionOrder: number;
     static existing(game: Game): Economy | undefined;
     // (undocumented)
@@ -231,6 +235,9 @@ export class Economy extends Component {
     multiplierOf(target: EffectTarget): BigNum;
     static of(game: Game): Economy;
     readonly offlineGains: GameEvent<OfflineGains>;
+    readonly offlineSummary: GameEvent<OfflineSummary>;
+    // (undocumented)
+    onDestroy(): void;
     // (undocumented)
     onOffline(elapsedMs: number): void;
     readonly purchased: GameEvent<Purchase>;
@@ -401,6 +408,15 @@ export type NodeStatus = 'owned' | 'available' | 'unaffordable' | 'locked' | 'bl
 export interface OfflineGains {
     readonly elapsedMs: number;
     readonly gains: ReadonlyMap<Resource, BigNum>;
+}
+
+// @public
+export interface OfflineSummary {
+    readonly appliedMs: number;
+    readonly elapsedMs: number;
+    readonly gains: ReadonlyMap<Resource, BigNum>;
+    readonly source: OfflineSource;
+    readonly status: OfflineStatus;
 }
 
 // @public

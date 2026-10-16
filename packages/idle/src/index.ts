@@ -11,6 +11,7 @@ export type {
   ModifierContext,
   ModifierValue,
   OfflineGains,
+  OfflineSummary,
   Purchase,
   PurchaseGuard,
 } from './economy.ts';
