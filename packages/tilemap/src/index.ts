@@ -18,3 +18,5 @@ export type {
 } from './tiled.ts';
 export { TileMapView } from './view.ts';
 export type { DrawMapOptions } from './view.ts';
+export { solidRects } from './collision.ts';
+export type { SolidRect, SolidTest } from './collision.ts';
