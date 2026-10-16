@@ -74,3 +74,59 @@ loadSdk().then((sdk) => analytics.attach(sdk.asAnalytics()));
 `AdGate` keeps interstitials polite: call `gate.breakpoint()` at natural pauses and it only shows an ad when the cooldown has passed and enough pauses happened since the last one. `gate.rewarded()` is never limited (the player asked for it) and tells you whether to give the reward. Both report the result to your analytics.
 
 No provider SDKs are bundled; they differ per platform and change often, so they belong in your game or in a separate adapter package.
+
+## Installable and offline (PWA)
+
+A game that is installed from the browser and starts without a network needs three things: a manifest, a service worker and a page that registers it. `createPwaFiles` writes the first two from the list of files your build produced, and the precache is exactly that list, so the whole game is available offline after the first visit.
+
+With Vite, a small plugin emits both files (this is the whole integration):
+
+```ts
+// vite.config.ts
+import { createPwaFiles } from '@portojs/platform';
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  plugins: [
+    {
+      name: 'portojs-pwa',
+      generateBundle(_options, bundle) {
+        const files = createPwaFiles({
+          manifest: {
+            name: 'My Game',
+            backgroundColor: '#0b0d14',
+            icons: [
+              { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+              { src: 'icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+            ],
+          },
+          version: String(Date.now()), // or your package version
+          files: Object.keys(bundle),
+        });
+        for (const [fileName, source] of Object.entries(files)) {
+          this.emitFile({ type: 'asset', fileName, source });
+        }
+      },
+    },
+  ],
+});
+```
+
+Put the icons in `public/` and add `<link rel="manifest" href="manifest.webmanifest">` to `index.html`. The worker serves precached files from the cache, keeps other same-origin files it fetches, tries the network first for the page itself and falls back to the cached page when offline. A new version gets a new cache name; the old caches are removed when it takes over.
+
+In the game, register the worker and handle the two moments that matter:
+
+```ts
+import { InstallPrompt, registerServiceWorker } from '@portojs/platform';
+
+await registerServiceWorker('sw.js', navigator.serviceWorker, {
+  onOfflineReady: () => toast('Ready to play offline'),
+  onUpdateReady: (applyUpdate) => showButton('Update', applyUpdate), // reloads after applying
+});
+
+const install = new InstallPrompt(window);
+install.onChange = () => (installButton.hidden = !install.available);
+installButton.onclick = () => install.prompt(); // 'accepted' | 'dismissed' | 'unavailable'
+```
+
+A new version never replaces files in the middle of a game: it waits until `applyUpdate` is called (for example from a button on the title screen). `InstallPrompt` keeps Chrome's `beforeinstallprompt` event until the player taps; Safari on iOS has no such event, so show a hint about "Add to Home Screen" there. The generator and the worker are tested by running the generated worker source against a fake cache.
