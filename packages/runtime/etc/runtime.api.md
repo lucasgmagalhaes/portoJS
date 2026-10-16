@@ -16,6 +16,40 @@ import type { Scheduler } from '@portojs/core';
 import type { Unsubscribe } from '@portojs/core';
 
 // @public
+export class Autosave {
+    constructor(game: Game, storage: SaveStorage, options?: AutosaveOptions);
+    clear(): Promise<void>;
+    readonly failed: GameEvent<unknown>;
+    flush(): Promise<void>;
+    load(): Promise<AutosaveLoadResult | undefined>;
+    request(): void;
+    get running(): boolean;
+    save(): Promise<void>;
+    readonly saved: GameEvent<{
+        at: number;
+    }>;
+    start(): void;
+    stop(): void;
+}
+
+// @public
+export interface AutosaveLoadResult {
+    readonly report: OfflineReport | undefined;
+    readonly skipped: number;
+    readonly source: string;
+}
+
+// @public
+export interface AutosaveOptions {
+    readonly backups?: number;
+    readonly compress?: boolean;
+    readonly debounceMs?: number;
+    readonly intervalMs?: number;
+    readonly key?: string;
+    readonly scheduler?: Scheduler;
+}
+
+// @public
 export abstract class Component {
     constructor(gameObject: GameObject);
     awake?(): void;
@@ -102,13 +136,18 @@ export class Game {
     get objects(): readonly GameObject[];
     on<K extends keyof GameEvents>(event: K, listener: Listener<GameEvents[K]>): Unsubscribe;
     once<K extends keyof GameEvents>(event: K, listener: Listener<GameEvents[K]>): Unsubscribe;
+    pause(): void;
+    get paused(): boolean;
     // @internal
     refreshActivity(target: GameObject | Component): void;
     // @internal
     registerComponent(component: Component): void;
     reset(): void;
+    resume(): void;
     get running(): boolean;
     save(): SaveData;
+    setInterval(callback: () => void, intervalMs: number): Timer;
+    setTimeout(callback: () => void, delayMs: number): Timer;
     simulateOffline(ms: number): OfflineReport;
     start(): void;
     // @internal
@@ -120,6 +159,8 @@ export class Game {
     get structureVersion(): number;
     get tickCount(): number;
     readonly time: Time;
+    get timeScale(): number;
+    set timeScale(value: number);
     // @internal
     unregisterComponent(component: Component): void;
     // @internal
@@ -156,6 +197,12 @@ export interface GameEvents {
     };
     overflow: {
         droppedMs: number;
+    };
+    pause: {
+        at: number;
+    };
+    resume: {
+        at: number;
     };
     saved: {
         save: SaveData;
@@ -216,6 +263,25 @@ export interface GameOptions {
 }
 
 // @public
+export class IndexedDbSaveStorage implements SaveStorage {
+    constructor(options?: IndexedDbSaveStorageOptions);
+    close(): Promise<void>;
+    // (undocumented)
+    get(key: string): Promise<string | null>;
+    // (undocumented)
+    remove(key: string): Promise<void>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
+
+// @public
+export interface IndexedDbSaveStorageOptions {
+    readonly database?: string;
+    readonly factory?: IDBFactory;
+    readonly store?: string;
+}
+
+// @public
 export type InstantiateOptions<P> = CreateObjectOptions & (undefined extends P ? {
     readonly params?: P;
 } : {
@@ -229,6 +295,17 @@ export interface LoadOptions {
 
 // @public
 export function loadScene(game: Game, scene: unknown, registry: ComponentRegistry): GameObject[];
+
+// @public
+export class MemorySaveStorage implements SaveStorage {
+    // (undocumented)
+    get(key: string): Promise<string | null>;
+    keys(): string[];
+    // (undocumented)
+    remove(key: string): Promise<void>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
 
 // @public
 export type OfflineSource = 'load' | 'background' | 'manual';
@@ -246,9 +323,19 @@ export class Prefab<P = undefined> {
 export type PrefabBuilder<P> = (object: GameObject, params: P) => void;
 
 // @public
+export interface SaveStorage {
+    get(key: string): Promise<string | null>;
+    remove(key: string): Promise<void>;
+    set(key: string, value: string): Promise<void>;
+}
+
+// @public
 export interface Scene {
     readonly objects: readonly SceneObject[];
 }
+
+// @public
+export type SceneBuilder = (context: SceneContext) => void | Promise<void>;
 
 // @public
 export interface SceneComponent {
@@ -258,9 +345,45 @@ export interface SceneComponent {
 }
 
 // @public
+export interface SceneContext {
+    createObject(name: string, options?: CreateObjectOptions): GameObject;
+    readonly game: Game;
+    readonly name: string;
+}
+
+// @public
 export class SceneError extends Error {
     // (undocumented)
     readonly name = "SceneError";
+}
+
+// @public
+export interface SceneLoadOptions {
+    readonly transition?: SceneTransition;
+}
+
+// @public
+export class SceneManager {
+    constructor(game: Game, options?: SceneManagerOptions);
+    get current(): string | undefined;
+    has(name: string): boolean;
+    isLoaded(name: string): boolean;
+    load(name: string, options?: SceneLoadOptions): Promise<void>;
+    loadAdditive(name: string): Promise<void>;
+    readonly loaded: GameEvent<{
+        name: string;
+        additive: boolean;
+    }>;
+    get loadedScenes(): readonly string[];
+    persist(object: GameObject): void;
+    register(name: string, source: SceneSource): this;
+    unload(name: string): Promise<void>;
+    readonly unloaded: GameEvent<string>;
+}
+
+// @public
+export interface SceneManagerOptions {
+    readonly registry?: ComponentRegistry;
 }
 
 // @public
@@ -272,6 +395,17 @@ export interface SceneObject {
 }
 
 // @public
+export type SceneSource = SceneBuilder | {
+    readonly objects: readonly unknown[];
+};
+
+// @public
+export interface SceneTransition {
+    readonly in?: () => void | Promise<void>;
+    readonly out?: () => void | Promise<void>;
+}
+
+// @public
 export class Time {
     constructor(fixedDeltaTime: number);
     advance(): void;
@@ -279,8 +413,31 @@ export class Time {
     // (undocumented)
     readonly fixedDeltaTime: number;
     get fixedTime(): number;
+    get scaledTime(): number;
     get tickCount(): number;
     get time(): number;
+    get timeScale(): number;
+    set timeScale(value: number);
+    get unscaledDeltaTime(): number;
+}
+
+// @public
+export class Timer {
+    // @internal
+    constructor(callback: () => void,
+    dueMs: number,
+    intervalMs: number | undefined,
+    sequence: number);
+    // (undocumented)
+    readonly callback: () => void;
+    cancel(): void;
+    // @internal (undocumented)
+    dueMs: number;
+    // @internal (undocumented)
+    readonly intervalMs: number | undefined;
+    get isCancelled(): boolean;
+    // @internal (undocumented)
+    readonly sequence: number;
 }
 
 // @public
@@ -302,6 +459,27 @@ export class WaitWhile extends YieldInstruction {
     constructor(condition: () => boolean);
     // (undocumented)
     isDone(): boolean;
+}
+
+// @public
+export class WebSaveStorage implements SaveStorage {
+    constructor(store: WebStorageLike);
+    // (undocumented)
+    get(key: string): Promise<string | null>;
+    // (undocumented)
+    remove(key: string): Promise<void>;
+    // (undocumented)
+    set(key: string, value: string): Promise<void>;
+}
+
+// @public
+export interface WebStorageLike {
+    // (undocumented)
+    getItem(key: string): string | null;
+    // (undocumented)
+    removeItem(key: string): void;
+    // (undocumented)
+    setItem(key: string, value: string): void;
 }
 
 // @public

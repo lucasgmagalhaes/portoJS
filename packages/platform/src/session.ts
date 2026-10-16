@@ -2,6 +2,18 @@ import type { Game } from '@portojs/runtime';
 import type { Platform } from './platform.ts';
 
 /**
+ * What the game does while the app is in the background:
+ *
+ * - `offline`: stop the loop and, on return, credit the time away as offline progress (default).
+ * - `pause`: stop the loop and freeze game time; the time away is not credited.
+ * - `run`: keep the loop running (the browser may throttle it, and dropped time is credited as
+ *   offline progress by the game itself).
+ *
+ * In every case the game saves when it goes to the background.
+ */
+export type BackgroundPolicy = 'offline' | 'pause' | 'run';
+
+/**
  * Options of {@link bindPlatform}.
  */
 export interface SessionOptions {
@@ -18,6 +30,10 @@ export interface SessionOptions {
    * Store compressed saves, which are several times smaller. Default `true`.
    */
   readonly compress?: boolean;
+  /**
+   * What happens in the background. Default `offline`.
+   */
+  readonly background?: BackgroundPolicy;
   /**
    * Called when a save cannot be read or written. The game carries on, so a damaged save never
    * blocks play.
@@ -57,6 +73,7 @@ export async function bindPlatform(
   const key = options.key ?? 'portojs-save';
   const autosaveMs = options.autosaveMs ?? 10_000;
   const compress = options.compress ?? true;
+  const background = options.background ?? 'offline';
   const report = (error: unknown): void => {
     options.onError?.(error);
   };
@@ -80,14 +97,14 @@ export async function bindPlatform(
   const suspend = (): void => {
     if (suspendedAt !== undefined) return;
     suspendedAt = game.now();
-    game.stop();
+    if (background !== 'run') game.stop();
     void save();
   };
   const resume = (): void => {
     if (suspendedAt === undefined) return;
     const away = game.now() - suspendedAt;
     suspendedAt = undefined;
-    if (away > 0) game.simulateOffline(away);
+    if (background === 'offline' && away > 0) game.simulateOffline(away);
     game.start();
   };
   const autosave = (): void => {

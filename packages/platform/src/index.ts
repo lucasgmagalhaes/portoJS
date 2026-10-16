@@ -7,6 +7,7 @@
 export { webPlatform } from './platform.ts';
 export type {
   Haptic,
+  PageLifecycleTarget,
   Platform,
   PlatformStorage,
   PlatformUser,
@@ -20,4 +21,4 @@ export type { TelegramPlatformOptions, TelegramWebApp } from './telegram.ts';
 export { tiktokPlatform } from './tiktok.ts';
 export type { TikTokApi, TikTokPlatformOptions } from './tiktok.ts';
 export { bindPlatform } from './session.ts';
-export type { Session, SessionOptions } from './session.ts';
+export type { BackgroundPolicy, Session, SessionOptions } from './session.ts';

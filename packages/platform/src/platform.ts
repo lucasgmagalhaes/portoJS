@@ -94,6 +94,14 @@ export interface VisibilityTarget {
 }
 
 /**
+ * The part of `window` the web adapter uses for page lifecycle events.
+ */
+export interface PageLifecycleTarget {
+  addEventListener(type: 'pagehide' | 'pageshow', listener: () => void): void;
+  removeEventListener(type: 'pagehide' | 'pageshow', listener: () => void): void;
+}
+
+/**
  * Options of {@link webPlatform}.
  */
 export interface WebPlatformOptions {
@@ -105,6 +113,11 @@ export interface WebPlatformOptions {
    * Where visibility changes come from. Default `document`.
    */
   readonly document?: VisibilityTarget;
+  /**
+   * Where `pagehide` and `pageshow` come from, which fire on mobile browsers when the page is
+   * put in the back-forward cache and some browsers skip `visibilitychange`. Default `window`.
+   */
+  readonly window?: PageLifecycleTarget;
   /**
    * Haptics. Default `navigator.vibrate`.
    */
@@ -134,15 +147,20 @@ function defaultVibrate(pattern: number): unknown {
 export function webPlatform(options: WebPlatformOptions = {}): Platform {
   const storage = options.storage ?? globalThis.localStorage;
   const page = options.document ?? globalThis.document;
+  const win = options.window ?? (typeof window === 'undefined' ? undefined : window);
   const buzz = options.vibrate ?? defaultVibrate;
 
   const subscribe = (visible: boolean, listener: () => void): Unsubscribe => {
     const onChange = (): void => {
       if ((page.visibilityState === 'visible') === visible) listener();
     };
+    const onPage = (): void => listener();
+    const pageEvent = visible ? 'pageshow' : 'pagehide';
     page.addEventListener('visibilitychange', onChange);
+    win?.addEventListener(pageEvent, onPage);
     return () => {
       page.removeEventListener('visibilitychange', onChange);
+      win?.removeEventListener(pageEvent, onPage);
     };
   };
 

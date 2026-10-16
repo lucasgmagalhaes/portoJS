@@ -89,6 +89,15 @@ Economy.of(game).offlineGains.addListener(({ elapsedMs, gains }) => {
 });
 ```
 
+For a "welcome back" screen, `offlineSummary` puts everything in one payload: the source, the status (`'capped'` tells you the player was away longer than was credited), the real time away, the time credited and what each resource gained.
+
+```ts
+Economy.of(game).offlineSummary.addListener(({ source, status, elapsedMs, appliedMs, gains }) => {
+  if (source !== 'load') return;
+  showWelcomeBack({ away: elapsedMs, credited: appliedMs, capped: status === 'capped', gains });
+});
+```
+
 The `offline` event is skipped only for zero time; it fires with `'backward'` so you can warn the player.
 
 ## Background tabs

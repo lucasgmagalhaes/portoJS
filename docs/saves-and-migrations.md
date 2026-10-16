@@ -111,3 +111,27 @@ Saving records `savedAt`, which is what offline progress measures from, so save 
 ## Custom components
 
 A component persists itself through `onSave()` and `onLoad(data)`. `onLoad(undefined)` must restore defaults. Throw `SaveCorruptedError` for data you cannot accept. Give the component a `static typeId` so its key does not depend on the class name.
+
+## Autosave and storage
+
+`Autosave` writes the game to a `SaveStorage` on a timer or on request, keeps rotating backups and loads the newest copy that is not corrupted.
+
+```ts
+import { Autosave, WebSaveStorage } from 'portojs';
+
+const autosave = new Autosave(game, new WebSaveStorage(localStorage), {
+  intervalMs: 30_000,
+  backups: 2,
+});
+
+const loaded = await autosave.load(); // main save, else the newest intact backup
+autosave.start(); // every 30 s of real time
+button.onclick = () => autosave.request(); // debounced: many requests, one save
+window.addEventListener('pagehide', () => void autosave.flush());
+```
+
+- **Storage:** `MemorySaveStorage` (tests), `WebSaveStorage` (anything shaped like `localStorage`) and `IndexedDbSaveStorage` (larger saves, no blocking). Implement `get`, `set` and `remove` to use anything else.
+- **Backups:** before each write the previous main save moves to `<key>.bak1`, that one to `.bak2`, and so on up to `backups`.
+- **Recovery:** `load()` skips a corrupted copy and tries the next. If every copy is corrupted it throws `SaveCorruptedError`. A save from a newer game version throws `SaveVersionError` instead of falling back, so progress is not silently lost.
+- **Quota:** when a write fails with a quota error, the backups are dropped and the write is retried once.
+- **Writes never overlap:** saves are queued, and `failed` fires if an automatic save fails; the next one tries again.

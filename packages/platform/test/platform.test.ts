@@ -76,6 +76,29 @@ afterEach(() => {
   vi.useRealTimers();
 });
 
+class FakeWindow extends EventTarget {}
+
+describe('webPlatform page lifecycle', () => {
+  it('also suspends on pagehide and resumes on pageshow', () => {
+    const win = new FakeWindow();
+    const platform = webPlatform({
+      storage: new FakeStorage(),
+      document: new FakeDocument(),
+      window: win,
+    });
+    const log: string[] = [];
+    const offSuspend = platform.onSuspend(() => log.push('suspend'));
+    const offResume = platform.onResume(() => log.push('resume'));
+    win.dispatchEvent(new Event('pagehide'));
+    win.dispatchEvent(new Event('pageshow'));
+    offSuspend();
+    offResume();
+    win.dispatchEvent(new Event('pagehide'));
+    win.dispatchEvent(new Event('pageshow'));
+    expect(log).toEqual(['suspend', 'resume']);
+  });
+});
+
 describe('webPlatform defaults', () => {
   it('falls back to the globals when nothing is injected', () => {
     const platform = webPlatform({ storage: new FakeStorage(), document: new FakeDocument() });
@@ -387,6 +410,53 @@ describe('bindPlatform', () => {
     page.change('hidden');
     expect(game.running).toBe(true);
     game.dispose();
+  });
+
+  async function away(background: 'offline' | 'pause' | 'run'): Promise<{
+    gained: number;
+    running: boolean;
+    saved: boolean;
+  }> {
+    const storage = new FakeStorage();
+    const page = new FakeDocument();
+    const clock = new ManualClock(0);
+    const { game, gold } = makeGame(clock);
+    const session = await bindPlatform(game, webPlatform({ storage, document: page }), {
+      autosaveMs: 0,
+      key: 'k',
+      background,
+    });
+    const before = gold.amount.toNumber();
+    page.change('hidden');
+    const running = game.running;
+    await Promise.resolve();
+    const saved = storage.getItem('k') !== null;
+    clock.advance(60_000);
+    page.change('visible');
+    const gained = gold.amount.toNumber() - before;
+    session.dispose();
+    game.dispose();
+    return { gained, running, saved };
+  }
+
+  it('credits the time away with the offline policy and stops while away', async () => {
+    const result = await away('offline');
+    expect(result.running).toBe(false);
+    expect(result.saved).toBe(true);
+    expect(result.gained).toBeGreaterThan(0);
+  });
+
+  it('freezes time with the pause policy', async () => {
+    const result = await away('pause');
+    expect(result.running).toBe(false);
+    expect(result.saved).toBe(true);
+    expect(result.gained).toBe(0);
+  });
+
+  it('keeps the loop with the run policy and still saves', async () => {
+    const result = await away('run');
+    expect(result.running).toBe(true);
+    expect(result.saved).toBe(true);
   });
 
   it('keeps playing when the save is damaged or storage fails', async () => {
