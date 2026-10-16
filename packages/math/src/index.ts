@@ -21,3 +21,10 @@ export {
 export type { Circle } from './geometry.ts';
 export { clamp, inverseLerp, lerp, remap, wrap } from './scalar.ts';
 export { Color } from './color.ts';
+export {
+  contrastRatio,
+  okabeItoPalette,
+  relativeLuminance,
+  simulateColorBlindness,
+} from './accessibility.ts';
+export type { ColorBlindness } from './accessibility.ts';
