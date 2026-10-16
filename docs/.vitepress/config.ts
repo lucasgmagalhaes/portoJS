@@ -38,6 +38,7 @@ export default defineConfig({
           { text: 'Math and random numbers', link: '/math' },
           { text: 'Translations', link: '/i18n' },
           { text: 'Tilemaps', link: '/tilemap' },
+          { text: 'Testing', link: '/testing' },
           { text: 'Physics', link: '/physics' },
           { text: 'Web Worker', link: '/worker' },
           { text: 'Platforms', link: '/platforms' },
@@ -114,6 +115,9 @@ export default defineConfig({
         ),
         '@portojs/tilemap': fileURLToPath(
           new URL('../../packages/tilemap/src/index.ts', import.meta.url),
+        ),
+        '@portojs/testing': fileURLToPath(
+          new URL('../../packages/testing/src/index.ts', import.meta.url),
         ),
         '@portojs/physics': fileURLToPath(
           new URL('../../packages/physics/src/index.ts', import.meta.url),

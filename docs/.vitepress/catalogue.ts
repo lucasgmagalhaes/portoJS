@@ -117,6 +117,13 @@ const PACKAGES: readonly Row[] = [
     '/tilemap',
   ],
   [
+    '@portojs/testing',
+    'package',
+    '',
+    'A fake-clock test game, save round trips and fake input events.',
+    '/testing',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',
