@@ -82,6 +82,13 @@ const PACKAGES: readonly Row[] = [
   ],
   ['@portojs/tween', 'package', '', 'Tweens, easing and timelines driven by game time.', '/tween'],
   [
+    '@portojs/math',
+    'package',
+    '',
+    'Vectors, rectangles, geometry, colours and a seeded, serialisable RNG.',
+    '/math',
+  ],
+  [
     '@portojs/physics',
     'package',
     '',

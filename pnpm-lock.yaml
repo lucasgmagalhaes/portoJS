@@ -180,6 +180,8 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/math: {}
+
   packages/physics:
     dependencies:
       '@portojs/runtime':

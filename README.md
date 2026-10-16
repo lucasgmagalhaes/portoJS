@@ -119,6 +119,7 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/input`    | Keyboard, pointer and gamepad input with named actions                 |
 | `@portojs/audio`    | Web Audio mixer with buses and playback control                        |
 | `@portojs/tween`    | Tweens, easing and timelines driven by game time                       |
+| `@portojs/math`     | Vectors, rectangles, geometry, colours and a seeded, serialisable RNG  |
 | `@portojs/physics`  | 2D rigid bodies and collision events on Rapier                         |
 | `@portojs/worker`   | Run a game in a Web Worker, driven over a typed channel                |
 | `@portojs/platform` | Telegram, TikTok and web adapters: storage, lifecycle, haptics         |
@@ -126,6 +127,7 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/devtools` | React panel to inspect, edit and fast-forward a game                   |
 
 `@portojs/tween`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/math`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
@@ -155,6 +157,7 @@ Full site (guides, four tutorials, a searchable catalogue, API reference for eve
 - [Platforms](docs/platforms.md): Telegram and TikTok mini-games
 - [Web Worker](docs/worker.md): `@portojs/worker`, simulation off the main thread
 - [Tweens and easing](docs/tween.md): `@portojs/tween`, easing curves, timelines
+- [Math and random numbers](docs/math.md): `@portojs/math`, vectors, geometry and a seeded RNG
 - [Physics](docs/physics.md): `@portojs/physics`, rigid bodies and collisions
 - [ECS and rendering](docs/ecs-and-render.md): `@portojs/ecs`, `@portojs/render`, batching and benchmarks
 - [Coming from Unity or Phaser](docs/from-unity.md): how the concepts map
