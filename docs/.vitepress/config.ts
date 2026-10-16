@@ -57,6 +57,10 @@ export default defineConfig({
           { text: 'Your first idle game', link: '/tutorials/idle-game' },
           { text: 'A sprite game', link: '/tutorials/sprite-game' },
           { text: 'A bouncing ball', link: '/tutorials/bouncing-ball' },
+          { text: 'Example games', link: '/examples/' },
+          { text: 'Shooter', link: '/examples/shooter' },
+          { text: 'Platformer', link: '/examples/platformer' },
+          { text: 'Puzzle', link: '/examples/puzzle' },
         ],
       },
       {
