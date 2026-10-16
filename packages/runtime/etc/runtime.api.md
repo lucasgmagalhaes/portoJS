@@ -50,6 +50,19 @@ export interface AutosaveOptions {
 }
 
 // @public
+export class CloudSync {
+    constructor(local: SaveStorage, cloud: SaveStorage, options?: CloudSyncOptions);
+    sync(): Promise<SyncResult>;
+}
+
+// @public
+export interface CloudSyncOptions {
+    readonly key?: string;
+    readonly policy?: ConflictPolicy;
+    readonly progress?: (save: SaveData) => number;
+}
+
+// @public
 export abstract class Component {
     constructor(gameObject: GameObject);
     awake?(): void;
@@ -96,6 +109,9 @@ export class ComponentRegistry {
 
 // @public
 export type ComponentType<C extends Component = Component> = abstract new (...args: never[]) => C;
+
+// @public
+export type ConflictPolicy = 'newest' | 'furthest' | ((local: SaveData, cloud: SaveData) => 'local' | 'cloud' | SaveData);
 
 // @public
 export class Coroutine extends YieldInstruction {
@@ -308,6 +324,14 @@ export interface LoadOptions {
 export function loadScene(game: Game, scene: unknown, registry: ComponentRegistry): GameObject[];
 
 // @public
+export interface LockManagerLike {
+    // (undocumented)
+    request(name: string, options: {
+        readonly ifAvailable?: boolean;
+    }, callback: (lock: unknown) => Promise<unknown> | undefined): Promise<unknown>;
+}
+
+// @public
 export class MemorySaveStorage implements SaveStorage {
     // (undocumented)
     get(key: string): Promise<string | null>;
@@ -355,6 +379,24 @@ export class Prefab<P = undefined> {
 
 // @public
 export type PrefabBuilder<P> = (object: GameObject, params: P) => void;
+
+// @public
+export class SaveSlots {
+    constructor(game: Game, storage: SaveStorage, options?: SaveSlotsOptions);
+    copy(from: number, to: number): Promise<void>;
+    delete(slot: number): Promise<void>;
+    list(): Promise<(SlotInfo | undefined)[]>;
+    load(slot: number): Promise<OfflineReport | undefined>;
+    save(slot: number, label?: string): Promise<SlotInfo>;
+    get size(): number;
+}
+
+// @public
+export interface SaveSlotsOptions {
+    readonly compress?: boolean;
+    readonly key?: string;
+    readonly slots?: number;
+}
 
 // @public
 export interface SaveStorage {
@@ -437,6 +479,43 @@ export type SceneSource = SceneBuilder | {
 export interface SceneTransition {
     readonly in?: () => void | Promise<void>;
     readonly out?: () => void | Promise<void>;
+}
+
+// @public
+export class SlotEmptyError extends Error {
+    // (undocumented)
+    readonly name = "SlotEmptyError";
+}
+
+// @public
+export interface SlotInfo {
+    readonly corrupted: boolean;
+    readonly label: string;
+    readonly savedAt: number;
+    readonly slot: number;
+}
+
+// @public
+export interface SyncResult {
+    readonly action: 'none' | 'uploaded' | 'downloaded' | 'merged';
+    readonly conflict: boolean;
+}
+
+// @public
+export class TabLock {
+    constructor(options?: TabLockOptions);
+    acquire(options?: {
+        readonly wait?: boolean;
+    }): Promise<boolean>;
+    get held(): boolean;
+    release(): void;
+    get supported(): boolean;
+}
+
+// @public
+export interface TabLockOptions {
+    readonly locks?: LockManagerLike | undefined;
+    readonly name?: string;
 }
 
 // @public
