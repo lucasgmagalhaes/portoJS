@@ -43,6 +43,12 @@ export class Color {
 }
 
 // @public
+export type ColorBlindness = 'protanopia' | 'deuteranopia' | 'tritanopia';
+
+// @public
+export function contrastRatio(a: Color, b: Color): number;
+
+// @public
 export function inverseLerp(a: number, b: number, value: number): number;
 
 // @public
@@ -73,6 +79,9 @@ export class Mat3 {
     // (undocumented)
     ty: number;
 }
+
+// @public
+export function okabeItoPalette(): Color[];
 
 // @public
 export function pointInCircle(circle: Circle, x: number, y: number): boolean;
@@ -114,6 +123,9 @@ export class Rect {
 }
 
 // @public
+export function relativeLuminance(color: Color): number;
+
+// @public
 export function remap(value: number, inMin: number, inMax: number, outMin: number, outMax: number): number;
 
 // @public
@@ -140,6 +152,9 @@ export type RngState = readonly [number, number, number, number];
 
 // @public
 export function segmentsIntersect(a1: Vec2, a2: Vec2, b1: Vec2, b2: Vec2): boolean;
+
+// @public
+export function simulateColorBlindness(color: Color, kind: ColorBlindness, out?: Color): Color;
 
 // @public
 export class Vec2 {

@@ -102,6 +102,9 @@ export interface LabelOptions extends NodeOptions {
 export type NavAction = 'up' | 'down' | 'left' | 'right' | 'next' | 'previous' | 'confirm' | 'cancel';
 
 // @public
+export function navActionFromKey(key: string, shift?: boolean): NavAction | undefined;
+
+// @public
 export function nineSlice(width: number, height: number, skinWidth: number, skinHeight: number, insets: Insets): Patch[];
 
 // @public

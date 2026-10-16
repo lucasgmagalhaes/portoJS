@@ -39,6 +39,16 @@ export interface Analytics {
 }
 
 // @public
+export type AnnouncePriority = 'polite' | 'assertive';
+
+// @public
+export class Announcer {
+    constructor(document: DocumentLike);
+    announce(message: string, priority?: AnnouncePriority): void;
+    clear(): void;
+}
+
+// @public
 export type BackgroundPolicy = 'offline' | 'pause' | 'run';
 
 // @public
@@ -73,6 +83,28 @@ export function createPwaFiles(options: PwaFilesOptions): Record<string, string>
 
 // @public
 export function createServiceWorker(options: ServiceWorkerOptions): string;
+
+// @public
+export interface DocumentLike {
+    // (undocumented)
+    readonly body: {
+        appendChild(child: ElementLike): unknown;
+    };
+    // (undocumented)
+    createElement(tag: string): ElementLike;
+}
+
+// @public
+export interface ElementLike {
+    // (undocumented)
+    setAttribute(name: string, value: string): void;
+    // (undocumented)
+    readonly style: {
+        cssText: string;
+    };
+    // (undocumented)
+    textContent: string | null;
+}
 
 // @public
 export type EventProps = Readonly<Record<string, string | number | boolean | null>>;
@@ -128,6 +160,19 @@ export interface ManifestOptions {
 }
 
 // @public
+export type MatchMedia = (query: string) => MediaQueryLike;
+
+// @public
+export interface MediaQueryLike {
+    // (undocumented)
+    addEventListener(type: 'change', listener: () => void): void;
+    // (undocumented)
+    readonly matches: boolean;
+    // (undocumented)
+    removeEventListener(type: 'change', listener: () => void): void;
+}
+
+// @public
 export class MemoryAnalytics implements Analytics {
     // (undocumented)
     readonly events: {
@@ -171,6 +216,9 @@ export const noPurchases: Purchases;
 export const noServices: Services;
 
 // @public
+export type Orientation = 'portrait' | 'landscape';
+
+// @public
 export interface PageLifecycleTarget {
     // (undocumented)
     addEventListener(type: 'pagehide' | 'pageshow', listener: () => void): void;
@@ -200,6 +248,15 @@ export interface PlatformStorage {
 export interface PlatformUser {
     readonly id: string;
     readonly name?: string;
+}
+
+// @public
+export interface Preferences {
+    readonly dark: boolean;
+    readonly highContrast: boolean;
+    // (undocumented)
+    readonly orientation: Orientation;
+    readonly reducedMotion: boolean;
 }
 
 // @public
@@ -244,6 +301,18 @@ export interface PwaFilesOptions {
 }
 
 // @public
+export function readSafeArea(probe: {
+    style: {
+        cssText: string;
+    };
+}, computed: (element: never) => {
+    paddingTop: string;
+    paddingRight: string;
+    paddingBottom: string;
+    paddingLeft: string;
+}): SafeArea;
+
+// @public
 export interface RegisterOptions {
     readonly onError?: (error: unknown) => void;
     readonly onOfflineReady?: () => void;
@@ -255,6 +324,18 @@ export interface RegisterOptions {
 
 // @public
 export function registerServiceWorker(url: string, host: ServiceWorkerHost | undefined, options?: RegisterOptions): Promise<boolean>;
+
+// @public
+export interface SafeArea {
+    // (undocumented)
+    readonly bottom: number;
+    // (undocumented)
+    readonly left: number;
+    // (undocumented)
+    readonly right: number;
+    // (undocumented)
+    readonly top: number;
+}
 
 // @public
 export interface Services {
@@ -421,6 +502,15 @@ export function typedAnalytics<E extends {
 
 // @public
 export type Unsubscribe = () => void;
+
+// @public
+export class UserPreferences {
+    constructor(matchMedia: MatchMedia);
+    get current(): Preferences;
+    dispose(): void;
+    motion(durationMs: number): number;
+    onChange: ((preferences: Preferences) => void) | undefined;
+}
 
 // @public
 export interface VisibilityTarget {
