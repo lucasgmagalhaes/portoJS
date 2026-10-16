@@ -25,3 +25,5 @@ export type {
 } from './gestures.ts';
 export { Pointable, PointerSystem, circleHitTest, rectHitTest } from './pointable.ts';
 export type { HitTest, PointableOptions, PointerHit, PointerSystemOptions } from './pointable.ts';
+export { VirtualControls } from './virtual-controls.ts';
+export type { JoystickOptions, Region, VirtualControlsOptions } from './virtual-controls.ts';
