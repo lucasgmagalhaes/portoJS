@@ -290,3 +290,77 @@ describe('InputComponent', () => {
     expect(component.input.keyboard.isDown('KeyB')).toBe(false);
   });
 });
+
+describe('Input sources and rebinding', () => {
+  function make() {
+    const { target, fire } = makeTarget();
+    const input = new Input({ keyboardTarget: target, pointerTarget: target });
+    return { input, fire };
+  }
+
+  class Fake {
+    readonly state = new ButtonState();
+    ended = 0;
+    isDown = (id: string): boolean => this.state.isDown(id);
+    wasPressed = (id: string): boolean => this.state.wasPressed(id);
+    wasReleased = (id: string): boolean => this.state.wasReleased(id);
+    endFrame = (): void => {
+      this.ended += 1;
+      this.state.endFrame();
+    };
+  }
+
+  it('reads a custom source through <name>:<id> bindings and ends its frame', () => {
+    const { input } = make();
+    const source = new Fake();
+    input.addSource('virtual', source);
+    input.bind('jump', 'virtual:A', 'key:Space');
+    source.state.press('A');
+    expect(input.isDown('jump')).toBe(true);
+    expect(input.wasPressed('jump')).toBe(true);
+    input.endFrame();
+    expect(source.ended).toBe(1);
+    expect(input.wasPressed('jump')).toBe(false);
+    expect(input.isDown('jump')).toBe(true);
+    source.state.release('A');
+    expect(input.wasReleased('jump')).toBe(true);
+  });
+
+  it('rejects bad source names and bindings to unknown sources', () => {
+    const { input } = make();
+    input.addSource('virtual', new Fake());
+    expect(() => input.addSource('virtual', new Fake())).toThrow(/cannot be used/);
+    expect(() => input.addSource('key', new Fake())).toThrow(/cannot be used/);
+    expect(() => input.addSource('bad name', new Fake())).toThrow(/cannot be used/);
+    expect(() => input.bind('x', 'ghost:A')).toThrow(/invalid binding/);
+    expect(() => input.bind('x', 'key:')).toThrow(/invalid binding/);
+    expect(() => input.bind('x', 'nocolon')).toThrow(/invalid binding/);
+  });
+
+  it('reads, exports and imports bindings for a remapping screen', () => {
+    const { input, fire } = make();
+    input.bind('jump', 'key:Space');
+    input.bind('fire', 'pointer:Button0', 'key:KeyF');
+    expect(input.bindingsOf('fire')).toEqual(['pointer:Button0', 'key:KeyF']);
+    expect(input.bindingsOf('nothing')).toEqual([]);
+    const saved = JSON.parse(JSON.stringify(input.exportBindings())) as Record<string, string[]>;
+    expect(saved).toEqual({ jump: ['key:Space'], fire: ['pointer:Button0', 'key:KeyF'] });
+
+    input.importBindings({ jump: ['key:KeyW'] });
+    expect(input.bindingsOf('jump')).toEqual(['key:KeyW']);
+    expect(input.bindingsOf('fire')).toEqual(['pointer:Button0', 'key:KeyF']);
+    fire('keydown', { code: 'KeyW' });
+    expect(input.isDown('jump')).toBe(true);
+  });
+
+  it('imports nothing when any entry is invalid', () => {
+    const { input } = make();
+    input.bind('jump', 'key:Space');
+    expect(() => input.importBindings({ jump: ['key:KeyW'], fire: ['wat:1'] })).toThrow();
+    expect(input.bindingsOf('jump')).toEqual(['key:Space']);
+    expect(input.bindingsOf('fire')).toEqual([]);
+    expect(() => input.importBindings({ jump: 'key:KeyW' as never })).toThrow(/list of strings/);
+    expect(() => input.importBindings({ jump: [1] as never })).toThrow(/list of strings/);
+    expect(input.bindingsOf('jump')).toEqual(['key:Space']);
+  });
+});

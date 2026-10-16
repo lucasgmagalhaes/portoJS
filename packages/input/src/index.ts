@@ -8,7 +8,7 @@ export { ButtonState } from './button-state.ts';
 export { Gamepads } from './gamepad.ts';
 export type { GamepadLike, GamepadProvider, GamepadsOptions } from './gamepad.ts';
 export { Input } from './input.ts';
-export type { InputOptions } from './input.ts';
+export type { ButtonSource, InputOptions } from './input.ts';
 export { InputComponent } from './input-component.ts';
 export { Keyboard } from './keyboard.ts';
 export type { KeyboardOptions } from './keyboard.ts';
