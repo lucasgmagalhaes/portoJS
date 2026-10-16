@@ -56,10 +56,53 @@ export interface PricedPurchasable extends Purchasable {
 }
 
 // @public
+export interface ProfileEntry {
+    readonly average: number;
+    readonly calls: number;
+    readonly max: number;
+    // (undocumented)
+    readonly phase: ProfilePhase;
+    readonly total: number;
+    readonly type: string;
+}
+
+// @public
+export interface ProfileFrame {
+    readonly fixedMs: number;
+    readonly frameMs: number;
+    readonly memory: number | undefined;
+}
+
+// @public
+export type ProfilePhase = 'fixedUpdate' | 'update' | 'lateUpdate';
+
+// @public
+export class Profiler {
+    constructor(options?: ProfilerOptions);
+    attach(game: Game): this;
+    get attached(): boolean;
+    detach(): void;
+    frames(): readonly ProfileFrame[];
+    report(): ProfileEntry[];
+    reset(): void;
+    sync(): void;
+}
+
+// @public
+export interface ProfilerOptions {
+    readonly history?: number;
+    readonly memory?: () => number;
+    readonly now?: () => number;
+}
+
+// @public
 export interface Purchasable {
     buy(): unknown;
     canBuy(): boolean;
 }
+
+// @public
+export function reloadWithState(game: Game, setup: (game: Game) => void): number;
 
 // @public
 export function setComponentState(component: Component, state: JsonValue): void;
