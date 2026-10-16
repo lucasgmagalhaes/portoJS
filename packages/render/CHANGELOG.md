@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/render-v0.10.0...render-v0.11.0) (2026-10-16)
+
+
+### Features
+
+* **render:** add atlases, sprite animation, sorting layers and viewport scaling ([#63](https://github.com/lucasgmagalhaes/portoJS/issues/63)) ([e5f49d3](https://github.com/lucasgmagalhaes/portoJS/commit/e5f49d3d435194052b1f190564928a9e48e3be8d))
+* **render:** add BitmapFont to draw laid-out text into a SpriteBatch ([6b44a13](https://github.com/lucasgmagalhaes/portoJS/commit/6b44a13366d45ad4467bed788edd9ed9f4fe7219))
+* **render:** add CameraController with follow, dead zone, shake, zoom and bounds ([4b82e50](https://github.com/lucasgmagalhaes/portoJS/commit/4b82e50c130a4f8ff4cbbf32b370719119fe5d44))
+* **render:** add layoutText for bitmap-font glyph placement ([556c687](https://github.com/lucasgmagalhaes/portoJS/commit/556c687cc5f29e7f84589142f23aa7948cf76306))
+* **render:** add parseBmfont for AngelCode BMFont text files ([c08d23e](https://github.com/lucasgmagalhaes/portoJS/commit/c08d23e9f1a8865d2271c97f2b5077242b940789))
+* **render:** add rasterizeText and CanvasText for canvas-backed text ([a8dbcca](https://github.com/lucasgmagalhaes/portoJS/commit/a8dbcca9916f2862bedafc65fa50ef9cff3fb6b1))
+* **render:** render into a viewport and keep the previous frame with RenderOptions ([961b43e](https://github.com/lucasgmagalhaes/portoJS/commit/961b43edea913b784a912750e263761274273388))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/ecs bumped to 0.11.0
+  * devDependencies
+    * @portojs/core bumped to 0.11.0
+    * @portojs/runtime bumped to 0.11.0
+
 ## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/render-v0.9.0...render-v0.10.0) (2026-10-15)
 
 

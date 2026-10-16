@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/physics-v0.10.0...physics-v0.11.0) (2026-10-16)
+
+
+### Features
+
+* **physics:** add raycast, overlap queries and named collision layers ([#67](https://github.com/lucasgmagalhaes/portoJS/issues/67)) ([55af414](https://github.com/lucasgmagalhaes/portoJS/commit/55af41452e5378ea21080e706050631943a2b2b3))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.11.0
+  * devDependencies
+    * @portojs/core bumped to 0.11.0
+
 ## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/physics-v0.9.0...physics-v0.10.0) (2026-10-15)
 
 

@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/devtools-v0.10.0...devtools-v0.11.0) (2026-10-16)
+
+
+### Chores
+
+* **devtools:** Synchronize portojs versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/tools bumped to 0.11.0
+  * devDependencies
+    * @portojs/core bumped to 0.11.0
+    * @portojs/runtime bumped to 0.11.0
+
 ## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/devtools-v0.9.0...devtools-v0.10.0) (2026-10-15)
 
 

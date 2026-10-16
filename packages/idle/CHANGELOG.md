@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/idle-v0.10.0...idle-v0.11.0) (2026-10-16)
+
+
+### Features
+
+* **idle:** add Economy.offlineSummary for a welcome-back screen ([#65](https://github.com/lucasgmagalhaes/portoJS/issues/65)) ([89d5792](https://github.com/lucasgmagalhaes/portoJS/commit/89d57929822766c5e5b0d87ad13c0a1557ee5970))
+* **idle:** add Quest chains and PrestigeTree with branches and respec ([5cde7ee](https://github.com/lucasgmagalhaes/portoJS/commit/5cde7eee6f1bfd1875807787b2f2d9ef3f1aa1e9))
+* **runtime:** add SceneManager with additive scenes, persistence and transitions ([#62](https://github.com/lucasgmagalhaes/portoJS/issues/62)) ([e2fb2d0](https://github.com/lucasgmagalhaes/portoJS/commit/e2fb2d06e19e7d780b3c33e1a2dd6d94b83c1115))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.11.0
+    * @portojs/runtime bumped to 0.11.0
+
 ## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/idle-v0.9.0...idle-v0.10.0) (2026-10-15)
 
 
