@@ -66,10 +66,66 @@ export interface BufferedAnalyticsOptions {
 export function consoleAnalytics(log: (message: string, props?: EventProps) => void): Analytics;
 
 // @public
+export function createManifest(options: ManifestOptions): Record<string, unknown>;
+
+// @public
+export function createPwaFiles(options: PwaFilesOptions): Record<string, string>;
+
+// @public
+export function createServiceWorker(options: ServiceWorkerOptions): string;
+
+// @public
 export type EventProps = Readonly<Record<string, string | number | boolean | null>>;
 
 // @public
 export type Haptic = 'light' | 'medium' | 'heavy' | 'success' | 'error';
+
+// @public
+export type InstallOutcome = 'accepted' | 'dismissed' | 'unavailable';
+
+// @public
+export class InstallPrompt {
+    constructor(target: InstallTarget);
+    get available(): boolean;
+    get installed(): boolean;
+    onChange: (() => void) | undefined;
+    prompt(): Promise<InstallOutcome>;
+}
+
+// @public
+export interface InstallTarget {
+    // (undocumented)
+    addEventListener(type: string, listener: (event: never) => void): void;
+}
+
+// @public
+export interface ManifestIcon {
+    readonly purpose?: 'any' | 'maskable' | 'monochrome';
+    readonly sizes: string;
+    // (undocumented)
+    readonly src: string;
+    // (undocumented)
+    readonly type?: string;
+}
+
+// @public
+export interface ManifestOptions {
+    // (undocumented)
+    readonly backgroundColor?: string;
+    // (undocumented)
+    readonly description?: string;
+    readonly display?: 'fullscreen' | 'standalone' | 'minimal-ui' | 'browser';
+    // (undocumented)
+    readonly icons: readonly ManifestIcon[];
+    // (undocumented)
+    readonly name: string;
+    // (undocumented)
+    readonly orientation?: 'any' | 'landscape' | 'portrait';
+    readonly shortName?: string;
+    readonly startUrl?: string;
+    // (undocumented)
+    readonly themeColor?: string;
+}
 
 // @public
 export class MemoryAnalytics implements Analytics {
@@ -178,6 +234,29 @@ export interface Purchases {
 export type PurchaseStatus = 'purchased' | 'cancelled' | 'already-owned' | 'unavailable' | 'error';
 
 // @public
+export interface PwaFilesOptions {
+    // (undocumented)
+    readonly fallback?: string;
+    readonly files: readonly string[];
+    // (undocumented)
+    readonly manifest: ManifestOptions;
+    readonly version: string;
+}
+
+// @public
+export interface RegisterOptions {
+    readonly onError?: (error: unknown) => void;
+    readonly onOfflineReady?: () => void;
+    readonly onUpdateReady?: (applyUpdate: () => void) => void;
+    readonly reload?: () => void;
+    // (undocumented)
+    readonly scope?: string;
+}
+
+// @public
+export function registerServiceWorker(url: string, host: ServiceWorkerHost | undefined, options?: RegisterOptions): Promise<boolean>;
+
+// @public
 export interface Services {
     // (undocumented)
     readonly ads: Ads;
@@ -185,6 +264,37 @@ export interface Services {
     readonly analytics: Analytics;
     // (undocumented)
     readonly purchases: Purchases;
+}
+
+// @public
+export interface ServiceWorkerHost {
+    // (undocumented)
+    addEventListener(type: 'controllerchange', listener: () => void): void;
+    // (undocumented)
+    readonly controller: unknown;
+    // (undocumented)
+    register(url: string, options?: {
+        scope?: string;
+    }): Promise<ServiceWorkerRegistrationLike>;
+}
+
+// @public
+export interface ServiceWorkerOptions {
+    readonly fallback?: string;
+    readonly precache: readonly string[];
+    readonly version: string;
+}
+
+// @public
+export interface ServiceWorkerRegistrationLike {
+    // (undocumented)
+    addEventListener(type: 'updatefound', listener: () => void): void;
+    // (undocumented)
+    readonly installing: WorkerLike | null;
+    // (undocumented)
+    update?(): Promise<unknown>;
+    // (undocumented)
+    readonly waiting: WorkerLike | null;
 }
 
 // @public
@@ -341,6 +451,16 @@ export interface WebStorageLike {
     removeItem(key: string): void;
     // (undocumented)
     setItem(key: string, value: string): void;
+}
+
+// @public
+export interface WorkerLike {
+    // (undocumented)
+    addEventListener(type: 'statechange', listener: () => void): void;
+    // (undocumented)
+    postMessage(message: unknown): void;
+    // (undocumented)
+    readonly state: string;
 }
 
 // (No @packageDocumentation comment for this package)
