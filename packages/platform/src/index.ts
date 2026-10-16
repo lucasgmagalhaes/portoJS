@@ -63,3 +63,14 @@ export type {
   ServiceWorkerRegistrationLike,
   WorkerLike,
 } from './pwa-client.ts';
+export { Announcer, UserPreferences, readSafeArea } from './a11y.ts';
+export type {
+  AnnouncePriority,
+  DocumentLike,
+  ElementLike,
+  MatchMedia,
+  MediaQueryLike,
+  Orientation,
+  Preferences,
+  SafeArea,
+} from './a11y.ts';
