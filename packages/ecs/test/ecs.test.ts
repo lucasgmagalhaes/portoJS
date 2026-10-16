@@ -1,7 +1,7 @@
 import { ManualClock } from '@portojs/core';
 import { Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
-import { EcsWorld, World, defineComponent, not } from '../src/index.ts';
+import { EcsWorld, SnapshotError, World, defineComponent, not } from '../src/index.ts';
 
 const Position = defineComponent({ x: 'f32', y: 'f32' });
 const Velocity = defineComponent({ vx: 'f32', vy: 'f32' });
@@ -181,5 +181,108 @@ describe('EcsWorld component', () => {
     expect(moving.entities).toHaveLength(50_000);
     for (const e of moving.entities) pos.x[e] = (pos.x[e] ?? 0) + (vel.vx[e] ?? 0);
     expect(pos.x[49_999]).toBe(50_000);
+  });
+});
+
+describe('World snapshot and restore', () => {
+  const Health = defineComponent({ hp: 'u16' });
+  const known = { Position, Health };
+
+  function populated(): World {
+    const world = new World({ capacity: 16 });
+    const a = world.createEntity();
+    const b = world.createEntity();
+    const c = world.createEntity();
+    world.addComponent(a, Position, { x: 1.5, y: -2 });
+    world.addComponent(b, Health, { hp: 40 });
+    world.addComponent(c, Position, { x: 9, y: 9 });
+    world.addComponent(c, Health, { hp: 7 });
+    world.destroyEntity(b);
+    return world;
+  }
+
+  it('captures live entities and their named components as plain JSON', () => {
+    const snapshot = populated().snapshot(known);
+    expect(snapshot).toEqual({
+      entities: [
+        { id: 0, components: { Position: [1.5, -2] } },
+        { id: 2, components: { Position: [9, 9], Health: [7] } },
+      ],
+    });
+    expect(JSON.parse(JSON.stringify(snapshot))).toEqual(snapshot);
+  });
+
+  it('restores into a fresh world with the same ids, data and free ids', () => {
+    const snapshot = populated().snapshot(known);
+    const world = new World({ capacity: 16 });
+    world.restore(snapshot, known);
+    expect(world.size).toBe(2);
+    expect(world.isAlive(0)).toBe(true);
+    expect(world.isAlive(1)).toBe(false);
+    expect(world.isAlive(2)).toBe(true);
+    expect(world.use(Position).x[2]).toBe(9);
+    expect(world.use(Health).hp[2]).toBe(7);
+    expect(world.hasComponent(0, Health)).toBe(false);
+    expect(world.createEntity()).toBe(1);
+    expect(world.createEntity()).toBe(3);
+  });
+
+  it('replaces what was there and keeps queries working', () => {
+    const world = new World({ capacity: 16 });
+    const query = world.query(Position);
+    const stale = world.createEntity();
+    world.addComponent(stale, Position, { x: 100, y: 100 });
+    expect(query.entities).toEqual([0]);
+    world.restore(populated().snapshot(known), known);
+    expect(query.entities).toEqual([0, 2]);
+    expect(world.use(Position).x[0]).toBe(1.5);
+  });
+
+  it('saves non-finite values as 0', () => {
+    const world = new World({ capacity: 4 });
+    const e = world.createEntity();
+    world.addComponent(e, Position, { x: Infinity, y: NaN });
+    expect(world.snapshot(known).entities[0]?.components['Position']).toEqual([0, 0]);
+  });
+
+  it('rejects bad snapshots and leaves the world untouched', () => {
+    const world = new World({ capacity: 4 });
+    const e = world.createEntity();
+    world.addComponent(e, Health, { hp: 5 });
+    const bad: unknown[] = [
+      null,
+      {},
+      { entities: [{ id: -1, components: {} }] },
+      { entities: [{ id: 4, components: {} }] },
+      {
+        entities: [
+          { id: 0, components: {} },
+          { id: 0, components: {} },
+        ],
+      },
+      { entities: [{ id: 0 }] },
+      { entities: [{ id: 0, components: { Nope: [1] } }] },
+      { entities: [{ id: 0, components: { Position: [1] } }] },
+      { entities: [{ id: 0, components: { Position: [1, 'x'] } }] },
+    ];
+    for (const snapshot of bad) {
+      expect(() => world.restore(snapshot, known)).toThrow(SnapshotError);
+    }
+    expect(world.size).toBe(1);
+    expect(world.use(Health).hp[0]).toBe(5);
+  });
+
+  it('createEntityAt and clear', () => {
+    const world = new World({ capacity: 8 });
+    world.createEntityAt(5);
+    expect(world.isAlive(5)).toBe(true);
+    expect(world.createEntity()).toBe(4);
+    world.createEntityAt(2);
+    expect(() => world.createEntityAt(2)).toThrow(/already alive/);
+    expect(() => world.createEntityAt(8)).toThrow(RangeError);
+    expect(() => world.createEntityAt(1.5)).toThrow(RangeError);
+    world.clear();
+    expect(world.size).toBe(0);
+    expect(world.createEntity()).toBe(0);
   });
 });
