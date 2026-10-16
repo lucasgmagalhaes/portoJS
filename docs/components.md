@@ -356,3 +356,34 @@ bullets.release(bullet);
 ```
 
 Pooled objects remain part of the game: their components are saved and found by `findObjectsOfType` even while switched off, so keep `max` modest and reset state in `onGet`. `releaseAll()` gives everything back and `clear()` destroys the waiting objects.
+
+## Frame updates and smooth motion
+
+`fixedUpdate` runs at the game's fixed step (100 ms by default), which is right for simulation but looks choppy on screen. Two more hooks run once per frame, after the fixed steps of that frame:
+
+```ts
+class Mover extends Component {
+  previous = 0;
+  current = 0;
+  shown = 0;
+
+  override fixedUpdate(dt: number) {
+    this.previous = this.current;
+    this.current += 10 * dt; // simulation
+  }
+
+  override update(dt: number) {
+    // game.alpha: how far we are into the next fixed step, 0 to 1
+    this.shown = this.previous + (this.current - this.previous) * this.game.alpha;
+  }
+
+  override lateUpdate() {
+    camera.x = this.shown; // after every update has moved things
+  }
+}
+```
+
+- `update(dt)` and `lateUpdate(dt)` receive the real seconds since the previous frame, scaled by `game.timeScale` and `0` while paused. `game.time.unscaledFrameDeltaTime` has the unscaled value, handy for UI that must keep animating when the game is paused.
+- Every `update` runs (in `executionOrder`) before any `lateUpdate`.
+- Frames are driven by `game.update()` (the loop calls it every `pollMs`) and by `game.advance(ms)`, which counts as one frame of `ms`. For a display-rate loop, set `pollMs` to about 16, or call `game.update()` from `requestAnimationFrame`.
+- Action games can use a short step, for example `new Game({ stepMs: 16 })`. The simulation stays deterministic because it always advances in whole steps, whatever the frame rate.
