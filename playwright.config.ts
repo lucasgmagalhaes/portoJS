@@ -47,5 +47,12 @@ export default defineConfig({
       reuseExistingServer: !process.env['CI'],
       timeout: 60_000,
     },
+    {
+      command: 'npx vite --port 4177 --strictPort',
+      cwd: 'examples/puzzle',
+      url: 'http://localhost:4177',
+      reuseExistingServer: !process.env['CI'],
+      timeout: 60_000,
+    },
   ],
 });
