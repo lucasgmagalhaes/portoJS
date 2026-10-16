@@ -3,6 +3,8 @@
 ## Commits
 
 - Make small, atomic commits, always: one logical step each (a type, one behaviour with its test, the docs, the API report). Never one big commit per feature.
+- Author commits as the repository owner (`Lucas Gomes <lucasgsm88@gmail.com>`), never as Claude, and do not add `Co-Authored-By` or other attribution trailers.
+- Author commits as the repository owner (`Lucas Gomes <lucasgsm88@gmail.com>`), never as Claude, and do not add `Co-Authored-By` or other attribution trailers.
 - Use Conventional Commit messages (`feat(scope):`, `fix:`, `docs:`, `test:`, `chore:`); release-please builds the changelog from them.
 
 ## Finishing a task
