@@ -373,6 +373,62 @@ describe('Offline', () => {
     expect(gains[0]).toBeCloseTo(180, 6);
   });
 
+  it('emits an offline summary with source, status, real time and gains', () => {
+    const { game, gold, miner } = build(1000);
+    miner.buy(3);
+    const summaries: Array<{
+      source: string;
+      status: string;
+      elapsedMs: number;
+      appliedMs: number;
+      gold: number;
+    }> = [];
+    Economy.of(game).offlineSummary.addListener((summary) => {
+      summaries.push({
+        source: summary.source,
+        status: summary.status,
+        elapsedMs: summary.elapsedMs,
+        appliedMs: summary.appliedMs,
+        gold: (summary.gains.get(gold) ?? BigNum.ZERO).toNumber(),
+      });
+    });
+    game.simulateOffline(60_000);
+    game.simulateOffline(-5);
+    game.simulateOffline(0);
+    expect(summaries).toHaveLength(2);
+    expect(summaries[0]).toMatchObject({
+      source: 'manual',
+      status: 'applied',
+      elapsedMs: 60_000,
+      appliedMs: 60_000,
+    });
+    expect(summaries[0]?.gold).toBeCloseTo(180, 6);
+    expect(summaries[1]).toMatchObject({ status: 'backward', appliedMs: 0, gold: 0 });
+  });
+
+  it('reports a capped span with the real time away', () => {
+    const clock = new ManualClock(0);
+    const game = new Game({ clock, offline: { maxMs: 10_000, efficiency: 0.5 } });
+    const gold = game.createObject('Gold').addComponent(Resource);
+    game.createObject('Economy').addComponent(Economy);
+    game.createObject('Miner').addComponent(Generator, {
+      cost: { resource: gold, base: 1, growth: 1 },
+      produces: gold,
+      rate: 1,
+      initial: 1,
+    });
+    const seen: Array<[string, number, number, number]> = [];
+    Economy.of(game).offlineSummary.addListener(({ status, elapsedMs, appliedMs, gains }) => {
+      seen.push([status, elapsedMs, appliedMs, (gains.get(gold) ?? BigNum.ZERO).toNumber()]);
+    });
+    const save = game.save();
+    clock.advance(60_000);
+    game.load(save);
+    expect(seen).toHaveLength(1);
+    expect(seen[0]?.slice(0, 3)).toEqual(['capped', 60_000, 5_000]);
+    expect(seen[0]?.[3]).toBeCloseTo(5, 6);
+  });
+
   it('falls back to a bounded simulation for feedback cycles', () => {
     const game = new Game({ clock: new ManualClock(0) });
     const gold = game.createObject('Gold').addComponent(Resource);
