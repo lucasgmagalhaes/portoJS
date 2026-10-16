@@ -17,6 +17,32 @@ export type RendererBackend = 'webgpu' | 'webgl2';
 export type ClearColor = readonly [number, number, number, number];
 
 /**
+ * A region of the drawing buffer, in pixels, with the origin at the top left.
+ */
+export interface RenderViewport {
+  readonly x: number;
+  readonly y: number;
+  readonly width: number;
+  readonly height: number;
+}
+
+/**
+ * Options of {@link Renderer.render}.
+ */
+export interface RenderOptions {
+  /**
+   * Draw only inside this region of the canvas, for split screen or a minimap. Give the camera
+   * the same size with `camera.setViewport(width, height)`. Default: the whole canvas.
+   */
+  readonly viewport?: RenderViewport;
+  /**
+   * Clear the whole canvas to the clear colour first. Default `true`. For several views in one
+   * frame, clear on the first call and pass `false` on the others.
+   */
+  readonly clear?: boolean;
+}
+
+/**
  * Draws batched sprites to a canvas. Get one with {@link createRenderer}.
  */
 export interface Renderer {
@@ -41,9 +67,10 @@ export interface Renderer {
    */
   resize(width: number, height: number): void;
   /**
-   * Clears the canvas and draws the batch: one instanced draw call per group.
+   * Clears the canvas (unless `options.clear` is `false`) and draws the batch: one instanced
+   * draw call per group.
    */
-  render(camera: Camera2D, batch: BatchResult): void;
+  render(camera: Camera2D, batch: BatchResult, options?: RenderOptions): void;
   /**
    * Releases GPU resources.
    */

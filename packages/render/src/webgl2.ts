@@ -1,7 +1,7 @@
 import type { BatchResult, Texture } from './batch.ts';
 import type { Camera2D } from './camera.ts';
 import { INSTANCE_BYTES } from './renderer.ts';
-import type { ClearColor, Renderer, TextureSource } from './renderer.ts';
+import type { ClearColor, RenderOptions, Renderer, TextureSource } from './renderer.ts';
 
 const VERTEX_SHADER = `#version 300 es
 layout(location = 0) in vec2 aCorner;
@@ -135,11 +135,24 @@ export class WebGL2Renderer implements Renderer {
     this.gl.viewport(0, 0, width, height);
   }
 
-  render(camera: Camera2D, batch: BatchResult): void {
+  render(camera: Camera2D, batch: BatchResult, options: RenderOptions = {}): void {
     const gl = this.gl;
-    gl.clearColor(...this.clearColor);
-    gl.clear(gl.COLOR_BUFFER_BIT);
+    const width = gl.drawingBufferWidth;
+    const height = gl.drawingBufferHeight;
+    gl.disable(gl.SCISSOR_TEST);
+    gl.viewport(0, 0, width, height);
+    if (options.clear !== false) {
+      gl.clearColor(...this.clearColor);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
     if (batch.count === 0) return;
+    const region = options.viewport;
+    if (region !== undefined) {
+      const bottom = height - region.y - region.height;
+      gl.viewport(region.x, bottom, region.width, region.height);
+      gl.enable(gl.SCISSOR_TEST);
+      gl.scissor(region.x, bottom, region.width, region.height);
+    }
     gl.useProgram(this.program);
     gl.uniformMatrix4fv(this.viewProj, false, camera.viewProjection(this.matrix));
     gl.bindVertexArray(this.vao);
@@ -157,6 +170,8 @@ export class WebGL2Renderer implements Renderer {
       gl.drawArraysInstanced(gl.TRIANGLE_STRIP, 0, 4, group.count);
     }
     gl.bindVertexArray(null);
+    gl.disable(gl.SCISSOR_TEST);
+    gl.viewport(0, 0, width, height);
   }
 
   destroy(): void {
