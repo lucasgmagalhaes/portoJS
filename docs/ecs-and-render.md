@@ -92,3 +92,71 @@ function frame(dt: number) {
 `pnpm exec tsx bench/ecs-render.bench.ts` on Node 24: moving and collecting sprites for 10,000 entities takes about 0.4 ms per frame, for 50,000 entities about 2.1 ms, and building the draw groups for 50,000 instances about 0.1 ms. These are CPU numbers; GPU time depends on the device.
 
 The `examples/sprites` app draws 10,000 moving sprites. Run it with `pnpm --filter portojs-sprites-example dev`; add `?backend=webgl2` or `?count=50000` to the URL.
+
+## Atlases, animation, layers and scaling
+
+### Atlases
+
+A sprite sheet packed by TexturePacker or Aseprite (JSON, hash or array format) becomes an `Atlas`: one texture, many named frames, one draw call.
+
+```ts
+import { Atlas, SpriteBatch, parseAtlasJson } from '@portojs/render';
+
+const atlas = new Atlas(texture, parseAtlasJson(json));
+atlas.draw(batch, 'hero_idle', { x: 100, y: 50, scale: 2 });
+```
+
+Trimmed frames are drawn so the visible part stays where it was in the source image, and the pivot refers to the untrimmed image. Rotated frames are not supported: turn rotation off in the packer.
+
+### Animation
+
+`Animator` plays clips and tells which frame to show; it does not draw. Aseprite tags become clips with their own durations and direction.
+
+```ts
+import { Animator, clipsFromAtlas } from '@portojs/render';
+
+const animator = new Animator(clipsFromAtlas(atlas), {
+  onEvent: (event) => sound.play(event),
+});
+animator.addTransition({ from: 'idle', to: 'run', when: () => player.moving });
+animator.play('idle');
+
+// every frame, with the delta in seconds
+animator.update(dt);
+atlas.draw(batch, animator.frame, { x, y });
+```
+
+A clip loops, plays once (`onComplete`) or ping-pongs, and can fire named events on chosen frames. `animator.speed` scales playback.
+
+### Sorting layers
+
+Layers are numbers; `SortingLayers` gives them names and an order inside each layer:
+
+```ts
+const layers = new SortingLayers(['background', 'world', 'effects', 'ui']);
+batch.add(texture, { ...draw, layer: layers.key('world', SortingLayers.ySort(y, 4)) });
+```
+
+Sprites of one layer are grouped by texture, so an `order` inside a layer is honoured between layers of the key, not between textures of the same key. Give two sprites different keys when one must be in front of the other.
+
+### Resizing and scaling
+
+`computeViewport` turns the size of the space available into a canvas size, a position, a drawing-buffer size and camera settings for six modes: `fit`, `fill`, `stretch`, `fixedWidth`, `fixedHeight` and `pixelPerfect`.
+
+```ts
+const layout = computeViewport({
+  mode: 'fit',
+  designWidth: 320,
+  designHeight: 180,
+  containerWidth: container.clientWidth,
+  containerHeight: container.clientHeight,
+  pixelRatio: window.devicePixelRatio,
+});
+renderer.resize(layout.pixelWidth, layout.pixelHeight);
+applyViewport(camera, layout);
+
+const point = containerToViewport(layout, event.offsetX, event.offsetY);
+const world = camera.screenToWorld(point.x, point.y);
+```
+
+Call it again from a `ResizeObserver`. It is a pure function, so it is easy to test.
