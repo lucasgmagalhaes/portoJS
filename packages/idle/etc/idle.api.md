@@ -148,6 +148,16 @@ export interface ChartSeries {
 }
 
 // @public
+export interface CheckIn {
+    readonly best: number;
+    readonly missed: number;
+    // (undocumented)
+    readonly status: StreakStatus;
+    // (undocumented)
+    readonly streak: number;
+}
+
+// @public
 export function compileCost(curve: CostCurve): CostFunctions;
 
 // @public
@@ -198,6 +208,86 @@ export interface CustomCost {
 }
 
 // @public
+export interface DailyQuestDefinition {
+    readonly description?: string;
+    readonly id: string;
+    readonly reward?: (game: Game) => void;
+    readonly target: number;
+    readonly weight?: number;
+}
+
+// @public
+export class DailyQuests extends Component {
+    constructor(gameObject: GameObject, options: DailyQuestsOptions);
+    add(id: string, amount?: number): boolean;
+    claim(id: string): boolean;
+    claimAll(): number;
+    readonly claimed: GameEvent<DailyQuestState>;
+    readonly completed: GameEvent<DailyQuestState>;
+    get day(): number;
+    // (undocumented)
+    fixedUpdate(deltaTime: number): void;
+    get msUntilReset(): number;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    get quests(): readonly DailyQuestState[];
+    refresh(): boolean;
+    readonly refreshed: GameEvent<readonly DailyQuestState[]>;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface DailyQuestsOptions {
+    readonly count?: number;
+    readonly pool: readonly DailyQuestDefinition[];
+    readonly seed?: number;
+    readonly utcOffsetMinutes?: number;
+}
+
+// @public
+export interface DailyQuestState {
+    readonly claimed: boolean;
+    readonly complete: boolean;
+    // (undocumented)
+    readonly definition: DailyQuestDefinition;
+    // (undocumented)
+    readonly progress: number;
+}
+
+// @public
+export class DailyStreak extends Component {
+    constructor(gameObject: GameObject, options?: DailyStreakOptions);
+    get best(): number;
+    get canClaim(): boolean;
+    readonly checkedIn: GameEvent<CheckIn>;
+    get checkedInToday(): boolean;
+    checkIn(): CheckIn;
+    claim(): boolean;
+    readonly claimed: GameEvent<number>;
+    get msUntilNextDay(): number;
+    // (undocumented)
+    onLoad(data: JsonValue | undefined): void;
+    // (undocumented)
+    onSave(): JsonValue;
+    // (undocumented)
+    start(): void;
+    get streak(): number;
+    // (undocumented)
+    static typeId: string;
+}
+
+// @public
+export interface DailyStreakOptions {
+    readonly autoCheckIn?: boolean;
+    readonly graceDays?: number;
+    readonly reward?: (game: Game, streak: number) => void;
+    readonly utcOffsetMinutes?: number;
+}
+
+// @public
 export class DataStore extends Component {
     readonly changed: GameEvent<{
         readonly key: string;
@@ -218,6 +308,9 @@ export class DataStore extends Component {
     // (undocumented)
     static typeId: string;
 }
+
+// @public
+export function dayNumber(ms: number, utcOffsetMinutes?: number): number;
 
 // @public
 export class Economy extends Component {
@@ -392,6 +485,9 @@ export interface ModifierContext {
 
 // @public
 export type ModifierValue = BigNumLike | ((context: ModifierContext) => BigNumLike);
+
+// @public
+export function nextDayStart(ms: number, utcOffsetMinutes?: number): number;
 
 // @public
 export interface NodeBought {
@@ -642,6 +738,9 @@ export interface SteppedCost {
     // (undocumented)
     readonly type: 'stepped';
 }
+
+// @public
+export type StreakStatus = 'started' | 'continued' | 'reset' | 'already';
 
 // @public
 export type TargetedMultiplier = EffectTarget & {
