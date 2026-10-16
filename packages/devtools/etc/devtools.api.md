@@ -5,6 +5,7 @@
 ```ts
 
 import { inspectGame } from '@portojs/tools';
+import type { Profiler } from '@portojs/tools';
 import type { ReactElement } from 'react';
 
 // @public
@@ -16,6 +17,21 @@ export interface DevtoolsProps {
     // Warning: (ae-forgotten-export) The symbol "PanelGame" needs to be exported by the entry point index.d.ts
     readonly game: PanelGame;
     readonly refreshEveryTicks?: number;
+}
+
+// @public
+export function ProfilerPanel(input: ProfilerPanelProps): ReactElement;
+
+// @public
+export interface ProfilerPanelProps {
+    // (undocumented)
+    readonly className?: string;
+    // Warning: (ae-forgotten-export) The symbol "TickSource" needs to be exported by the entry point index.d.ts
+    readonly game: TickSource;
+    readonly graphHeight?: number;
+    readonly profiler: Profiler;
+    readonly refreshEveryTicks?: number;
+    readonly rows?: number;
 }
 
 // (No @packageDocumentation comment for this package)
