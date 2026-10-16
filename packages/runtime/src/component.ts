@@ -115,6 +115,20 @@ export abstract class Component {
   fixedUpdate?(deltaTime: number): void;
 
   /**
+   * Called once per frame while active, after the fixed steps of that frame, with the real time
+   * since the previous frame in seconds, scaled by `game.timeScale` (so `0` while paused). Use it
+   * for visuals and input that should not wait for the next fixed step; read `game.alpha` to
+   * interpolate between fixed steps. Runs in `executionOrder`, before every `lateUpdate`.
+   */
+  update?(deltaTime: number): void;
+
+  /**
+   * Called once per frame while active, after every `update`. Good for cameras that follow
+   * objects that moved in `update`.
+   */
+  lateUpdate?(deltaTime: number): void;
+
+  /**
    * Called when the component stops being active.
    */
   onDisable?(): void;
