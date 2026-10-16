@@ -108,6 +108,18 @@ export interface BatchResult {
 }
 
 // @public
+export class BitmapFont {
+    constructor(texture: Texture, data: FontData);
+    // (undocumented)
+    readonly data: FontData;
+    draw(batch: SpriteBatch, text: string, options: DrawTextOptions): TextLayout;
+    drawLayout(batch: SpriteBatch, layout: TextLayout, options: DrawTextOptions): void;
+    layout(text: string, options?: TextLayoutOptions): TextLayout;
+    // (undocumented)
+    readonly texture: Texture;
+}
+
+// @public
 export class Camera2D {
     constructor(width?: number, height?: number);
     // (undocumented)
@@ -123,6 +135,26 @@ export class Camera2D {
     y: number;
     zoom: number;
 }
+
+// @public
+class CanvasText_2<C extends TextCanvas & TextureSource> {
+    constructor(host: TextureHost, createCanvas: (width: number, height: number) => C);
+    dispose(): void;
+    draw(batch: SpriteBatch, options: {
+        readonly x: number;
+        readonly y: number;
+        readonly anchorX?: number;
+        readonly anchorY?: number;
+        readonly scale?: number;
+        readonly color?: number;
+        readonly layer?: number;
+    }): void;
+    get height(): number;
+    set(text: string, style: TextStyle): void;
+    get texture(): Texture | undefined;
+    get width(): number;
+}
+export { CanvasText_2 as CanvasText }
 
 // @public
 export type ClearColor = readonly [number, number, number, number];
@@ -162,6 +194,30 @@ export interface DrawGroup {
 }
 
 // @public
+export interface DrawTextOptions extends TextLayoutOptions {
+    readonly anchorX?: number;
+    // (undocumented)
+    readonly anchorY?: number;
+    readonly color?: number;
+    readonly layer?: number;
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
+}
+
+// @public
+export interface FontData {
+    // (undocumented)
+    readonly glyphs: ReadonlyMap<number, GlyphInfo>;
+    readonly kerning: ReadonlyMap<number, number>;
+    readonly lineHeight: number;
+    readonly size: number;
+    // (undocumented)
+    readonly textureHeight: number;
+    readonly textureWidth: number;
+}
+
+// @public
 export interface FrameUv {
     // (undocumented)
     readonly u: number;
@@ -174,10 +230,29 @@ export interface FrameUv {
 }
 
 // @public
+export interface GlyphInfo {
+    // (undocumented)
+    readonly height: number;
+    readonly id: number;
+    // (undocumented)
+    readonly width: number;
+    readonly x: number;
+    readonly xAdvance: number;
+    readonly xOffset: number;
+    // (undocumented)
+    readonly y: number;
+    // (undocumented)
+    readonly yOffset: number;
+}
+
+// @public
 export const INSTANCE_BYTES = 48;
 
 // @public
 export const INSTANCE_FLOATS = 12;
+
+// @public
+export function layoutText(text: string, font: FontData, options?: TextLayoutOptions): TextLayout;
 
 // @public
 export type LoopMode = 'once' | 'loop' | 'pingpong';
@@ -186,12 +261,41 @@ export type LoopMode = 'once' | 'loop' | 'pingpong';
 export function parseAtlasJson(json: unknown): AtlasData;
 
 // @public
+export function parseBmfont(text: string): FontData;
+
+// @public
+export interface PlacedGlyph {
+    // (undocumented)
+    readonly glyph: GlyphInfo;
+    // (undocumented)
+    readonly height: number;
+    readonly width: number;
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
+}
+
+// @public
 export interface Point {
     // (undocumented)
     readonly x: number;
     // (undocumented)
     readonly y: number;
 }
+
+// @public
+export interface RasterizedText<C> {
+    // (undocumented)
+    readonly canvas: C;
+    // (undocumented)
+    readonly height: number;
+    // (undocumented)
+    readonly lineCount: number;
+    readonly width: number;
+}
+
+// @public
+export function rasterizeText<C extends TextCanvas>(text: string, style: TextStyle, createCanvas: (width: number, height: number) => C): RasterizedText<C>;
 
 // @public
 export interface Renderer {
@@ -288,10 +392,92 @@ export interface SpriteDraw {
 }
 
 // @public
+export type TextAlign = 'left' | 'center' | 'right';
+
+// @public
+export interface TextCanvas {
+    // (undocumented)
+    getContext(kind: '2d'): TextContext | null;
+    // (undocumented)
+    height: number;
+    // (undocumented)
+    width: number;
+}
+
+// @public
+export interface TextContext {
+    // (undocumented)
+    fillStyle: string | CanvasGradient | CanvasPattern;
+    // (undocumented)
+    fillText(text: string, x: number, y: number): void;
+    // (undocumented)
+    font: string;
+    // (undocumented)
+    lineJoin: CanvasLineJoin;
+    // (undocumented)
+    lineWidth: number;
+    // (undocumented)
+    measureText(text: string): {
+        readonly width: number;
+    };
+    // (undocumented)
+    scale(x: number, y: number): void;
+    // (undocumented)
+    strokeStyle: string | CanvasGradient | CanvasPattern;
+    // (undocumented)
+    strokeText(text: string, x: number, y: number): void;
+    // (undocumented)
+    textAlign: CanvasTextAlign;
+    // (undocumented)
+    textBaseline: CanvasTextBaseline;
+}
+
+// @public
+export interface TextLayout {
+    // (undocumented)
+    readonly glyphs: readonly PlacedGlyph[];
+    // (undocumented)
+    readonly height: number;
+    readonly lineCount: number;
+    readonly width: number;
+}
+
+// @public
+export interface TextLayoutOptions {
+    readonly align?: TextAlign;
+    readonly lineSpacing?: number;
+    readonly maxWidth?: number;
+    readonly size?: number;
+}
+
+// @public
+export interface TextStyle {
+    readonly align?: TextAlign;
+    readonly color?: string;
+    readonly font: string;
+    readonly lineHeight?: number;
+    readonly maxWidth?: number;
+    readonly padding?: number;
+    readonly resolution?: number;
+    readonly stroke?: {
+        readonly color: string;
+        readonly width: number;
+    };
+}
+
+// @public
 export interface Texture {
     readonly height: number;
     readonly id: number;
     readonly width: number;
+}
+
+// @public
+export interface TextureHost {
+    // (undocumented)
+    createTexture(source: TextureSource): Texture;
+    // (undocumented)
+    deleteTexture(texture: Texture): void;
 }
 
 // @public
