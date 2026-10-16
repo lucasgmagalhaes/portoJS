@@ -1,7 +1,7 @@
 import type { BatchResult, Texture } from './batch.ts';
 import type { Camera2D } from './camera.ts';
 import { INSTANCE_BYTES, MATRIX_BYTES } from './renderer.ts';
-import type { ClearColor, Renderer, TextureSource } from './renderer.ts';
+import type { ClearColor, RenderOptions, Renderer, TextureSource } from './renderer.ts';
 
 const SHADER = `
 struct Uniforms { viewProj : mat4x4<f32> };
@@ -151,7 +151,7 @@ export class WebGPURenderer implements Renderer {
     this.canvas.height = height;
   }
 
-  render(camera: Camera2D, batch: BatchResult): void {
+  render(camera: Camera2D, batch: BatchResult, options: RenderOptions = {}): void {
     const device = this.device;
     if (batch.count > this.capacity) {
       this.instances.destroy();
@@ -167,12 +167,17 @@ export class WebGPURenderer implements Renderer {
         {
           view: this.context.getCurrentTexture().createView(),
           clearValue: { r, g, b, a },
-          loadOp: 'clear',
+          loadOp: options.clear === false ? 'load' : 'clear',
           storeOp: 'store',
         },
       ],
     });
     if (batch.count > 0) {
+      const region = options.viewport;
+      if (region !== undefined) {
+        pass.setViewport(region.x, region.y, region.width, region.height, 0, 1);
+        pass.setScissorRect(region.x, region.y, region.width, region.height);
+      }
       pass.setPipeline(this.pipeline);
       pass.setVertexBuffer(0, this.instances);
       for (const group of batch.groups) {

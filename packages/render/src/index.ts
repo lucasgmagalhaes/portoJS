@@ -12,6 +12,8 @@ export { createRenderer } from './create-renderer.ts';
 export { INSTANCE_BYTES } from './renderer.ts';
 export type {
   ClearColor,
+  RenderOptions,
+  RenderViewport,
   Renderer,
   RendererBackend,
   RendererOptions,
