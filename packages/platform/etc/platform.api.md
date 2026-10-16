@@ -7,13 +7,112 @@
 import type { Game } from '@portojs/runtime';
 
 // @public
+export class AdGate {
+    constructor(ads: Ads, options?: AdGateOptions);
+    breakpoint(): Promise<AdResult>;
+    rewarded(): Promise<boolean>;
+}
+
+// @public
+export interface AdGateOptions {
+    readonly analytics?: Analytics;
+    readonly breakpointsBetween?: number;
+    readonly cooldownSeconds?: number;
+    readonly now?: () => number;
+}
+
+// @public
+export type AdResult = 'completed' | 'skipped' | 'unavailable' | 'error';
+
+// @public
+export interface Ads {
+    isAvailable(kind: 'interstitial' | 'rewarded'): boolean;
+    showInterstitial(): Promise<AdResult>;
+    showRewarded(): Promise<AdResult>;
+}
+
+// @public
+export interface Analytics {
+    flush?(): void | Promise<void>;
+    identify?(userId: string): void;
+    track(event: string, props?: EventProps): void;
+}
+
+// @public
 export type BackgroundPolicy = 'offline' | 'pause' | 'run';
 
 // @public
 export function bindPlatform(game: Game, platform: Platform, options?: SessionOptions): Promise<Session>;
 
 // @public
+export class BufferedAnalytics implements Analytics {
+    constructor(options?: BufferedAnalyticsOptions);
+    attach(target: Analytics): void;
+    get buffered(): number;
+    // (undocumented)
+    flush(): void | Promise<void>;
+    // (undocumented)
+    identify(userId: string): void;
+    // (undocumented)
+    track(event: string, props?: EventProps): void;
+}
+
+// @public
+export interface BufferedAnalyticsOptions {
+    readonly capacity?: number;
+}
+
+// @public
+export function consoleAnalytics(log: (message: string, props?: EventProps) => void): Analytics;
+
+// @public
+export type EventProps = Readonly<Record<string, string | number | boolean | null>>;
+
+// @public
 export type Haptic = 'light' | 'medium' | 'heavy' | 'success' | 'error';
+
+// @public
+export class MemoryAnalytics implements Analytics {
+    // (undocumented)
+    readonly events: {
+        readonly event: string;
+        readonly props: EventProps | undefined;
+    }[];
+    // (undocumented)
+    flush(): void;
+    // (undocumented)
+    flushes: number;
+    // (undocumented)
+    identify(userId: string): void;
+    // (undocumented)
+    track(event: string, props?: EventProps): void;
+    // (undocumented)
+    userId: string | undefined;
+}
+
+// @public
+export class MemoryPurchases implements Purchases {
+    constructor(catalogue: readonly Product[]);
+    readonly outcomes: ('purchased' | 'cancelled' | 'error')[];
+    // (undocumented)
+    products(): Promise<readonly Product[]>;
+    // (undocumented)
+    purchase(productId: string): Promise<PurchaseResult>;
+    // (undocumented)
+    restore(): Promise<readonly string[]>;
+}
+
+// @public
+export const noAds: Ads;
+
+// @public
+export const noAnalytics: Analytics;
+
+// @public
+export const noPurchases: Purchases;
+
+// @public
+export const noServices: Services;
 
 // @public
 export interface PageLifecycleTarget {
@@ -48,6 +147,47 @@ export interface PlatformUser {
 }
 
 // @public
+export interface Product {
+    // (undocumented)
+    readonly id: string;
+    readonly kind: 'consumable' | 'permanent';
+    readonly price: string;
+    // (undocumented)
+    readonly title: string;
+}
+
+// @public
+export interface PurchaseResult {
+    // (undocumented)
+    readonly productId: string;
+    readonly receipt?: string;
+    // (undocumented)
+    readonly status: PurchaseStatus;
+}
+
+// @public
+export interface Purchases {
+    // (undocumented)
+    products(): Promise<readonly Product[]>;
+    // (undocumented)
+    purchase(productId: string): Promise<PurchaseResult>;
+    restore(): Promise<readonly string[]>;
+}
+
+// @public
+export type PurchaseStatus = 'purchased' | 'cancelled' | 'already-owned' | 'unavailable' | 'error';
+
+// @public
+export interface Services {
+    // (undocumented)
+    readonly ads: Ads;
+    // (undocumented)
+    readonly analytics: Analytics;
+    // (undocumented)
+    readonly purchases: Purchases;
+}
+
+// @public
 export interface Session {
     dispose(): void;
     save(): Promise<void>;
@@ -60,6 +200,22 @@ export interface SessionOptions {
     readonly compress?: boolean;
     readonly key?: string;
     readonly onError?: (error: unknown) => void;
+}
+
+// @public
+export class SimulatedAds implements Ads {
+    available: boolean;
+    // (undocumented)
+    interstitials: number;
+    // (undocumented)
+    isAvailable(): boolean;
+    readonly results: AdResult[];
+    // (undocumented)
+    rewardeds: number;
+    // (undocumented)
+    showInterstitial(): Promise<AdResult>;
+    // (undocumented)
+    showRewarded(): Promise<AdResult>;
 }
 
 // @public
@@ -145,6 +301,13 @@ export function tiktokPlatform(api: TikTokApi, options?: TikTokPlatformOptions):
 export interface TikTokPlatformOptions {
     readonly user?: PlatformUser;
 }
+
+// @public
+export function typedAnalytics<E extends {
+    [K in keyof E]: EventProps;
+}>(analytics: Analytics): {
+    track<K extends keyof E & string>(event: K, props: E[K]): void;
+};
 
 // @public
 export type Unsubscribe = () => void;
