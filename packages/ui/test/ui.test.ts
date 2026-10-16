@@ -1,5 +1,15 @@
 import { describe, expect, it, vi } from 'vitest';
-import { Button, Label, Panel, ProgressBar, ScrollView, Slider, Toggle, Ui } from '../src/index.ts';
+import {
+  Button,
+  Label,
+  Panel,
+  ProgressBar,
+  ScrollView,
+  Slider,
+  Toggle,
+  Ui,
+  navActionFromKey,
+} from '../src/index.ts';
 
 function setup(): { ui: Ui; a: Button; b: Button; c: Button } {
   const ui = new Ui({ width: 200, height: 200 });
@@ -239,5 +249,18 @@ describe('tree', () => {
     ui.root.add(a, b);
     expect(a.children).toHaveLength(0);
     expect(ui.root.find('title')).toBe(label);
+  });
+});
+
+describe('navActionFromKey', () => {
+  it('maps the keys a menu uses and ignores the rest', () => {
+    expect(navActionFromKey('ArrowUp')).toBe('up');
+    expect(navActionFromKey('ArrowLeft')).toBe('left');
+    expect(navActionFromKey('Tab')).toBe('next');
+    expect(navActionFromKey('Tab', true)).toBe('previous');
+    expect(navActionFromKey('Enter')).toBe('confirm');
+    expect(navActionFromKey(' ')).toBe('confirm');
+    expect(navActionFromKey('Escape')).toBe('cancel');
+    expect(navActionFromKey('a')).toBeUndefined();
   });
 });
