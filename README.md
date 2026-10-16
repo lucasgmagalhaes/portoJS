@@ -126,8 +126,7 @@ PortoJS is a monorepo managed with [Lerna](https://lerna.js.org). Install the `p
 | `@portojs/tools`    | Balancing simulator and game inspector                                 |
 | `@portojs/devtools` | React panel to inspect, edit and fast-forward a game                   |
 
-`@portojs/tween`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
-`@portojs/math`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
+`@portojs/tween`, `@portojs/math`, `@portojs/ecs`, `@portojs/render`, `@portojs/input`, `@portojs/audio`, `@portojs/physics`, `@portojs/tools`, `@portojs/devtools`, `@portojs/worker`, `@portojs/platform`, `@portojs/svelte` and `@portojs/solid` are not part of the `portojs` umbrella: add them only if you need them.
 
 ## Performance
 
