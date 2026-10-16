@@ -44,3 +44,5 @@ export { Pool } from './pool.ts';
 export type { PoolOptions } from './pool.ts';
 export { SaveSlots, SlotEmptyError } from './save-slots.ts';
 export type { SaveSlotsOptions, SlotInfo } from './save-slots.ts';
+export { CloudSync } from './cloud-sync.ts';
+export type { CloudSyncOptions, ConflictPolicy, SyncResult } from './cloud-sync.ts';
