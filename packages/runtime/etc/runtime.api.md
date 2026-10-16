@@ -65,6 +65,7 @@ export abstract class Component {
     get isActive(): boolean;
     // @internal
     isDestroyed: boolean;
+    lateUpdate?(deltaTime: number): void;
     onDestroy?(): void;
     onDisable?(): void;
     onEnable?(): void;
@@ -77,6 +78,7 @@ export abstract class Component {
     startCoroutine(routine: Iterator<CoroutineYield>): Coroutine;
     stopAllCoroutines(): void;
     static typeId: string | undefined;
+    update?(deltaTime: number): void;
     // @internal
     wasActive: boolean;
 }
@@ -122,6 +124,7 @@ export interface CreateObjectOptions {
 export class Game {
     constructor(options?: GameOptions);
     advance(ms: number): number;
+    get alpha(): number;
     readonly clock: Clock;
     createObject(name: string, options?: CreateObjectOptions): GameObject;
     dispose(): void;
@@ -444,12 +447,14 @@ export class Time {
     // (undocumented)
     readonly fixedDeltaTime: number;
     get fixedTime(): number;
+    frameDeltaTime: number;
     get scaledTime(): number;
     get tickCount(): number;
     get time(): number;
     get timeScale(): number;
     set timeScale(value: number);
     get unscaledDeltaTime(): number;
+    unscaledFrameDeltaTime: number;
 }
 
 // @public

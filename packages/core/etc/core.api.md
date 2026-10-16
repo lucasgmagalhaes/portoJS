@@ -95,6 +95,7 @@ export class Engine {
 export interface EngineOptions {
     readonly clock?: Clock;
     readonly maxCatchUpTicks?: number;
+    readonly onFrame?: (deltaMs: number, steps: number) => void;
     readonly onOverflow?: (droppedMs: number) => void;
     readonly onStep: (dtMs: number) => void;
     readonly pollMs?: number;
