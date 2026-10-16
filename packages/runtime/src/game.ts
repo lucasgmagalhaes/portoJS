@@ -550,6 +550,39 @@ export class Game {
   }
 
   /**
+   * Every live object whose {@link GameObject.tag} is `tag`, in creation order.
+   */
+  findObjectsWithTag(tag: string): GameObject[] {
+    const found: GameObject[] = [];
+    for (const object of this.objectList) {
+      if (object.tag === tag) found.push(object);
+    }
+    return found;
+  }
+
+  /**
+   * The first live object with the tag, or `undefined`.
+   */
+  findWithTag(tag: string): GameObject | undefined {
+    return this.objectList.find(this.hasTag(tag));
+  }
+
+  /**
+   * Every live object on {@link GameObject.layer} `layer`, in creation order.
+   */
+  findObjectsOnLayer(layer: number): GameObject[] {
+    const found: GameObject[] = [];
+    for (const object of this.objectList) {
+      if (object.layer === layer) found.push(object);
+    }
+    return found;
+  }
+
+  private hasTag(tag: string): (object: GameObject) => boolean {
+    return (object) => object.tag === tag;
+  }
+
+  /**
    * Finds every component that is an instance of `type`, in any object. The result is cached
    * until objects or components are added or removed, so calling it every step is cheap; do not
    * modify the returned array.

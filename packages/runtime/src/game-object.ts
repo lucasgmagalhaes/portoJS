@@ -12,6 +12,13 @@ export class GameObject {
   private readonly childObjects: GameObject[] = [];
   private activeFlag: boolean;
   private destroyedFlag = false;
+  private layerValue = 0;
+
+  /**
+   * A free-form label for finding objects with {@link Game.findObjectsWithTag}, like Unity's tag.
+   * Empty by default. Tags are not saved.
+   */
+  tag = '';
 
   /**
    * @internal Use `game.createObject`.
@@ -67,6 +74,23 @@ export class GameObject {
   }
 
   /**
+   * A number from `0` to `31` for grouping objects, like Unity's layer. `0` by default. Find
+   * objects with {@link Game.findObjectsOnLayer}. Layers are not saved.
+   *
+   * @throws {RangeError} when set to anything but an integer from `0` to `31`.
+   */
+  get layer(): number {
+    return this.layerValue;
+  }
+
+  set layer(value: number) {
+    if (!Number.isInteger(value) || value < 0 || value > 31) {
+      throw new RangeError('GameObject.layer must be an integer from 0 to 31');
+    }
+    this.layerValue = value;
+  }
+
+  /**
    * Switches this object (and so its children) on or off.
    */
   setActive(active: boolean): void {
@@ -111,6 +135,28 @@ export class GameObject {
       if (component instanceof type) found.push(component);
     }
     return found;
+  }
+
+  /**
+   * Finds every component of `type` on this object's descendants, depth first, and on the object
+   * itself when `includeSelf` is `true` (the default).
+   */
+  getComponentsInChildren<C extends Component>(type: ComponentType<C>, includeSelf = true): C[] {
+    const found: C[] = includeSelf ? this.getComponents(type) : [];
+    for (const child of this.childObjects) found.push(...child.getComponentsInChildren(type));
+    return found;
+  }
+
+  /**
+   * Finds the first component of `type` on this object (when `includeSelf` is `true`, the
+   * default) or its closest ancestor that has one.
+   */
+  getComponentInParent<C extends Component>(
+    type: ComponentType<C>,
+    includeSelf = true,
+  ): C | undefined {
+    const own = includeSelf ? this.getComponent(type) : undefined;
+    return own ?? this.parent?.getComponentInParent(type);
   }
 
   /**
