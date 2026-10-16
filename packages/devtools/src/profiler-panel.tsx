@@ -54,7 +54,7 @@ function graphPoints(frames: readonly ProfileFrame[], height: number): ReactElem
 }
 
 /**
- * A React panel for a {@link Profiler}: the components that cost the most time per method, and
+ * A React panel for a `Profiler` from `@portojs/tools`: the components that cost the most time per method, and
  * a frame graph of the last steps. Mount it only in development builds.
  *
  * @example
