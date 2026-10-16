@@ -80,6 +80,7 @@ const PACKAGES: readonly Row[] = [
     'Web Audio mixer with buses and playback control.',
     '/input-and-audio',
   ],
+  ['@portojs/tween', 'package', '', 'Tweens, easing and timelines driven by game time.', '/tween'],
   [
     '@portojs/physics',
     'package',
@@ -204,6 +205,13 @@ const CODE: readonly Row[] = [
     'audio',
     'Owns an AudioEngine and suspends it with the game.',
     '/input-and-audio',
+  ],
+  [
+    'TweenSystem',
+    'component',
+    'tween',
+    'Advances tweens and timelines in game time; they follow pause and timeScale.',
+    '/tween',
   ],
   [
     'PhysicsWorld',

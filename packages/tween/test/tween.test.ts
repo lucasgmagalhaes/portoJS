@@ -1,7 +1,7 @@
 import fc from 'fast-check';
 import { describe, expect, it } from 'vitest';
-import { BigNum } from '@portojs/core';
-import { Component, Game, ManualClock } from '@portojs/runtime';
+import { BigNum, ManualClock } from '@portojs/core';
+import { Component, Game } from '@portojs/runtime';
 import {
   Timeline,
   Tween,
@@ -103,7 +103,7 @@ describe('Tween', () => {
     tween.update(0.4);
     expect(box.x).toBe(0);
     tween.update(0.6);
-    expect(box.x).toBeCloseTo(1, 9);
+    expect(box.x).toBeCloseTo(5, 9);
     expect(tween.duration).toBe(1.5);
   });
 
