@@ -28,3 +28,12 @@ export type { AnimationClip, AnimationTransition, AnimatorOptions, LoopMode } fr
 export { SortingLayers } from './sorting.ts';
 export { applyViewport, computeViewport, containerToViewport } from './viewport.ts';
 export type { ScaleMode, ViewportInput, ViewportLayout } from './viewport.ts';
+export { layoutText } from './text-layout.ts';
+export type {
+  FontData,
+  GlyphInfo,
+  PlacedGlyph,
+  TextAlign,
+  TextLayout,
+  TextLayoutOptions,
+} from './text-layout.ts';
