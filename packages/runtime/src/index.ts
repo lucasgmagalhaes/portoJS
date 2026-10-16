@@ -40,3 +40,5 @@ export type {
   SceneTransition,
 } from './scene-manager.ts';
 export { Timer } from './timers.ts';
+export { Pool } from './pool.ts';
+export type { PoolOptions } from './pool.ts';
