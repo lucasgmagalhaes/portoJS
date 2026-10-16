@@ -61,3 +61,5 @@ export { costChartSvg, costTable } from './cost-chart.ts';
 export type { ChartSeries, CostChartOptions, CostRow, CostTableOptions } from './cost-chart.ts';
 export { LiveEvent } from './live-event.ts';
 export type { EventWindow, LiveEventOptions } from './live-event.ts';
+export { DailyStreak, dayNumber, nextDayStart } from './daily-streak.ts';
+export type { CheckIn, DailyStreakOptions, StreakStatus } from './daily-streak.ts';
