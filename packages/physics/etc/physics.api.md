@@ -10,6 +10,14 @@ import type { GameObject } from '@portojs/runtime';
 import type * as RapierNamespace from '@dimforge/rapier2d-compat';
 
 // @public
+export interface Anchor {
+    // (undocumented)
+    readonly x: number;
+    // (undocumented)
+    readonly y: number;
+}
+
+// @public
 export type BodyShape = {
     kind: 'box';
     width: number;
@@ -17,6 +25,16 @@ export type BodyShape = {
 } | {
     kind: 'circle';
     radius: number;
+} | {
+    kind: 'capsule';
+    length: number;
+    radius: number;
+} | {
+    kind: 'polygon';
+    points: readonly {
+        x: number;
+        y: number;
+    }[];
 };
 
 // @public
@@ -29,6 +47,46 @@ export interface CollisionEvent {
 }
 
 // @public
+export class Joint {
+    // @internal
+    constructor(bodyA: RigidBody2D, bodyB: RigidBody2D, world: PhysicsWorld, handle: number);
+    // (undocumented)
+    readonly bodyA: RigidBody2D;
+    // (undocumented)
+    readonly bodyB: RigidBody2D;
+    remove(): void;
+    get removed(): boolean;
+}
+
+// @public
+export interface JointOptions {
+    readonly anchorA?: Anchor;
+    readonly anchorB?: Anchor;
+    readonly worldAnchor?: Anchor;
+}
+
+// @public
+export type JointSpec = {
+    readonly kind: 'revolute';
+} | {
+    readonly kind: 'rope';
+    readonly length: number;
+} | {
+    readonly kind: 'spring';
+    readonly restLength: number;
+    readonly stiffness: number;
+    readonly damping?: number;
+} | {
+    readonly kind: 'prismatic';
+    readonly axis: {
+        readonly x: number;
+        readonly y: number;
+    };
+} | {
+    readonly kind: 'fixed';
+};
+
+// @public
 export function loadRapier(): Promise<Rapier>;
 
 // @public
@@ -37,10 +95,12 @@ export class PhysicsWorld extends Component {
     get bodyCount(): number;
     readonly collisionEnded: GameEvent<CollisionEvent>;
     readonly collisionStarted: GameEvent<CollisionEvent>;
+    createJoint(bodyA: RigidBody2D, bodyB: RigidBody2D, spec: JointSpec, options?: JointOptions): Joint;
     // (undocumented)
     static executionOrder: number;
     fixedUpdate(deltaTime: number): void;
     groupsFor(layer: string | undefined, collidesWith: readonly string[] | undefined): number;
+    hasJoint(handle: number): boolean;
     // (undocumented)
     onDestroy(): void;
     overlapBox(x: number, y: number, width: number, height: number, rotation?: number, options?: QueryOptions): RigidBody2D[];
@@ -55,6 +115,7 @@ export class PhysicsWorld extends Component {
         y: number;
     }, maxDistance: number, options?: QueryOptions): RayHit | undefined;
     register(colliderHandle: number, body: RigidBody2D): void;
+    removeJoint(handle: number): void;
     // (undocumented)
     static typeId: string;
     unregister(colliderHandle: number): void;
