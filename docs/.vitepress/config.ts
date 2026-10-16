@@ -37,6 +37,7 @@ export default defineConfig({
           { text: 'Tweens and easing', link: '/tween' },
           { text: 'Math and random numbers', link: '/math' },
           { text: 'Translations', link: '/i18n' },
+          { text: 'Tilemaps', link: '/tilemap' },
           { text: 'Physics', link: '/physics' },
           { text: 'Web Worker', link: '/worker' },
           { text: 'Platforms', link: '/platforms' },
@@ -110,6 +111,9 @@ export default defineConfig({
         ),
         '@portojs/i18n': fileURLToPath(
           new URL('../../packages/i18n/src/index.ts', import.meta.url),
+        ),
+        '@portojs/tilemap': fileURLToPath(
+          new URL('../../packages/tilemap/src/index.ts', import.meta.url),
         ),
         '@portojs/physics': fileURLToPath(
           new URL('../../packages/physics/src/index.ts', import.meta.url),
