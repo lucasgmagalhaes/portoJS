@@ -160,3 +160,39 @@ const world = camera.screenToWorld(point.x, point.y);
 ```
 
 Call it again from a `ResizeObserver`. It is a pure function, so it is easy to test.
+
+## Text
+
+Two ways to draw text, both into the same `SpriteBatch` as everything else.
+
+### Bitmap fonts
+
+A bitmap font is a texture of glyphs and a metrics file. `parseBmfont` reads the text format of AngelCode BMFont (also written by Hiero, ShoeBox and msdf-bmfont); only fonts with one texture page are supported.
+
+```ts
+import { BitmapFont, parseBmfont } from '@portojs/render';
+
+const font = new BitmapFont(texture, parseBmfont(fntText));
+font.draw(batch, 'Score: 120', { x: 10, y: 10, size: 24, color: 0xffd800ff });
+```
+
+`draw` accepts `size`, `maxWidth` (word wrapping, over-long words are broken), `align` (`left`, `center`, `right`), `lineSpacing`, `anchorX`/`anchorY` (`0.5` centres the block on `x`, `y`), `color` and `layer`. Kerning is applied, and a character the font lacks is drawn as `?` when the font has one. For text that does not change every frame, call `font.layout(text, options)` once and `font.drawLayout(batch, layout, options)` each frame; the layout also gives you the measured `width` and `height`.
+
+### Canvas text
+
+`CanvasText` draws with the browser's fonts on a canvas and uploads the result as a texture. It re-rasterises only when the text or style changes, and frees the old texture when it does.
+
+```ts
+import { CanvasText } from '@portojs/render';
+
+const label = new CanvasText(renderer, (w, h) => new OffscreenCanvas(w, h));
+label.set('Level 3', {
+  font: 'bold 32px Arial',
+  color: '#ffffff',
+  stroke: { color: '#000000', width: 4 },
+  resolution: window.devicePixelRatio,
+});
+label.draw(batch, { x: 400, y: 20, anchorX: 0.5 });
+```
+
+The font size must be in `px`. Use `rasterizeText` directly if you want the canvas without the cache. Both take the canvas as a function, so they work with `OffscreenCanvas` in a worker, a DOM canvas, or a fake in tests. Prefer bitmap fonts for text that changes often (a score counter), and canvas text for labels and for scripts a bitmap font does not cover.
