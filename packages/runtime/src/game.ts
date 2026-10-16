@@ -254,6 +254,8 @@ export class Game {
   private readonly byName = new Map<string, GameObject>();
   private readonly componentList: Component[] = [];
   private readonly updatable: Component[] = [];
+  private readonly frameUpdatable: Component[] = [];
+  private readonly lateUpdatable: Component[] = [];
   private pendingStart: Component[] = [];
   private coroutines: Coroutine[] = [];
   private readonly timers = new Timers();
@@ -282,6 +284,20 @@ export class Game {
     this.bus.emit('tick', { dtMs, tick: this.engine.stepCount });
   };
 
+  private readonly frame = (deltaMs: number): void => {
+    const unscaled = deltaMs / 1000;
+    const scaled = this.isPaused ? 0 : unscaled * this.time.timeScale;
+    this.time.unscaledFrameDeltaTime = unscaled;
+    this.time.frameDeltaTime = scaled;
+    this.startPending();
+    for (const component of [...this.frameUpdatable]) {
+      if (component.isActive && component.startCalled) component.update?.(scaled);
+    }
+    for (const component of [...this.lateUpdatable]) {
+      if (component.isActive && component.startCalled) component.lateUpdate?.(scaled);
+    }
+  };
+
   private readonly overflow = (droppedMs: number): void => {
     this.bus.emit('overflow', { droppedMs });
     if (this.offlineOptions.background !== false) {
@@ -308,6 +324,7 @@ export class Game {
       clock: this.clock,
       onStep: this.step,
       onOverflow: this.overflow,
+      onFrame: this.frame,
       ...(options.stepMs === undefined ? {} : { stepMs: options.stepMs }),
       ...(options.maxCatchUpTicks === undefined
         ? {}
@@ -351,6 +368,15 @@ export class Game {
 
   set timeScale(value: number) {
     this.time.timeScale = value;
+  }
+
+  /**
+   * How far the game is into the next fixed step, from `0` up to (but not including) `1`. With a
+   * 100 ms step, `0.5` means 50 ms have passed since the last step. Interpolate visuals with it:
+   * draw at `previous + (current - previous) * game.alpha`.
+   */
+  get alpha(): number {
+    return this.engine.pending / this.engine.stepMs;
   }
 
   /**
@@ -604,6 +630,8 @@ export class Game {
   registerComponent(component: Component): void {
     insertSorted(this.componentList, component);
     if (typeof component.fixedUpdate === 'function') insertSorted(this.updatable, component);
+    if (typeof component.update === 'function') insertSorted(this.frameUpdatable, component);
+    if (typeof component.lateUpdate === 'function') insertSorted(this.lateUpdatable, component);
     if (typeof component.start === 'function') this.pendingStart.push(component);
     else component.startCalled = true;
     this.structure += 1;
@@ -630,6 +658,8 @@ export class Game {
     component.onDestroy?.();
     removeFrom(this.componentList, component);
     removeFrom(this.updatable, component);
+    removeFrom(this.frameUpdatable, component);
+    removeFrom(this.lateUpdatable, component);
     removeFrom(this.pendingStart, component);
     this.structure += 1;
   }

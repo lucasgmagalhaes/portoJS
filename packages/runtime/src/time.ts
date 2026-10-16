@@ -73,6 +73,17 @@ export class Time {
   }
 
   /**
+   * Seconds of real time the last frame took, scaled by {@link Time.timeScale} and `0` while the
+   * game is paused. This is what `update` and `lateUpdate` receive.
+   */
+  frameDeltaTime = 0;
+
+  /**
+   * Seconds of real time the last frame took, ignoring {@link Time.timeScale} and pause.
+   */
+  unscaledFrameDeltaTime = 0;
+
+  /**
    * Records one more fixed step. Called by the game; not meant for user code.
    */
   advance(): void {
