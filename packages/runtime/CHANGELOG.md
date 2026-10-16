@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/runtime-v0.11.0...runtime-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **runtime:** add CloudSync to reconcile the local and cloud saves ([475433d](https://github.com/lucasgmagalhaes/portoJS/commit/475433d4d412737e7316f17ac52913e0c38e29c5))
+* **runtime:** add per-frame update/lateUpdate hooks and game.alpha ([7c1d832](https://github.com/lucasgmagalhaes/portoJS/commit/7c1d8325e4aadef05992da49defe4bfa9054cc2e))
+* **runtime:** add SaveSlots for several named save games in one storage ([6d8f143](https://github.com/lucasgmagalhaes/portoJS/commit/6d8f143b9232e43925b72e3f54a9680b1aa49f36))
+* **runtime:** add TabLock so only one tab plays a game at a time ([072f539](https://github.com/lucasgmagalhaes/portoJS/commit/072f539265790ee44a23fd9355919488b346ebd1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/runtime-v0.10.0...runtime-v0.11.0) (2026-10-16)
 
 

@@ -1,5 +1,31 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/portojs-v0.11.0...portojs-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **examples:** add the 2048 puzzle with undo, seeded randomness and saves, with tests ([d94ccf8](https://github.com/lucasgmagalhaes/portoJS/commit/d94ccf8b2b5ad860c4cc67a2c291ebf5dfd2c958))
+* **examples:** add the platformer on a Tiled map with coyote time and jump buffer, with tests ([c06c6cd](https://github.com/lucasgmagalhaes/portoJS/commit/c06c6cddaf4089c0235f80dfd4d603e7827d93f3))
+* **examples:** add the shooter simulation on the ECS, with tests ([d45ec0c](https://github.com/lucasgmagalhaes/portoJS/commit/d45ec0c0a1b7664bc6f19d13447339e69a9ce7bb))
+* **idle:** add DailyQuests, a few quests drawn each day from a pool ([d346396](https://github.com/lucasgmagalhaes/portoJS/commit/d346396625f7aee3ee7e4cc08320725b42155523))
+* **idle:** add DailyStreak for consecutive-day login streaks ([b5322bb](https://github.com/lucasgmagalhaes/portoJS/commit/b5322bb21bd6cb3daf00a328b8eefdeeb911f10a))
+* **runtime:** add CloudSync to reconcile the local and cloud saves ([475433d](https://github.com/lucasgmagalhaes/portoJS/commit/475433d4d412737e7316f17ac52913e0c38e29c5))
+* **runtime:** add per-frame update/lateUpdate hooks and game.alpha ([7c1d832](https://github.com/lucasgmagalhaes/portoJS/commit/7c1d8325e4aadef05992da49defe4bfa9054cc2e))
+* **runtime:** add SaveSlots for several named save games in one storage ([6d8f143](https://github.com/lucasgmagalhaes/portoJS/commit/6d8f143b9232e43925b72e3f54a9680b1aa49f36))
+* **runtime:** add TabLock so only one tab plays a game at a time ([072f539](https://github.com/lucasgmagalhaes/portoJS/commit/072f539265790ee44a23fd9355919488b346ebd1))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.12.0
+    * @portojs/runtime bumped to 0.12.0
+    * @portojs/idle bumped to 0.12.0
+    * @portojs/react bumped to 0.12.0
+    * @portojs/vue bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/portojs-v0.10.0...portojs-v0.11.0) (2026-10-16)
 
 

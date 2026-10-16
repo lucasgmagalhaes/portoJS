@@ -1,5 +1,21 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/worker-v0.11.0...worker-v0.12.0) (2026-10-16)
+
+
+### Chores
+
+* **worker:** Synchronize portojs versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.12.0
+  * devDependencies
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/worker-v0.10.0...worker-v0.11.0) (2026-10-16)
 
 

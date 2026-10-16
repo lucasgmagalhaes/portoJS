@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/core-v0.11.0...core-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **core:** add an onFrame hook to Engine ([d772439](https://github.com/lucasgmagalhaes/portoJS/commit/d772439a3e3ad54aee154f56b87d06b7bdc7fb3c))
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/core-v0.10.0...core-v0.11.0) (2026-10-16)
 
 

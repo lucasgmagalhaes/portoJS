@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/tools-v0.11.0...tools-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **tools:** add Profiler and reloadWithState for state-preserving hot reload ([3bd6c5a](https://github.com/lucasgmagalhaes/portoJS/commit/3bd6c5a60893cb7def3b76a38c77d351cf204eb6))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.12.0
+    * @portojs/runtime bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/tools-v0.10.0...tools-v0.11.0) (2026-10-16)
 
 

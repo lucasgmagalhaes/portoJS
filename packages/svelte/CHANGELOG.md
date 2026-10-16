@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/svelte-v0.11.0...svelte-v0.12.0) (2026-10-16)
+
+
+### Chores
+
+* **svelte:** Synchronize portojs versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/svelte-v0.10.0...svelte-v0.11.0) (2026-10-16)
 
 

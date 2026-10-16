@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/audio-v0.11.0...audio-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **audio:** add 2D positional audio with SpatialAudio and spatialize ([2fef2e5](https://github.com/lucasgmagalhaes/portoJS/commit/2fef2e59abc95d37175aacdfb3e1277befcbc6e8))
+* **audio:** add MusicPlayer with crossfade, loop points and playlists ([d0ae961](https://github.com/lucasgmagalhaes/portoJS/commit/d0ae961548af6195acdf1668351505a3589c6763))
+* **audio:** add mute, exportable volume settings and loadVolumes/saveVolumes ([c53b207](https://github.com/lucasgmagalhaes/portoJS/commit/c53b20745380facace9511806c2aa0f2c2cf25ee))
+* **audio:** add SoundBank with variation, voice limits and audio sprites ([f074feb](https://github.com/lucasgmagalhaes/portoJS/commit/f074feb603710b7cd54f74bcf9997ba36713d685))
+* **audio:** fade a playback, play a region of a sound and set loop points ([3c01465](https://github.com/lucasgmagalhaes/portoJS/commit/3c014659add04891f3c03c074f4614a761d6ff3b))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.12.0
+  * devDependencies
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/audio-v0.10.0...audio-v0.11.0) (2026-10-16)
 
 

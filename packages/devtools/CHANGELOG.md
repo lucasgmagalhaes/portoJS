@@ -1,5 +1,27 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/devtools-v0.11.0...devtools-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **devtools:** add ProfilerPanel with a cost table and frame graph ([c1cb4f6](https://github.com/lucasgmagalhaes/portoJS/commit/c1cb4f642ee99d50f348041be2b4708099ed55da))
+
+
+### Documentation
+
+* **devtools:** fix the Profiler link in the panel docs ([f3ee9fe](https://github.com/lucasgmagalhaes/portoJS/commit/f3ee9fef9943b8f62dac695a8a8f53c58202d80a))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/tools bumped to 0.12.0
+  * devDependencies
+    * @portojs/core bumped to 0.12.0
+    * @portojs/runtime bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/devtools-v0.10.0...devtools-v0.11.0) (2026-10-16)
 
 

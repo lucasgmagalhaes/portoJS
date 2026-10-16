@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.12.0](https://github.com/lucasgmagalhaes/portoJS/compare/input-v0.11.0...input-v0.12.0) (2026-10-16)
+
+
+### Features
+
+* **input:** add input sources and bindings export/import for key remapping ([9f938dc](https://github.com/lucasgmagalhaes/portoJS/commit/9f938dc70d5d3fc0b1d18a26efccf09e9c0ce8a3))
+* **input:** add InputBuffer and CoyoteTime for forgiving platformer controls ([b0b2b67](https://github.com/lucasgmagalhaes/portoJS/commit/b0b2b67813ec35dd8d86bf6cb7771bcb0cacc655))
+* **input:** add VirtualControls with an on-screen stick and buttons ([96446f7](https://github.com/lucasgmagalhaes/portoJS/commit/96446f7ed495569330c3140c067a5658433deda7))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.12.0
+  * devDependencies
+    * @portojs/core bumped to 0.12.0
+
 ## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/input-v0.10.0...input-v0.11.0) (2026-10-16)
 
 
