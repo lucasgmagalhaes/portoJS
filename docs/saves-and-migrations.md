@@ -135,3 +135,62 @@ window.addEventListener('pagehide', () => void autosave.flush());
 - **Recovery:** `load()` skips a corrupted copy and tries the next. If every copy is corrupted it throws `SaveCorruptedError`. A save from a newer game version throws `SaveVersionError` instead of falling back, so progress is not silently lost.
 - **Quota:** when a write fails with a quota error, the backups are dropped and the write is retried once.
 - **Writes never overlap:** saves are queued, and `failed` fires if an automatic save fails; the next one tries again.
+
+## Save slots
+
+`SaveSlots` keeps several named saves in one storage, like the slots of a console game:
+
+```ts
+import { SaveSlots, WebSaveStorage } from 'portojs';
+
+const slots = new SaveSlots(game, new WebSaveStorage(localStorage), { slots: 3 });
+
+await slots.save(2, 'Before the boss');
+const list = await slots.list(); // one entry per slot: { slot, label, savedAt, corrupted } or undefined
+await slots.load(2);
+await slots.copy(2, 3);
+await slots.delete(1);
+```
+
+The list reads only each slot's name and time, so a menu can show it without loading anything. A slot that holds damaged data shows as `corrupted: true` and can still be overwritten or deleted; loading it throws `SaveCorruptedError`, and loading an empty slot throws `SlotEmptyError`.
+
+## Cloud sync
+
+`CloudSync` keeps the local save and a cloud copy in step. The cloud can be any `SaveStorage`: your server, a platform's cloud storage.
+
+```ts
+import { CloudSync } from 'portojs';
+
+const sync = new CloudSync(localStorageAdapter, serverStorage, {
+  policy: 'furthest',
+  progress: (save) => totalGoldEarned(save),
+});
+
+const { action, conflict } = await sync.sync(); // at start, and after saving
+if (action === 'downloaded') game.load((await localStorageAdapter.get('save')) ?? '');
+```
+
+When only one side has a save, it is copied to the other. When both differ, the `policy` decides:
+
+- `newest` (default): the later `savedAt` wins; a tie goes to the device.
+- `furthest`: the higher `progress(save)` wins, so a player does not lose progress to a newer but emptier save; ties go to the newest.
+- a function `(local, cloud) => 'local' | 'cloud' | mergedSave`: return a save with `version`, `savedAt` and `data` to merge them; its checksum is recomputed and it is written to both sides.
+
+A damaged side always loses to a readable one, and two damaged sides throw `SaveCorruptedError`. Sync compares `savedAt` and your `progress` only; it never loads the save into the game, so a save from a newer game version still syncs.
+
+## One tab at a time
+
+Two tabs playing the same game overwrite each other's saves. `TabLock` lets only one in, using the Web Locks API:
+
+```ts
+import { TabLock } from 'portojs';
+
+const lock = new TabLock({ name: 'my-game' });
+if (!(await lock.acquire())) {
+  showMessage('The game is open in another tab.');
+  await lock.acquire({ wait: true }); // continue when the other tab closes
+}
+startGame();
+```
+
+The lock is released when the tab closes or on `lock.release()`. Where the Web Locks API is missing (`lock.supported` is `false`) it cannot be enforced and `acquire` always succeeds.
