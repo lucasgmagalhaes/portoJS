@@ -26,3 +26,4 @@ export type { PrefabBuilder } from './prefab.ts';
 export { ComponentRegistry, SceneError, loadScene } from './scene.ts';
 export type { Scene, SceneComponent, SceneObject } from './scene.ts';
 export { Time } from './time.ts';
+export { Timer } from './timers.ts';
