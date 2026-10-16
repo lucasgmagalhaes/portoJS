@@ -26,4 +26,13 @@ export type { PrefabBuilder } from './prefab.ts';
 export { ComponentRegistry, SceneError, loadScene } from './scene.ts';
 export type { Scene, SceneComponent, SceneObject } from './scene.ts';
 export { Time } from './time.ts';
+export { SceneManager } from './scene-manager.ts';
+export type {
+  SceneBuilder,
+  SceneContext,
+  SceneLoadOptions,
+  SceneManagerOptions,
+  SceneSource,
+  SceneTransition,
+} from './scene-manager.ts';
 export { Timer } from './timers.ts';

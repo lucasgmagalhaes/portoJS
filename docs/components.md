@@ -282,6 +282,29 @@ Its multipliers apply to production while playing and not to offline gains, whic
 - Keep state JSON-friendly. Use `BigNum#toJSON()` and `BigNum.fromJSON()` for large values.
 - Give every saved component a `typeId`.
 
+## Scenes
+
+`SceneManager` registers scenes by name and gives them a lifecycle. A scene is a builder function (it may be async, for example to wait for assets) or a JSON description loaded through a `ComponentRegistry`.
+
+```ts
+import { SceneManager } from 'portojs';
+
+const scenes = new SceneManager(game, { registry });
+scenes.register('menu', (ctx) => {
+  ctx.createObject('Title');
+});
+scenes.register('level1', levelJson);
+
+await scenes.load('menu');
+await scenes.load('level1', { transition: { out: fadeOut, in: fadeIn } });
+await scenes.loadAdditive('hud'); // next to the scenes already loaded
+await scenes.unload('hud');
+```
+
+Objects made through `ctx.createObject` belong to the scene and are destroyed when it unloads. `scenes.persist(object)` keeps one alive across changes, like Unity's `DontDestroyOnLoad`. Loads are queued, so calling `load` twice runs the changes in order, and a builder that throws leaves nothing behind.
+
+Saves only hold live objects. Keep state that must outlive a scene on persistent objects.
+
 ## Time scale, pause and timers
 
 `game.timeScale` changes how fast game time runs: `0.5` is slow motion, `2` is double speed, `0` stops it. `fixedUpdate` receives the scaled delta, and coroutines and timers follow it. `game.pause()` and `game.resume()` freeze all three while the loop keeps running, so the UI and input stay live. Away-time credited by `load` is not affected.
