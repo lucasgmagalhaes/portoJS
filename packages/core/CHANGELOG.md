@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/core-v0.10.0...core-v0.11.0) (2026-10-16)
+
+
+### Chores
+
+* **core:** Synchronize portojs versions
+
 ## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/core-v0.9.0...core-v0.10.0) (2026-10-15)
 
 

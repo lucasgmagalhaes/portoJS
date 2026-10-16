@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.11.0](https://github.com/lucasgmagalhaes/portoJS/compare/input-v0.10.0...input-v0.11.0) (2026-10-16)
+
+
+### Features
+
+* **input:** add GestureRecognizer for tap, double tap, long press, swipe, pan and pinch ([ad97a38](https://github.com/lucasgmagalhaes/portoJS/commit/ad97a38d5bc999f18e7a861c40df10e88905a0ac))
+* **input:** add Pointable and PointerSystem for per-object pointer events ([ef43c40](https://github.com/lucasgmagalhaes/portoJS/commit/ef43c4011e5dd3d4b70d6f23242c647676ab4a22))
+* **input:** publish pointer down/move/up/cancel on Pointer.events ([5c6e577](https://github.com/lucasgmagalhaes/portoJS/commit/5c6e577017eea1535f8ef321d7ed02ac0dea8292))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @portojs/runtime bumped to 0.11.0
+  * devDependencies
+    * @portojs/core bumped to 0.11.0
+
 ## [0.10.0](https://github.com/lucasgmagalhaes/portoJS/compare/input-v0.9.0...input-v0.10.0) (2026-10-15)
 
 
