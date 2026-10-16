@@ -102,13 +102,18 @@ export class Game {
     get objects(): readonly GameObject[];
     on<K extends keyof GameEvents>(event: K, listener: Listener<GameEvents[K]>): Unsubscribe;
     once<K extends keyof GameEvents>(event: K, listener: Listener<GameEvents[K]>): Unsubscribe;
+    pause(): void;
+    get paused(): boolean;
     // @internal
     refreshActivity(target: GameObject | Component): void;
     // @internal
     registerComponent(component: Component): void;
     reset(): void;
+    resume(): void;
     get running(): boolean;
     save(): SaveData;
+    setInterval(callback: () => void, intervalMs: number): Timer;
+    setTimeout(callback: () => void, delayMs: number): Timer;
     simulateOffline(ms: number): OfflineReport;
     start(): void;
     // @internal
@@ -120,6 +125,8 @@ export class Game {
     get structureVersion(): number;
     get tickCount(): number;
     readonly time: Time;
+    get timeScale(): number;
+    set timeScale(value: number);
     // @internal
     unregisterComponent(component: Component): void;
     // @internal
@@ -156,6 +163,12 @@ export interface GameEvents {
     };
     overflow: {
         droppedMs: number;
+    };
+    pause: {
+        at: number;
+    };
+    resume: {
+        at: number;
     };
     saved: {
         save: SaveData;
@@ -251,6 +264,9 @@ export interface Scene {
 }
 
 // @public
+export type SceneBuilder = (context: SceneContext) => void | Promise<void>;
+
+// @public
 export interface SceneComponent {
     readonly enabled?: boolean;
     readonly options?: unknown;
@@ -258,9 +274,45 @@ export interface SceneComponent {
 }
 
 // @public
+export interface SceneContext {
+    createObject(name: string, options?: CreateObjectOptions): GameObject;
+    readonly game: Game;
+    readonly name: string;
+}
+
+// @public
 export class SceneError extends Error {
     // (undocumented)
     readonly name = "SceneError";
+}
+
+// @public
+export interface SceneLoadOptions {
+    readonly transition?: SceneTransition;
+}
+
+// @public
+export class SceneManager {
+    constructor(game: Game, options?: SceneManagerOptions);
+    get current(): string | undefined;
+    has(name: string): boolean;
+    isLoaded(name: string): boolean;
+    load(name: string, options?: SceneLoadOptions): Promise<void>;
+    loadAdditive(name: string): Promise<void>;
+    readonly loaded: GameEvent<{
+        name: string;
+        additive: boolean;
+    }>;
+    get loadedScenes(): readonly string[];
+    persist(object: GameObject): void;
+    register(name: string, source: SceneSource): this;
+    unload(name: string): Promise<void>;
+    readonly unloaded: GameEvent<string>;
+}
+
+// @public
+export interface SceneManagerOptions {
+    readonly registry?: ComponentRegistry;
 }
 
 // @public
@@ -272,6 +324,17 @@ export interface SceneObject {
 }
 
 // @public
+export type SceneSource = SceneBuilder | {
+    readonly objects: readonly unknown[];
+};
+
+// @public
+export interface SceneTransition {
+    readonly in?: () => void | Promise<void>;
+    readonly out?: () => void | Promise<void>;
+}
+
+// @public
 export class Time {
     constructor(fixedDeltaTime: number);
     advance(): void;
@@ -279,8 +342,31 @@ export class Time {
     // (undocumented)
     readonly fixedDeltaTime: number;
     get fixedTime(): number;
+    get scaledTime(): number;
     get tickCount(): number;
     get time(): number;
+    get timeScale(): number;
+    set timeScale(value: number);
+    get unscaledDeltaTime(): number;
+}
+
+// @public
+export class Timer {
+    // @internal
+    constructor(callback: () => void,
+    dueMs: number,
+    intervalMs: number | undefined,
+    sequence: number);
+    // (undocumented)
+    readonly callback: () => void;
+    cancel(): void;
+    // @internal (undocumented)
+    dueMs: number;
+    // @internal (undocumented)
+    readonly intervalMs: number | undefined;
+    get isCancelled(): boolean;
+    // @internal (undocumented)
+    readonly sequence: number;
 }
 
 // @public
