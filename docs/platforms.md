@@ -41,3 +41,15 @@ Telegram allows 4096 characters per cloud-storage item, so `telegramPlatform` sp
 ## What is verified
 
 The adapters are written against the documented shape of each platform's API and tested in plain Node with fakes of it: Telegram and TikTok storage, chunking, errors, lifecycle events, haptics and the session flow. **They have not been run inside the real Telegram or TikTok clients.** Try them in a test bot or a development build of your mini-game before shipping, and report differences.
+
+## Background behaviour
+
+`bindPlatform` saves when the app goes to the background. What happens to game time is a choice, with the `background` option:
+
+| `background` | While away                                     | On return                                  |
+| ------------ | ---------------------------------------------- | ------------------------------------------ |
+| `offline`    | The loop stops.                                | The time away is credited as offline time. |
+| `pause`      | The loop stops and game time is frozen.        | Nothing is credited.                       |
+| `run`        | The loop keeps running (browsers may throttle) | Dropped time is credited by the game.      |
+
+`offline` is the default. On the web, `webPlatform` treats `visibilitychange`, `pagehide` and `pageshow` all as suspend and resume, so a page put in the back-forward cache is saved too. Audio contexts that browsers suspend are resumed by `AudioManager` when the game resumes, and `engine.unlockOnGesture(window)` handles the first user gesture.

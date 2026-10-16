@@ -7,10 +7,21 @@
 import type { Game } from '@portojs/runtime';
 
 // @public
+export type BackgroundPolicy = 'offline' | 'pause' | 'run';
+
+// @public
 export function bindPlatform(game: Game, platform: Platform, options?: SessionOptions): Promise<Session>;
 
 // @public
 export type Haptic = 'light' | 'medium' | 'heavy' | 'success' | 'error';
+
+// @public
+export interface PageLifecycleTarget {
+    // (undocumented)
+    addEventListener(type: 'pagehide' | 'pageshow', listener: () => void): void;
+    // (undocumented)
+    removeEventListener(type: 'pagehide' | 'pageshow', listener: () => void): void;
+}
 
 // @public
 export interface Platform {
@@ -45,6 +56,7 @@ export interface Session {
 // @public
 export interface SessionOptions {
     readonly autosaveMs?: number;
+    readonly background?: BackgroundPolicy;
     readonly compress?: boolean;
     readonly key?: string;
     readonly onError?: (error: unknown) => void;
@@ -155,6 +167,7 @@ export interface WebPlatformOptions {
     readonly document?: VisibilityTarget;
     readonly storage?: WebStorageLike;
     readonly vibrate?: (pattern: number) => unknown;
+    readonly window?: PageLifecycleTarget;
 }
 
 // @public
