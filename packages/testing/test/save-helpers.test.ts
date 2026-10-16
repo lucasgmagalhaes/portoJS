@@ -1,5 +1,5 @@
 import { Generator, Resource } from '@portojs/idle';
-import { Game } from '@portojs/runtime';
+import type { Game } from '@portojs/runtime';
 import { describe, expect, it } from 'vitest';
 import { createTestGame, roundTrip, stableSave } from '../src/index.ts';
 
