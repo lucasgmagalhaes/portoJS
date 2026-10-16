@@ -38,3 +38,5 @@ export type {
   TextLayoutOptions,
 } from './text-layout.ts';
 export { parseBmfont } from './bmfont.ts';
+export { BitmapFont } from './bitmap-font.ts';
+export type { DrawTextOptions } from './bitmap-font.ts';
