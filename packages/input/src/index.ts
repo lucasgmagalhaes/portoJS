@@ -14,3 +14,12 @@ export { Keyboard } from './keyboard.ts';
 export type { KeyboardOptions } from './keyboard.ts';
 export { Pointer } from './pointer.ts';
 export type { PointerPosition, PointerStreamEvent, PointerTarget } from './pointer.ts';
+export { GestureRecognizer } from './gestures.ts';
+export type {
+  GestureOptions,
+  GesturePoint,
+  PanGesture,
+  PinchGesture,
+  SwipeDirection,
+  SwipeGesture,
+} from './gestures.ts';
