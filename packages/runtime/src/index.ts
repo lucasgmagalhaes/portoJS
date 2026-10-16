@@ -42,3 +42,5 @@ export type {
 export { Timer } from './timers.ts';
 export { Pool } from './pool.ts';
 export type { PoolOptions } from './pool.ts';
+export { SaveSlots, SlotEmptyError } from './save-slots.ts';
+export type { SaveSlotsOptions, SlotInfo } from './save-slots.ts';
