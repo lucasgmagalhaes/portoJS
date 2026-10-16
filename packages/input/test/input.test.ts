@@ -134,6 +134,25 @@ describe('Pointer', () => {
     expect(pointer.isDown('Button2')).toBe(false);
   });
 
+  it('publishes down, move, up and cancel on the event stream', () => {
+    const { target, fire } = makeTarget(canvas);
+    const pointer = new Pointer(target);
+    const seen: string[] = [];
+    const times: number[] = [];
+    pointer.events.addListener((e) => {
+      seen.push(`${e.type}:${e.pointerId}:${e.x},${e.y}`);
+      times.push(e.time);
+    });
+    fire('pointerdown', { pointerId: 1, button: 0, clientX: 10, clientY: 20 });
+    fire('pointermove', { pointerId: 1, button: 0, clientX: 110, clientY: 70 });
+    fire('pointerup', { pointerId: 1, button: 0, clientX: 110, clientY: 70 });
+    fire('pointercancel', { pointerId: 2, button: 0, clientX: 10, clientY: 20 });
+    expect(seen).toEqual(['down:1:0,0', 'move:1:200,100', 'up:1:200,100', 'cancel:2:0,0']);
+    expect(times.every((t) => t >= 0)).toBe(true);
+    pointer.dispose();
+    expect(pointer.events.listenerCount).toBe(0);
+  });
+
   it('stops listening after dispose', () => {
     const { target, fire } = makeTarget(canvas);
     const pointer = new Pointer(target);

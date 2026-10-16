@@ -13,4 +13,4 @@ export { InputComponent } from './input-component.ts';
 export { Keyboard } from './keyboard.ts';
 export type { KeyboardOptions } from './keyboard.ts';
 export { Pointer } from './pointer.ts';
-export type { PointerPosition, PointerTarget } from './pointer.ts';
+export type { PointerPosition, PointerStreamEvent, PointerTarget } from './pointer.ts';
