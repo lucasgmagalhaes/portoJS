@@ -94,4 +94,37 @@ function App() {
 
 It shows the object tree with each component's state as editable JSON (press Apply to write it back through `onLoad`), the step counter and game time, and buttons to jump forward one minute, one hour or one day. It redraws every `refreshEveryTicks` steps (default 10), never overwrites a draft while you type, and takes a `className` so you can style it. React 18 or newer is a peer dependency. Ship it only in development builds.
 
-The simulator, the inspector and the panel are covered by automated tests; the panel is rendered against a DOM in the test environment.
+## The profiler
+
+`Profiler` measures how long each component type spends in `fixedUpdate`, `update` and `lateUpdate`. It wraps the methods of the live components, so the game needs no changes, and `detach()` puts them back.
+
+```ts
+import { Profiler } from '@portojs/tools';
+
+const profiler = new Profiler().attach(game);
+// after playing for a while
+console.table(profiler.report().slice(0, 5)); // type, phase, calls, total, average, max (ms)
+profiler.frames(); // the last 120 steps: fixedMs, frameMs and memory, for a graph
+```
+
+Components created after `attach` are picked up on the next step. Memory is sampled only if you give `memory: () => bytes` (Chrome offers `performance.memory.usedJSHeapSize`; other browsers have no honest number, so there is no default and no allocation counter). `<ProfilerPanel profiler={profiler} game={game} />` from `@portojs/devtools` shows the table and a bar per step. Profiling is for development: the wrapping costs a clock read per call.
+
+## Hot reload that keeps the state
+
+`reloadWithState(game, setup)` saves the game, destroys every object, runs your `setup` again with the freshly loaded component classes and loads the save into the new objects, without crediting offline time. With Vite:
+
+```ts
+import { reloadWithState } from '@portojs/tools';
+import { setup } from './setup.ts';
+
+setup(game);
+if (import.meta.hot) {
+  import.meta.hot.accept('./setup.ts', (next) => {
+    if (next) reloadWithState(game, next.setup);
+  });
+}
+```
+
+Put the code that creates objects and components in `setup.ts` (and the component classes in files it imports). Editing a component then rebuilds the scene in place while the numbers you reached stay. Timers you started with `game.setTimeout` are not part of a save and keep running; state a component does not save in `onSave` starts fresh, which is the same rule as loading a save.
+
+The simulator, the inspector, the profiler, the reload and the panels are covered by automated tests; the panels are rendered against a DOM in the test environment.
