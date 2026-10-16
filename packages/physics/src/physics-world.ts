@@ -1,5 +1,7 @@
 import { Component, GameEvent } from '@portojs/runtime';
 import type { GameObject } from '@portojs/runtime';
+import { Joint } from './joint.ts';
+import type { Anchor, JointOptions, JointSpec } from './joint.ts';
 import type { Rapier } from './rapier.ts';
 import type { RigidBody2D } from './rigid-body.ts';
 
@@ -144,6 +146,92 @@ export class PhysicsWorld extends Component {
     const member = layer === undefined ? ALL_LAYERS : this.bit(layer);
     const filter = collidesWith === undefined ? ALL_LAYERS : this.maskOf(collidesWith);
     return ((member << 16) | filter) >>> 0;
+  }
+
+  /**
+   * Connects two bodies with a constraint: a hinge, a rope, a spring, a slider or a weld.
+   *
+   * @example
+   * physics.createJoint(ceiling, ball, { kind: 'revolute' }, { worldAnchor: { x: 0, y: 0 } });
+   * physics.createJoint(a, b, { kind: 'rope', length: 3 });
+   *
+   * @throws {RangeError} for a rope or spring with a non-positive length or negative stiffness.
+   */
+  createJoint(
+    bodyA: RigidBody2D,
+    bodyB: RigidBody2D,
+    spec: JointSpec,
+    options: JointOptions = {},
+  ): Joint {
+    const { anchorA, anchorB } = this.anchors(bodyA, bodyB, options, spec.kind === 'fixed');
+    const { JointData } = this.rapier;
+    let data: ReturnType<typeof JointData.revolute>;
+    switch (spec.kind) {
+      case 'revolute':
+        data = JointData.revolute(anchorA, anchorB);
+        break;
+      case 'rope':
+        if (!(spec.length > 0)) throw new RangeError('createJoint: a rope needs a length > 0');
+        data = JointData.rope(spec.length, anchorA, anchorB);
+        break;
+      case 'spring':
+        if (!(spec.restLength >= 0) || !(spec.stiffness >= 0) || !((spec.damping ?? 0) >= 0)) {
+          throw new RangeError(
+            'createJoint: a spring needs restLength, stiffness and damping >= 0',
+          );
+        }
+        data = JointData.spring(
+          spec.restLength,
+          spec.stiffness,
+          spec.damping ?? 0,
+          anchorA,
+          anchorB,
+        );
+        break;
+      case 'prismatic':
+        if (spec.axis.x === 0 && spec.axis.y === 0) {
+          throw new RangeError('createJoint: a prismatic joint needs a non-zero axis');
+        }
+        data = JointData.prismatic(anchorA, anchorB, spec.axis);
+        break;
+      case 'fixed':
+        data = JointData.fixed(anchorA, 0, anchorB, bodyA.rotation - bodyB.rotation);
+        break;
+    }
+    const joint = this.world.createImpulseJoint(data, bodyA.rigidBody, bodyB.rigidBody, true);
+    return new Joint(bodyA, bodyB, this, joint.handle);
+  }
+
+  /**
+   * Whether a joint still exists. Called by {@link Joint}.
+   */
+  hasJoint(handle: number): boolean {
+    return this.world.impulseJoints.contains(handle);
+  }
+
+  /**
+   * Removes a joint. Called by {@link Joint}.
+   */
+  removeJoint(handle: number): void {
+    const joint = this.world.impulseJoints.get(handle);
+    if (joint !== null) this.world.removeImpulseJoint(joint, true);
+  }
+
+  private anchors(
+    bodyA: RigidBody2D,
+    bodyB: RigidBody2D,
+    options: JointOptions,
+    weld: boolean,
+  ): { anchorA: Anchor; anchorB: Anchor } {
+    const world = options.worldAnchor;
+    if (world !== undefined) {
+      return { anchorA: toLocal(bodyA, world), anchorB: toLocal(bodyB, world) };
+    }
+    const own: Anchor = { x: 0, y: 0 };
+    return {
+      anchorA: options.anchorA ?? own,
+      anchorB: options.anchorB ?? (weld ? toLocal(bodyB, bodyA) : own),
+    };
   }
 
   /**
@@ -331,4 +419,12 @@ export class PhysicsWorld extends Component {
     (started ? a.collisionStarted : a.collisionEnded).invoke(b);
     (started ? b.collisionStarted : b.collisionEnded).invoke(a);
   };
+}
+
+function toLocal(body: RigidBody2D, point: Anchor): Anchor {
+  const dx = point.x - body.x;
+  const dy = point.y - body.y;
+  const cos = Math.cos(-body.rotation);
+  const sin = Math.sin(-body.rotation);
+  return { x: dx * cos - dy * sin, y: dx * sin + dy * cos };
 }
