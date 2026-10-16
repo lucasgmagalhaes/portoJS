@@ -22,3 +22,28 @@ export { tiktokPlatform } from './tiktok.ts';
 export type { TikTokApi, TikTokPlatformOptions } from './tiktok.ts';
 export { bindPlatform } from './session.ts';
 export type { BackgroundPolicy, Session, SessionOptions } from './session.ts';
+export {
+  BufferedAnalytics,
+  MemoryAnalytics,
+  consoleAnalytics,
+  noAds,
+  noAnalytics,
+  noPurchases,
+  noServices,
+  typedAnalytics,
+} from './services.ts';
+export type {
+  AdResult,
+  Ads,
+  Analytics,
+  BufferedAnalyticsOptions,
+  EventProps,
+  Product,
+  PurchaseResult,
+  PurchaseStatus,
+  Purchases,
+  Services,
+} from './services.ts';
+export { AdGate } from './ad-gate.ts';
+export type { AdGateOptions } from './ad-gate.ts';
+export { MemoryPurchases, SimulatedAds } from './memory-store.ts';
