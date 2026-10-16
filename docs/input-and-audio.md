@@ -79,6 +79,57 @@ const { engine } = game.createObject('Audio').addComponent(AudioManager);
 engine.unlockOnGesture(window);
 ```
 
+### Fades, regions and loop points
+
+`playback.fadeTo(volume, seconds)` moves the volume in a straight line, and `playback.stop(seconds)` fades out first. `play` also takes `offset` and `duration` (play one region of a longer file) and `loopStart`/`loopEnd` (an intro that plays once and a body that repeats).
+
+### Sound effects: variation, voice limits, audio sprites
+
+```ts
+import { SoundBank } from '@portojs/audio';
+
+const bank = new SoundBank(audio, { maxVoices: 16 });
+bank.add('hit', { sound: hit, pitchVariation: 0.1, volumeVariation: 0.2, maxVoices: 4 });
+bank.addSprites(sheet, { coin: { start: 0, duration: 0.4 }, jump: { start: 0.5, duration: 0.3 } });
+
+bank.play('hit'); // a little different every time
+```
+
+When all voices of a sound are busy the oldest is stopped (`policy: 'reject'` ignores the new request instead and `play` returns `undefined`), so a hundred explosions at once do not clip. `maxVoices` on the bank caps everything it plays.
+
+### Music
+
+```ts
+import { MusicPlayer } from '@portojs/audio';
+
+const music = new MusicPlayer(audio, { crossfade: 2 });
+music.play(menuTheme); // loops; the previous track fades out while this one fades in
+music.playlist([level1, level2, level3], { shuffle: true });
+// every frame, so the playlist can move on shortly before a track ends
+music.update();
+```
+
+`play(sound, { loopStart, loopEnd, fade, volume })` and `stop(fade)` give the rest. `next()` skips to the next track of a playlist.
+
+### 2D positional audio
+
+```ts
+import { SpatialAudio } from '@portojs/audio';
+
+const space = new SpatialAudio(audio, { refDistance: 50, maxDistance: 600 });
+const motor = space.play(motorSound, { loop: true }, enemy.x, enemy.y);
+
+// every frame
+space.listenAt(player.x, player.y);
+motor.moveTo(enemy.x, enemy.y);
+```
+
+Volume falls from full at `refDistance` to silent at `maxDistance` (`rolloff` bends the curve) and the sound pans left or right with its horizontal offset (`panDistance`). `spatialize(...)` is the same maths as a plain function.
+
+### Volume settings
+
+`audio.muted = true` silences everything and remembers the master volume. `audio.exportVolumes()` returns the master, mute flag and every bus as plain data to put in a save, and `importVolumes(data)` applies it (invalid values are ignored). For `localStorage`, `saveVolumes(audio, localStorage)` after a change and `loadVolumes(audio, localStorage)` at start do it for you.
+
 Both packages are covered by automated tests that use fake targets and a fake audio context, so they run in plain Node without a browser.
 
 ## Clicking objects and gestures
