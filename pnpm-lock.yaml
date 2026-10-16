@@ -189,6 +189,8 @@ importers:
         specifier: workspace:*
         version: link:../core
 
+  packages/math: {}
+
   packages/physics:
     dependencies:
       '@portojs/runtime':
@@ -281,6 +283,15 @@ importers:
         version: link:../core
 
   packages/tools:
+    dependencies:
+      '@portojs/core':
+        specifier: workspace:*
+        version: link:../core
+      '@portojs/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+
+  packages/tween:
     dependencies:
       '@portojs/core':
         specifier: workspace:*

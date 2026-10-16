@@ -34,6 +34,8 @@ export default defineConfig({
           { text: 'ECS and rendering', link: '/ecs-and-render' },
           { text: 'Input and audio', link: '/input-and-audio' },
           { text: 'Assets', link: '/assets' },
+          { text: 'Tweens and easing', link: '/tween' },
+          { text: 'Math and random numbers', link: '/math' },
           { text: 'Physics', link: '/physics' },
           { text: 'Web Worker', link: '/worker' },
           { text: 'Platforms', link: '/platforms' },
@@ -98,6 +100,12 @@ export default defineConfig({
         '@portojs/vue': fileURLToPath(new URL('../../packages/vue/src/index.ts', import.meta.url)),
         '@portojs/assets': fileURLToPath(
           new URL('../../packages/assets/src/index.ts', import.meta.url),
+        ),
+        '@portojs/tween': fileURLToPath(
+          new URL('../../packages/tween/src/index.ts', import.meta.url),
+        ),
+        '@portojs/math': fileURLToPath(
+          new URL('../../packages/math/src/index.ts', import.meta.url),
         ),
         '@portojs/physics': fileURLToPath(
           new URL('../../packages/physics/src/index.ts', import.meta.url),

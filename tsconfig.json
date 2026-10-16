@@ -12,6 +12,8 @@
       "@portojs/solid": ["./packages/solid/src/index.ts"],
       "portojs": ["./packages/portojs/src/index.ts"],
       "@portojs/assets": ["./packages/assets/src/index.ts"],
+      "@portojs/tween": ["./packages/tween/src/index.ts"],
+      "@portojs/math": ["./packages/math/src/index.ts"],
       "@portojs/ecs": ["./packages/ecs/src/index.ts"],
       "@portojs/render": ["./packages/render/src/index.ts"],
       "@portojs/input": ["./packages/input/src/index.ts"],
