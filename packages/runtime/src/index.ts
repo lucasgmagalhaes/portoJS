@@ -30,3 +30,13 @@ export { Autosave } from './autosave.ts';
 export type { AutosaveLoadResult, AutosaveOptions } from './autosave.ts';
 export { IndexedDbSaveStorage, MemorySaveStorage, WebSaveStorage } from './storage.ts';
 export type { IndexedDbSaveStorageOptions, SaveStorage, WebStorageLike } from './storage.ts';
+export { SceneManager } from './scene-manager.ts';
+export type {
+  SceneBuilder,
+  SceneContext,
+  SceneLoadOptions,
+  SceneManagerOptions,
+  SceneSource,
+  SceneTransition,
+} from './scene-manager.ts';
+export { Timer } from './timers.ts';
