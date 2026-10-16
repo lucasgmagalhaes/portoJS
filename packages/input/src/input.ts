@@ -36,9 +36,26 @@ function defaultTarget(): EventTarget {
 }
 
 /**
+ * Something that reports buttons by id, such as on-screen controls. Add one to an {@link Input}
+ * with {@link Input.addSource}.
+ */
+export interface ButtonSource {
+  isDown(id: string): boolean;
+  wasPressed(id: string): boolean;
+  wasReleased(id: string): boolean;
+  /**
+   * Called when the step ends, to forget pressed and released edges.
+   */
+  endFrame?(): void;
+}
+
+const BUILT_IN = ['key', 'pointer', 'pad'];
+
+/**
  * All input devices behind one object, with named actions.
  *
- * Bindings are strings: `key:Space`, `pointer:Button0`, `pad:0:1` (pad 0, button 1).
+ * Bindings are strings: `key:Space`, `pointer:Button0`, `pad:0:1` (pad 0, button 1), and
+ * `<name>:<id>` for a source added with {@link Input.addSource}.
  *
  * @example
  * const input = new Input({ pointerTarget: canvas });
@@ -63,6 +80,7 @@ export class Input {
   readonly gamepads: Gamepads;
 
   private readonly actions = new Map<string, readonly string[]>();
+  private readonly sources = new Map<string, ButtonSource>();
 
   /**
    * @throws {Error} if there is no `window` and the targets are not given.
@@ -74,17 +92,71 @@ export class Input {
   }
 
   /**
+   * Adds a source of buttons under a name, so actions can bind to `<name>:<id>`. The source's
+   * `endFrame` runs with this input's.
+   *
+   * @throws {Error} if the name is taken or is one of `key`, `pointer`, `pad`.
+   */
+  addSource(name: string, source: ButtonSource): void {
+    if (BUILT_IN.includes(name) || this.sources.has(name) || !/^[a-z][a-z0-9-]*$/i.test(name)) {
+      throw new Error(`Input: "${name}" cannot be used as a source name`);
+    }
+    this.sources.set(name, source);
+  }
+
+  /**
    * Binds an action to one or more inputs, replacing earlier bindings of that action.
    *
-   * @throws {Error} if a binding does not start with `key:`, `pointer:` or `pad:`.
+   * @throws {Error} if a binding does not start with `key:`, `pointer:`, `pad:` or the name of a
+   * source added with {@link Input.addSource}.
    */
   bind(action: string, ...bindings: string[]): void {
     for (const binding of bindings) {
-      if (!/^(key|pointer|pad):./.test(binding)) {
+      const kind = binding.slice(0, Math.max(0, binding.indexOf(':')));
+      const known = BUILT_IN.includes(kind) || this.sources.has(kind);
+      if (!known || binding.length <= kind.length + 1) {
         throw new Error(`Input: invalid binding "${binding}"`);
       }
     }
     this.actions.set(action, bindings);
+  }
+
+  /**
+   * The bindings of an action, or an empty list.
+   */
+  bindingsOf(action: string): readonly string[] {
+    return this.actions.get(action) ?? [];
+  }
+
+  /**
+   * Every action with its bindings, as plain data to store in the player's settings.
+   */
+  exportBindings(): Record<string, string[]> {
+    const out: Record<string, string[]> = {};
+    for (const [action, bindings] of this.actions) out[action] = [...bindings];
+    return out;
+  }
+
+  /**
+   * Replaces the bindings of the actions in `data` (as made by {@link Input.exportBindings}),
+   * leaving other actions alone. Nothing changes if any binding is invalid.
+   *
+   * @throws {Error} for a malformed entry or an invalid binding.
+   */
+  importBindings(data: Record<string, readonly string[]>): void {
+    const previous = new Map(this.actions);
+    try {
+      for (const [action, bindings] of Object.entries(data)) {
+        if (!Array.isArray(bindings) || !bindings.every(isString)) {
+          throw new Error(`Input: the bindings of "${action}" must be a list of strings`);
+        }
+        this.bind(action, ...bindings);
+      }
+    } catch (error) {
+      this.actions.clear();
+      for (const [action, bindings] of previous) this.actions.set(action, bindings);
+      throw error;
+    }
   }
 
   /**
@@ -124,6 +196,7 @@ export class Input {
     this.keyboard.state.endFrame();
     this.pointer.endFrame();
     this.gamepads.state.endFrame();
+    for (const source of this.sources.values()) source.endFrame?.();
     this.gamepads.poll();
   }
 
@@ -150,6 +223,11 @@ export class Input {
     const id = binding.slice(colon + 1);
     if (kind === 'key') return this.keyboard.state[query](id);
     if (kind === 'pointer') return this.pointer.state[query](id);
-    return this.gamepads.state[query](id);
+    if (kind === 'pad') return this.gamepads.state[query](id);
+    return this.sources.get(kind)?.[query](id) ?? false;
   }
+}
+
+function isString(value: unknown): value is string {
+  return typeof value === 'string';
 }
